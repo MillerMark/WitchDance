@@ -1232,7 +1232,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — extended height to allow particles above title */}
+      {/* Particle canvas — height allows particles to rise */}
       <canvas
         ref={canvasRef}
         style={{
@@ -1241,7 +1241,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(130px + 0.5em + 2rem)',
+          height: 'calc(30px + 0.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
