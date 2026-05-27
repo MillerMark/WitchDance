@@ -680,27 +680,28 @@ button:disabled {
 
 @keyframes resume-glow {
   from {
-    background: rgba(249, 115, 22, 0.08);
-    border-color: rgba(249, 115, 22, 0.3);
-    color: rgba(249, 115, 22, 0.8);
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(249, 115, 22, 0.4);
+    color: rgba(249, 115, 22, 0.85);
   }
   to {
-    background: rgba(249, 115, 22, 0.28);
+    background: rgba(0, 0, 0, 0.85);
     border-color: rgba(249, 115, 22, 0.9);
     color: #fff;
   }
 }
 
 .btn-cancel-fade {
-  width: 75%;
-  font-size: 1.125rem;
+  width: 90%;
+  font-size: 1.5rem;
   font-weight: 600;
-  min-height: 56px;
-  border-radius: 14px;
+  min-height: 112px;
+  min-width: 300px;
+  border-radius: 18px;
   letter-spacing: 0.01em;
   color: #f97316;
-  border-color: rgba(249, 115, 22, 0.3);
-  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.4);
+  background: rgba(0, 0, 0, 0.85);
   animation: resume-glow 0.75s ease-in-out infinite alternate;
 }
 
