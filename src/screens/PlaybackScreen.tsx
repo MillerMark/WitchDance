@@ -749,34 +749,53 @@ export function PlaybackScreen({
             Training Mode
           </p>
           <div style={{ display: 'flex', flexDirection: 'row', gap: '6px' }}>
-            {[
-              { icon: '⏮', label: 'Rewind', onClick: () => handleTrainingRewind() },
-              { icon: trainingPaused ? '▶' : '⏸', label: 'Pause/Play', onClick: () => handleTrainingPause() },
-              { icon: '⏭', label: 'Skip to End', onClick: () => handleSkipToEnd() },
-            ].map(({ icon, label, onClick }) => (
-              <button
-                key={label}
-                aria-label={label}
-                onClick={(e) => { e.stopPropagation(); onClick() }}
-                style={{
-                  background: 'rgba(0,0,0,0.85)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'rgba(255,200,80,1)',
-                  fontSize: '1.3rem',
-                  width: '44px',
-                  height: '36px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  padding: 0,
-                  WebkitTapHighlightColor: 'transparent',
-                } as React.CSSProperties}
-              >
-                {icon}
-              </button>
-            ))}
+            {(() => {
+              const btnStyle: React.CSSProperties = {
+                background: 'rgba(0,0,0,0.85)',
+                border: 'none',
+                borderRadius: '8px',
+                width: '44px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                padding: 0,
+                WebkitTapHighlightColor: 'transparent',
+              }
+              const Y = 'rgba(255,200,80,1)'
+              return (<>
+                {/* Rewind to start */}
+                <button aria-label="Rewind" style={btnStyle}
+                  onClick={(e) => { e.stopPropagation(); handleTrainingRewind() }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="2" y="3" width="3" height="14" rx="1.2" fill={Y}/>
+                    <polygon points="18,3 18,17 7,10" fill={Y}/>
+                  </svg>
+                </button>
+                {/* Pause / Play */}
+                <button aria-label="Pause/Play" style={btnStyle}
+                  onClick={(e) => { e.stopPropagation(); handleTrainingPause() }}>
+                  {trainingPaused
+                    ? <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <polygon points="4,2 4,18 17,10" fill={Y}/>
+                      </svg>
+                    : <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="3" width="5" height="14" rx="1.8" fill={Y}/>
+                        <rect x="12" y="3" width="5" height="14" rx="1.8" fill={Y}/>
+                      </svg>
+                  }
+                </button>
+                {/* Skip to end */}
+                <button aria-label="Skip to End" style={btnStyle}
+                  onClick={(e) => { e.stopPropagation(); handleSkipToEnd() }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <polygon points="2,3 2,17 13,10" fill={Y}/>
+                    <rect x="15" y="3" width="3" height="14" rx="1.2" fill={Y}/>
+                  </svg>
+                </button>
+              </>)
+            })()}
           </div>
         </div>
       </div>
@@ -860,7 +879,7 @@ export function PlaybackScreen({
             color: 'rgba(255,255,255,0.5)',
             fontSize: '0.8rem',
             margin: 0,
-            marginTop: '0.5em',
+            marginTop: 'calc(0.5em - 16px)',
             width: '100%',
             textAlign: 'center',
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
