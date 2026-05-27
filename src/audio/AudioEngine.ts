@@ -347,15 +347,25 @@ export class AudioEngine {
   }
 
   seek(timeSeconds: number): void {
-    if (!this.ctx || !this.currentNode) return
+    console.log('[AudioEngine] seek() called with timeSeconds:', timeSeconds)
+    if (!this.ctx || !this.currentNode) {
+      console.log('[AudioEngine] seek() blocked - no ctx or currentNode')
+      return
+    }
     const buffer = this.currentNode.source.buffer
-    if (!buffer) return
+    if (!buffer) {
+      console.log('[AudioEngine] seek() blocked - no buffer')
+      return
+    }
     const seekTime = Math.max(0, Math.min(timeSeconds, buffer.duration))
+    console.log('[AudioEngine] Seeking to', seekTime, '/', buffer.duration)
     
     // Stop current playback
     try {
       this.currentNode.source.stop()
+      console.log('[AudioEngine] Stopped current source')
     } catch (e) {
+      console.log('[AudioEngine] Error stopping source:', e)
       // Ignore if already stopped
     }
     
@@ -371,10 +381,12 @@ export class AudioEngine {
     this.currentStartCtxTime = ctx.currentTime - seekTime
     this.currentDuration = buffer.duration
     
+    console.log('[AudioEngine] Starting new source at offset', seekTime)
     src.start(0, seekTime)
     
     // Re-pause if we're paused
     if (this._mediaEl?.paused) {
+      console.log('[AudioEngine] Re-suspending context (was paused)')
       if (ctx.state === 'running') void ctx.suspend()
     }
   }

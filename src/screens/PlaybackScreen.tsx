@@ -556,22 +556,34 @@ export function PlaybackScreen({
 
   // ── Scrubbing (training mode when paused) ────────────────────────────────
   function handleProgressBarInteraction(clientX: number) {
-    if (!trainingMode || !trainingPaused) return
-    if (!progressBarRef.current) return
+    console.log('[SCRUB] handleProgressBarInteraction called', { trainingMode, trainingPaused, clientX })
+    if (!trainingMode || !trainingPaused) {
+      console.log('[SCRUB] Blocked - trainingMode:', trainingMode, 'trainingPaused:', trainingPaused)
+      return
+    }
+    if (!progressBarRef.current) {
+      console.log('[SCRUB] Blocked - no progressBarRef')
+      return
+    }
     
     const engine = engineRef.current
     const state = engine.getPlaybackState()
-    if (!state || state.duration === 0) return
+    if (!state || state.duration === 0) {
+      console.log('[SCRUB] Blocked - no state or zero duration', state)
+      return
+    }
     
     const rect = progressBarRef.current.getBoundingClientRect()
     const x = clientX - rect.left
     const pct = Math.max(0, Math.min(1, x / rect.width))
     const seekTime = pct * state.duration
     
+    console.log('[SCRUB] Seeking to', seekTime, 'seconds (', Math.floor(pct * 100), '%)')
     engine.seek(seekTime)
   }
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    console.log('[SCRUB] touchStart', { trainingMode, trainingPaused })
     if (!trainingMode || !trainingPaused) return
     e.preventDefault()
     isScrubbingRef.current = true
@@ -579,12 +591,14 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    console.log('[SCRUB] touchMove', { isScrubbing: isScrubbingRef.current })
     if (!isScrubbingRef.current) return
     e.preventDefault()
     handleProgressBarInteraction(e.touches[0].clientX)
   }
 
   function handleProgressBarTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    console.log('[SCRUB] touchEnd')
     e.preventDefault()
     isScrubbingRef.current = false
   }
@@ -668,6 +682,15 @@ export function PlaybackScreen({
       const touch = e.touches[0]
       const rect = progressBarRef.current.getBoundingClientRect()
       
+      console.log('[SCRUB] handleScreenTouchStart - checking bounds', {
+        touchX: touch.clientX,
+        touchY: touch.clientY,
+        rectLeft: rect.left,
+        rectRight: rect.right,
+        rectTop: rect.top,
+        rectBottom: rect.bottom
+      })
+      
       // Check if touch is within the progress bar area
       if (
         touch.clientX >= rect.left &&
@@ -676,6 +699,7 @@ export function PlaybackScreen({
         touch.clientY <= rect.bottom
       ) {
         // Touch is on progress bar - don't toggle controls, let scrubbing handle it
+        console.log('[SCRUB] Touch on progress bar - bypassing controls toggle')
         return
       }
     }
