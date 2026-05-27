@@ -803,7 +803,7 @@ export function PlaybackScreen({
       {/* Bottom info section — song title, spacer, next up */}
       <div style={{
         position: 'absolute',
-        bottom: '0.5em',
+        bottom: '1.5em',
         left: 0,
         right: 0,
         zIndex: 2,
