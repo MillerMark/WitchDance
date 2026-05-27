@@ -795,6 +795,7 @@ export function PlaybackScreen({
       ) {
         // Touch is on progress bar - don't toggle controls, let scrubbing handle it
         console.log('[SCRUB] Touch on progress bar - bypassing controls toggle')
+        e.stopPropagation() // Prevent event from bubbling up
         return
       }
     }
