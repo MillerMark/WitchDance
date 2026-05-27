@@ -1087,7 +1087,7 @@ export function PlaybackScreen({
             onClick={handleCancelFadeOut}
             disabled={isPanelOpen}
           >
-            ↺  Resume Playback
+            ↺  Resume Performance
           </button>
         </div>
       )}
