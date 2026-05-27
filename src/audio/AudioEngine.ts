@@ -371,6 +371,24 @@ export class AudioEngine {
     })
   }
 
+  seekToTrackIndex(index: number, offset = 0): void {
+    if (!this.ctx || !this.tracks.length) return
+    const ctx = this.ctx
+    const clampedIndex = ((index % this.tracks.length) + this.tracks.length) % this.tracks.length
+    this._reset()
+
+    this._streamDest = ctx.createMediaStreamDestination()
+    this._mediaEl = new Audio()
+    this._mediaEl.srcObject = this._streamDest.stream
+
+    this._intentionallyStopped = false
+    this._mediaEl.play().catch(() => {})
+
+    void this._playTrack(clampedIndex, 1, offset).then(() => {
+      this._preload(this._next(clampedIndex))
+    })
+  }
+
   /** Safe slow-poll recovery: call from a ~2s interval; won't cause double audio. */
   ensurePlaying(): void {
     if (this._mediaEl && this._mediaEl.paused && !this._intentionallyStopped) {

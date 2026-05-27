@@ -208,6 +208,7 @@ export function PlaybackScreen({
     engine.callbacks = {
       onTrackChange: (idx) => {
         setCurrentIndex(idx)
+        setNextUpIndex((idx + 1) % tracks.length)
         updateMediaSession(
           tracks[idx]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance',
         )
@@ -509,7 +510,19 @@ export function PlaybackScreen({
   }
 
   function handleSkipToEnd() {
-    engineRef.current.seekToNearEnd(10)
+    const engine = engineRef.current
+    const state = engine.getPlaybackState()
+    const elapsed = state?.elapsed ?? 0
+    const duration = state?.duration ?? 0
+    if (duration > 0 && duration - elapsed <= 10) {
+      // Already near end — jump to beginning of next track
+      const nextIdx = (engine.getCurrentIndex() + 1) % tracks.length
+      engine.seekToTrackIndex(nextIdx, 0)
+      setCurrentIndex(nextIdx)
+      setNextUpIndex((nextIdx + 1) % tracks.length)
+    } else {
+      engine.seekToNearEnd(10)
+    }
     setTrainingPaused(false)
   }
 
@@ -525,7 +538,18 @@ export function PlaybackScreen({
   }
 
   function handleTrainingRewind() {
-    engineRef.current.seekToTrackStart()
+    const engine = engineRef.current
+    const state = engine.getPlaybackState()
+    const elapsed = state?.elapsed ?? 0
+    if (elapsed < 3) {
+      // Near start — go to previous track
+      const prevIdx = (engine.getCurrentIndex() - 1 + tracks.length) % tracks.length
+      engine.seekToTrackIndex(prevIdx, 0)
+      setCurrentIndex(prevIdx)
+      setNextUpIndex((prevIdx + 1) % tracks.length)
+    } else {
+      engine.seekToTrackStart()
+    }
     setTrainingPaused(false)
   }
 
