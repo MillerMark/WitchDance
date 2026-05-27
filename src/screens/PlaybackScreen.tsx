@@ -729,10 +729,10 @@ export function PlaybackScreen({
         </div>
       </div>
 
-      {/* Bottom info section — song title, spacer, next up (positions preserved from AboutOverlay) */}
+      {/* Bottom info section — song title, spacer, next up */}
       <div style={{
         position: 'absolute',
-        bottom: '2.2em',
+        bottom: '1.5em',
         left: 0,
         right: 0,
         zIndex: 2,
@@ -754,7 +754,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '-2.0em',
+          marginBottom: '-1.2em',
         }}>
           {isFillerMode
             ? (fillerTrack ? displayName(fillerTrack) : '')
@@ -763,7 +763,7 @@ export function PlaybackScreen({
 
         {/* Elapsed / countdown flank the bar — only when controls are visible */}
         <div style={{
-          height: '80px',
+          height: '30px',
           width: '100%',
           position: 'relative',
         }}>
@@ -869,7 +869,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(80px + 2.2em + 2rem)',
+          height: 'calc(30px + 1.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
@@ -910,12 +910,65 @@ export function PlaybackScreen({
         Created by the Wayward Witches of Connecticut
       </p>
 
-      {/* ── Tap-reveal controls (normal mode only) ───────────────────── */}
-      {!isFillerMode && (
+      {/* ── Always-visible Resume Playback (when fading to stop) ────────── */}
+      {isFadingToStop && !isFillerMode && (
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(2.2em + 1rem + 80px + 20px)',
+            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
+            left: 0,
+            right: 0,
+            zIndex: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '0 24px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="stop-fade-status">
+            <p className="ending-subtitle">
+              Fading out, returning to playlist{stopFadeCountdown > 0 ? ` in ${stopFadeCountdown}…` : '…'}
+            </p>
+            <button className="btn-cancel-fade" onClick={handleResumeFromStop}>
+              ↺ Resume Playback
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Always-visible Cancel Fade (when fade-out active, not stop-fading) ── */}
+      {isFadeOut && !isFadingToStop && !isFillerMode && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
+            left: 0,
+            right: 0,
+            zIndex: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '0 24px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="btn-cancel-fade"
+            onClick={handleCancelFadeOut}
+            disabled={isPanelOpen}
+          >
+            ↺  Resume Playback
+          </button>
+        </div>
+      )}
+
+      {/* ── Tap-reveal controls: Fade Out, Change Song, Stop ─────────── */}
+      {!isFillerMode && !isFadingToStop && !isFadeOut && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
             left: 0,
             right: 0,
             zIndex: 3,
@@ -930,38 +983,17 @@ export function PlaybackScreen({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {isFadingToStop ? (
-            <div className="stop-fade-status">
-              <p className="ending-subtitle">
-                Fading out, returning to playlist{stopFadeCountdown > 0 ? ` in ${stopFadeCountdown}…` : '…'}
-              </p>
-              <button className="btn-cancel-fade" onClick={handleResumeFromStop}>
-                ↺ Resume Playback
-              </button>
-            </div>
-          ) : (
-            <>
-              {isFadeOut ? (
-                <button
-                  className="btn-cancel-fade"
-                  onClick={handleCancelFadeOut}
-                  disabled={isPanelOpen}
-                >
-                  ↺  Resume Playback
-                </button>
-              ) : (
-                <button
-                  className="btn-fade-out"
-                  onClick={handleFadeOut}
-                  disabled={isPanelOpen}
-                >
-                  Fade Out
-                  <svg width="36" height="14" viewBox="0 0 40 16" style={{ display:'inline-block', verticalAlign:'middle', marginLeft:10, position:'relative', top:-2 }}>
-                    <polygon points="0,0 0,16 40,16" fill="rgba(255,255,255,0.5)" />
-                  </svg>
-                </button>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
+          <button
+            className="btn-fade-out"
+            onClick={handleFadeOut}
+            disabled={isPanelOpen}
+          >
+            Fade Out
+            <svg width="36" height="14" viewBox="0 0 40 16" style={{ display:'inline-block', verticalAlign:'middle', marginLeft:10, position:'relative', top:-2 }}>
+              <polygon points="0,0 0,16 40,16" fill="rgba(255,255,255,0.5)" />
+            </svg>
+          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
                 {fillerTrack && (
                   <button
                     ref={fillerBtnRef}
@@ -993,12 +1025,10 @@ export function PlaybackScreen({
               >
                 Stop
               </button>
-            </>
-          )}
         </div>
       )}
 
-      {/* ── Restart selector panel ────────────────────────────────────── */}
+      {/* ── Restart selector panel────────────────────────────────────── */}
       <div
         className={`restart-panel${isPanelOpen ? ' visible' : ''}`}
         style={{ zIndex: 4 }}
