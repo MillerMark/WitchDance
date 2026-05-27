@@ -585,6 +585,7 @@ export function PlaybackScreen({
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     console.log('[SCRUB] touchStart', { trainingMode, trainingPaused })
     if (!trainingMode || !trainingPaused) return
+    e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
     isScrubbingRef.current = true
     handleProgressBarInteraction(e.touches[0].clientX)
@@ -593,12 +594,14 @@ export function PlaybackScreen({
   function handleProgressBarTouchMove(e: React.TouchEvent<HTMLDivElement>) {
     console.log('[SCRUB] touchMove', { isScrubbing: isScrubbingRef.current })
     if (!isScrubbingRef.current) return
+    e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
     handleProgressBarInteraction(e.touches[0].clientX)
   }
 
   function handleProgressBarTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
     console.log('[SCRUB] touchEnd')
+    e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
     isScrubbingRef.current = false
   }
