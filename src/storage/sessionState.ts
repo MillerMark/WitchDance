@@ -55,3 +55,11 @@ export function loadFillerOffset(): number {
     return isFinite(n) ? n : 0
   } catch { return 0 }
 }
+
+export function saveDebugMode(on: boolean): void {
+  try { sessionStorage.setItem('debug-mode', on ? '1' : '0') } catch { /* silent */ }
+}
+
+export function loadDebugMode(): boolean {
+  try { return sessionStorage.getItem('debug-mode') === '1' } catch { return false }
+}

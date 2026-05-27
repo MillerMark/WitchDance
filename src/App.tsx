@@ -5,7 +5,7 @@ import { Playback } from './screens/Playback'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
 import { saveLibrary, loadLibrary } from './storage/libraryDb'
-import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId } from './storage/sessionState'
+import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId, saveDebugMode, loadDebugMode } from './storage/sessionState'
 import { loadPlaybackPos, clearPlaybackPos } from './storage/playbackPos'
 import { iosAudioUnlock } from './audio/iosUnlock'
 import './index.css'
@@ -19,6 +19,7 @@ export function App() {
   const [restored, setRestored] = useState(false)
   const [resumePos, setResumePos] = useState<{ trackIndex: number; elapsed: number } | null>(null)
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
+  const [debugMode, setDebugMode] = useState(() => loadDebugMode())
   const audioCtxRef = useRef<AudioContext | null>(null)
 
   // Restore state from storage on mount
@@ -113,18 +114,25 @@ export function App() {
 
   return (
     <div className="app">
-      <div style={{
-        position: 'fixed',
-        top: '8px',
-        left: '10px',
-        fontSize: '10px',
-        color: 'rgba(255,255,255,0.35)',
-        fontFamily: 'monospace',
-        pointerEvents: 'none',
-        zIndex: 9999,
-        userSelect: 'none',
-      }}>
-        v1.0-{__COMMIT_HASH__}
+      <div
+        style={{
+          position: 'fixed',
+          top: '8px',
+          left: '10px',
+          fontSize: '10px',
+          color: debugMode ? 'rgba(255,200,0,0.6)' : 'rgba(255,255,255,0.35)',
+          fontFamily: 'monospace',
+          cursor: 'pointer',
+          zIndex: 9999,
+          userSelect: 'none',
+        }}
+        onClick={() => {
+          const next = !debugMode
+          setDebugMode(next)
+          saveDebugMode(next)
+        }}
+      >
+        WitchDance v1.0-{__COMMIT_HASH__}
       </div>
       {screen === 'library' && (
         <Library
@@ -153,6 +161,7 @@ export function App() {
           resumePos={resumePos}
           onResumeConsumed={() => setResumePos(null)}
           fillerTrack={library.find((t) => t.id === fillerTrackId) ?? null}
+          debugMode={debugMode}
         />
       )}
     </div>

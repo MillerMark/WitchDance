@@ -6,6 +6,7 @@ import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
 import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
 
+
 interface Props {
   tracks: Track[]
   audioCtx: AudioContext | null
@@ -13,6 +14,7 @@ interface Props {
   resumePos?: { trackIndex: number; elapsed: number } | null
   onResumeConsumed?: () => void
   fillerTrack: Track | null
+  debugMode?: boolean
 }
 
 function formatTime(secs: number): string {
@@ -31,7 +33,7 @@ function displayName(track: Track | undefined): string {
 
 type TitlePhase = 'stable' | 'dim' | 'swap'
 
-export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack }: Props) {
+export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack, debugMode }: Props) {
   const engineRef = useRef(new AudioEngine())
   const onStopRef = useRef(onStop)
   useEffect(() => { onStopRef.current = onStop })
@@ -512,7 +514,11 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
                   onClick={handleEnterFiller}
                   disabled={isPanelOpen}
                 >
-                  ⏸&nbsp;&nbsp;Go to Filler
+                  <svg width="20" height="16" viewBox="0 0 20 16" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 8, position: 'relative', top: -1 }}>
+                    <rect x="1" y="1" width="6" height="14" rx="2" fill="rgba(251,191,36,0.5)" />
+                    <rect x="13" y="1" width="6" height="14" rx="2" fill="rgba(251,191,36,0.5)" />
+                  </svg>
+                  Go to Filler
                 </button>
               )}
               <button
@@ -522,14 +528,16 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
               >
                 Change Song
               </button>
-              <button
-                className="btn-stop-immediate btn-destructive"
-                onClick={handleStopButton}
-                disabled={isPanelOpen}
-              >
-                Stop
-              </button>
             </div>
+            <button
+              className="btn-stop-immediate btn-destructive"
+              onClick={handleStopButton}
+              disabled={isPanelOpen}
+              style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: 'calc(56px + 6px)' }}
+            >
+              Stop
+            </button>
+            {debugMode && (
             <button
               className="btn-test-skip"
               onClick={handleSkipToEnd}
@@ -537,6 +545,7 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
             >
               ⏭ Skip to End
             </button>
+            )}
           </>
         )}
       </div>
@@ -632,6 +641,7 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
       )}
 
       {/* ── Debug overlay ────────────────────────────────── */}
+      {debugMode && (
       <button
         onClick={() => { setDebugLog(engineRef.current.getDebugLog()); setShowDebug(v => !v) }}
         style={{
@@ -642,6 +652,7 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
       >
         DBG
       </button>
+      )}
 
       {showDebug && (
         <div style={{
