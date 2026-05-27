@@ -1,6 +1,7 @@
 import type { Track } from '../types/track'
 
 const XFADE_SECS = 6
+const STOP_FADE_SECS = 10
 
 export interface PlaybackState {
   currentTrackIndex: number
@@ -138,9 +139,9 @@ export class AudioEngine {
   }
 
   fadeOutNow(): number {
-    if (!this.ctx || !this.currentNode) return XFADE_SECS
+    if (!this.ctx || !this.currentNode) return STOP_FADE_SECS
     const ctx = this.ctx
-    const xfadeSecs = this._xfadeSecs(this.currentDuration)
+    const xfadeSecs = STOP_FADE_SECS
 
     this._clearTimer('all')
 

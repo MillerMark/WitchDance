@@ -1,11 +1,14 @@
-// Simple deploy script: pushes dist/ to the gh-pages branch
+// Simple deploy script: builds then pushes dist/ to the gh-pages branch
 import { execSync } from 'child_process'
-import { mkdirSync, cpSync, rmSync, existsSync } from 'fs'
+import { mkdirSync, cpSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 
 const remote = execSync('git remote get-url origin').toString().trim()
 const tmp = join(tmpdir(), 'witchdance-deploy-' + Date.now())
+
+console.log('Building...')
+execSync('npm run build', { stdio: 'inherit' })
 
 console.log('Deploying to gh-pages branch...')
 rmSync(tmp, { recursive: true, force: true })

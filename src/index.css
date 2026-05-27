@@ -456,7 +456,7 @@ button:disabled {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   transition: opacity 600ms ease-in-out;
 }
 
@@ -471,7 +471,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 7px;
 }
 
 .playback-title-current,
@@ -562,7 +562,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
+  padding: 10px 0;
   gap: 6px;
 }
 
@@ -647,13 +647,14 @@ button:disabled {
 .playback-footer {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
   padding: 12px 0 max(24px, env(safe-area-inset-bottom));
   flex-shrink: 0;
 }
 
 .btn-fade-out {
-  width: 100%;
+  width: 75%;
   background: #5b2d8e;
   color: #fff;
   font-size: 1.125rem;
@@ -677,30 +678,39 @@ button:disabled {
   width: 100%;
 }
 
+@keyframes resume-glow {
+  from {
+    background: rgba(249, 115, 22, 0.08);
+    border-color: rgba(249, 115, 22, 0.3);
+    color: rgba(249, 115, 22, 0.8);
+  }
+  to {
+    background: rgba(249, 115, 22, 0.28);
+    border-color: rgba(249, 115, 22, 0.9);
+    color: #fff;
+  }
+}
+
 .btn-cancel-fade {
-  width: 100%;
+  width: 75%;
   font-size: 1.125rem;
   font-weight: 600;
   min-height: 56px;
   border-radius: 14px;
   letter-spacing: 0.01em;
-  transition: opacity 200ms ease-out, background 200ms ease-out, border-color 200ms ease-out;
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.3);
-  background: rgba(251, 191, 36, 0.08);
-}
-
-.btn-cancel-fade:hover {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.5);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.3);
+  background: rgba(249, 115, 22, 0.08);
+  animation: resume-glow 0.75s ease-in-out infinite alternate;
 }
 
 .btn-cancel-fade:disabled {
   opacity: 0.75;
+  animation: none;
 }
 
 .btn-stop-immediate {
-  width: 100%;
+  width: 75%;
   background: var(--surface);
   color: var(--text);
   font-size: 1.125rem;
@@ -1108,7 +1118,7 @@ button:disabled {
 }
 
 .btn-enter-filler {
-  width: 100%;
+  width: 75%;
   background: rgba(251, 191, 36, 0.07);
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.25);

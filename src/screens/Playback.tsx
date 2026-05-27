@@ -158,8 +158,10 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
         }
         if (elapsedRef.current)
           elapsedRef.current.textContent = formatTime(state.elapsed)
-        if (durationRef.current)
-          durationRef.current.textContent = formatTime(state.duration)
+        if (durationRef.current) {
+          const remaining = state.duration > 0 ? Math.max(0, state.duration - state.elapsed) : 0
+          durationRef.current.textContent = `-${formatTime(remaining)}`
+        }
 
         // Throttle position saves to once per second
         const now = Date.now()
@@ -507,18 +509,18 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
                 </svg>
               </button>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
               {fillerTrack && (
                 <button
                   className="btn-enter-filler"
                   onClick={handleEnterFiller}
                   disabled={isPanelOpen}
                 >
-                  <svg width="20" height="16" viewBox="0 0 20 16" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 8, position: 'relative', top: -1 }}>
-                    <rect x="1" y="1" width="6" height="14" rx="2" fill="rgba(251,191,36,0.5)" />
-                    <rect x="13" y="1" width="6" height="14" rx="2" fill="rgba(251,191,36,0.5)" />
+                  <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
+                    <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
+                    <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
                   </svg>
-                  Go to Filler
+                  Pause and Fill...
                 </button>
               )}
               <button

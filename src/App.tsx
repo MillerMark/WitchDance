@@ -21,6 +21,7 @@ export function App() {
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
   const [debugMode, setDebugMode] = useState(() => loadDebugMode())
   const audioCtxRef = useRef<AudioContext | null>(null)
+  const lastTapRef = useRef<number>(0)
 
   // Restore state from storage on mount
   useEffect(() => {
@@ -126,10 +127,19 @@ export function App() {
           zIndex: 9999,
           userSelect: 'none',
         }}
-        onClick={() => {
+        onDoubleClick={() => {
           const next = !debugMode
           setDebugMode(next)
           saveDebugMode(next)
+        }}
+        onTouchEnd={() => {
+          const now = Date.now()
+          if (now - lastTapRef.current < 350) {
+            const next = !debugMode
+            setDebugMode(next)
+            saveDebugMode(next)
+          }
+          lastTapRef.current = now
         }}
       >
         WitchDance v1.0-{__COMMIT_HASH__}

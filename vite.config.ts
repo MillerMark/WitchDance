@@ -5,9 +5,9 @@ import { execSync } from 'child_process'
 
 const commitHash = (() => {
   try {
-    return execSync('git rev-parse --short HEAD').toString().trim()
+    return execSync('git rev-list --count HEAD').toString().trim()
   } catch {
-    return 'dev'
+    return '0'
   }
 })()
 
@@ -31,7 +31,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        skipWaiting: true,
+        clientsClaim: true,
       }
     })
   ],
