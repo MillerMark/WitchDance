@@ -708,7 +708,7 @@ export function PlaybackScreen({
         />
 
         {/* Version label — left-aligned under PNG */}
-        <div style={{ width: '100%', maxWidth: '480px', paddingLeft: '12px', marginTop: '-4px' }}>
+        <div style={{ width: '100%', maxWidth: '480px', paddingLeft: '17px', marginTop: '-9px' }}>
           <span style={{
             fontSize: '0.65rem',
             fontFamily: 'monospace',
