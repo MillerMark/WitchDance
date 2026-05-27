@@ -405,7 +405,7 @@ button:disabled {
 .btn-play {
   width: 100%;
   background: var(--accent);
-  color: var(--bg);
+  color: #fff;
   font-size: 1.125rem;
   font-weight: 600;
   padding: 18px;
@@ -1000,7 +1000,7 @@ button:disabled {
 .resume-content {
   text-align: center;
   padding: 32px 24px;
-  max-width: 320px;
+  max-width: 750px;
 }
 
 .resume-label {
@@ -1027,13 +1027,12 @@ button:disabled {
 .btn-resume {
   display: block;
   width: 100%;
-  min-height: 112px;
-  min-width: 300px;
+  min-height: 164px;
   border-radius: 18px;
   border: 1px solid rgba(255,200,80,0.5);
   background: rgba(0, 0, 0, 0.85);
   color: rgba(255,200,80,1);
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 12px;
@@ -1048,7 +1047,8 @@ button:disabled {
 
 .btn-resume-cancel {
   display: block;
-  width: 100%;
+  width: 85%;
+  margin: 112px auto 0;
   padding: 13px 0;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1118,7 +1118,7 @@ button:disabled {
 }
 
 .btn-resume-playlist:hover {
-  background: rgba(26, 26, 0, 0.85);
+  background: rgba(0, 0, 0, 0.85);
   border-color: rgba(255,200,80,0.8);
 }
 

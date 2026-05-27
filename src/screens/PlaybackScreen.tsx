@@ -92,10 +92,7 @@ export function PlaybackScreen({
   const [, setIsCrossfading] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [isChangeSongMode, setIsChangeSongMode] = useState(false)
-  const [showStopConfirm, setShowStopConfirm] = useState(false)
-  const [isFadingToStop, setIsFadingToStop] = useState(false)
-  const [stopFadeCountdown, setStopFadeCountdown] = useState(0)
-  const stopFadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const [stoppedAtIndex, setStoppedAtIndex] = useState(0)
   const [pendingAction, setPendingAction] = useState<ConfirmAction | null>(null)
   const [isFadeOut, setIsFadeOut] = useState(false)
@@ -423,7 +420,6 @@ export function PlaybackScreen({
     return () => {
       cancelAnimationFrame(rafRef.current)
       xfadeTimersRef.current.forEach(clearTimeout)
-      if (stopFadeIntervalRef.current) clearInterval(stopFadeIntervalRef.current)
       if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
       clearMediaSession()
       void releaseWakeLock()
@@ -441,46 +437,10 @@ export function PlaybackScreen({
   }
 
   function handleStopButton() {
-    setShowStopConfirm(true)
-  }
-
-  function handleStopConfirm() {
-    clearPlaybackPos()
-    const fadeSecs = engineRef.current.fadeOutNow()
-    const secs = Math.round(fadeSecs)
-    setStopFadeCountdown(secs)
-    setIsFadingToStop(true)
-    setShowStopConfirm(false)
-    if (stopFadeIntervalRef.current) clearInterval(stopFadeIntervalRef.current)
-    let remaining = secs
-    stopFadeIntervalRef.current = setInterval(() => {
-      remaining -= 1
-      if (remaining <= 0) {
-        clearInterval(stopFadeIntervalRef.current!)
-        stopFadeIntervalRef.current = null
-        setStopFadeCountdown(0)
-      } else {
-        setStopFadeCountdown(remaining)
-      }
-    }, 1000)
-  }
-
-  function handleResumeFromStop() {
-    engineRef.current.cancelFadeOut()
-    setIsFadingToStop(false)
-    if (stopFadeIntervalRef.current) {
-      clearInterval(stopFadeIntervalRef.current)
-      stopFadeIntervalRef.current = null
-    }
-  }
-
-  function handleCancelStopConfirm() {
-    setShowStopConfirm(false)
-  }
-
-  function handleFadeOut() {
     setShowFadePicker(true)
   }
+
+
 
   function handleFadeNow() {
     setShowFadePicker(false)
@@ -541,6 +501,8 @@ export function PlaybackScreen({
     const engine = engineRef.current
     const state = engine.getPlaybackState()
     const elapsed = state?.elapsed ?? 0
+    const wasPaused = engine.isPaused()
+    
     if (elapsed < 3) {
       // Near start — go to previous track
       const prevIdx = (engine.getCurrentIndex() - 1 + tracks.length) % tracks.length
@@ -550,7 +512,12 @@ export function PlaybackScreen({
     } else {
       engine.seekToTrackStart()
     }
-    setTrainingPaused(false)
+    
+    // Resume playback after seek if it was paused
+    if (wasPaused) {
+      engine.resumePlayback()
+      setTrainingPaused(false)
+    }
   }
 
   function handleEnterFiller() {
@@ -783,6 +750,16 @@ export function PlaybackScreen({
               letterSpacing: '0.04em',
             }}>
               (double tap for training mode)
+            </span>
+          )}
+          {trainingMode && (
+            <span style={{
+              fontSize: '0.65rem',
+              fontFamily: 'monospace',
+              color: 'rgba(255,255,255,0.45)',
+              letterSpacing: '0.04em',
+            }}>
+              (double tap for performance mode)
             </span>
           )}
         </div>
@@ -1056,35 +1033,8 @@ export function PlaybackScreen({
         Created by the Wayward Witches of Connecticut
       </p>
 
-      {/* ── Always-visible Resume Playback (when fading to stop) ────────── */}
-      {isFadingToStop && !isFillerMode && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 'calc(0.5em + 1rem + 30px + 48px)',
-            left: 0,
-            right: 0,
-            zIndex: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '0 24px',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="stop-fade-status">
-            <p className="ending-subtitle">
-              Fading out, returning to playlist{stopFadeCountdown > 0 ? ` in ${stopFadeCountdown}…` : '…'}
-            </p>
-            <button className="btn-cancel-fade" onClick={handleResumeFromStop}>
-              ↺ Resume Playback
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Always-visible Cancel Fade (when fade-out active, not stop-fading) ── */}
-      {isFadeOut && !isFadingToStop && !isFillerMode && (
+      {/* ── Cancel Fade button ────────── */}
+      {isFadeOut && !isFillerMode && (
         <div
           style={{
             position: 'absolute',
@@ -1109,8 +1059,8 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* ── Tap-reveal controls: Fade Out, Change Song, Stop ─────────── */}
-      {!isFillerMode && !isFadingToStop && !isFadeOut && (
+      {/* ── Tap-reveal controls: Change Song, Stop ─────────── */}
+      {!isFillerMode && !isFadeOut && (
         <div
           style={{
             position: 'absolute',
@@ -1129,16 +1079,7 @@ export function PlaybackScreen({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            className="btn-fade-out"
-            onClick={handleFadeOut}
-            disabled={isPanelOpen}
-          >
-            Fade Out
-            <svg width="36" height="14" viewBox="0 0 40 16" style={{ display:'inline-block', verticalAlign:'middle', marginLeft:10, position:'relative', top:-2 }}>
-              <polygon points="0,0 0,16 40,16" fill="rgba(255,255,255,0.5)" />
-            </svg>
-          </button>
+
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
                 {fillerTrack && (
                   <button
@@ -1146,7 +1087,6 @@ export function PlaybackScreen({
                     className="btn-enter-filler"
                     onClick={handleEnterFiller}
                     disabled={isPanelOpen}
-                    style={{ opacity: 0, pointerEvents: 'none' }}
                   >
                     <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
                       <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
@@ -1224,17 +1164,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {showStopConfirm && (
-        <div className="confirm-overlay" style={{ zIndex: 5 }} onClick={(e) => e.stopPropagation()}>
-          <div className="confirm-dialog">
-            <p className="confirm-message">Fade out and go back to playlist?</p>
-            <div className="confirm-buttons">
-              <button className="btn-confirm-cancel" onClick={handleCancelStopConfirm}>Cancel</button>
-              <button className="confirm-btn btn-destructive" onClick={handleStopConfirm}>Confirm</button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {showFadePicker && (
         <div className="confirm-overlay" style={{ zIndex: 5 }} onClick={() => setShowFadePicker(false)}>
