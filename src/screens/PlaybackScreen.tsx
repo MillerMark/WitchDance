@@ -1078,7 +1078,7 @@ export function PlaybackScreen({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '4px',
+        gap: '8px',
         padding: '0 24px',
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
@@ -1093,7 +1093,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '-0.6em',
+          marginBottom: '-1.2em',
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
