@@ -335,7 +335,7 @@ export function PlaybackScreen({
               if (state) pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
             }
 
-            const barY = 20
+            const barY = 18
             const filledW = W * pct / 100
 
             ctx.clearRect(0, 0, W, H)
@@ -784,7 +784,7 @@ export function PlaybackScreen({
       {/* Bottom info section — song title, spacer, next up */}
       <div style={{
         position: 'absolute',
-        bottom: '1.5em',
+        bottom: '0.5em',
         left: 0,
         right: 0,
         zIndex: 2,
@@ -921,7 +921,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(30px + 1.5em + 2rem)',
+          height: 'calc(30px + 0.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
@@ -967,7 +967,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
             left: 0,
             right: 0,
             zIndex: 3,
@@ -994,7 +994,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
             left: 0,
             right: 0,
             zIndex: 3,
@@ -1020,7 +1020,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(1.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
             left: 0,
             right: 0,
             zIndex: 3,
