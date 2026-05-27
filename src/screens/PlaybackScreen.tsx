@@ -1094,7 +1094,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '0.2em',
+          marginBottom: '-1.2em',
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
@@ -1233,7 +1233,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — extended to allow particles above title */}
+      {/* Particle canvas — full height so particles fall to screen bottom */}
       <canvas
         ref={canvasRef}
         style={{
@@ -1242,7 +1242,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(100px + 0.5em + 2rem)',
+          height: 'calc(30px + 0.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
