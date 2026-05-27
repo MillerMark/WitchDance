@@ -5,6 +5,7 @@ import { iosAudioUnlock } from '../audio/iosUnlock'
 import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
 import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
+import packageJson from '../../package.json'
 
 declare const __COMMIT_HASH__: string
 
@@ -551,7 +552,7 @@ export function PlaybackScreen({
     if (action.type === 'restart') {
       const engine = engineRef.current
       setIsFadeOut(false)
-      setIsFadeAfterThis(false)
+      setFadeAfterThis(false)
       setFadeOutFinalIndex(-1)
       engine.crossfadeTo(action.index)
     } else {
@@ -635,6 +636,23 @@ export function PlaybackScreen({
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
+        {/* Version number at top */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0, 0, 0, 0.85)',
+          color: 'white',
+          padding: '8px 24px',
+          borderRadius: '8px',
+          fontSize: '1.5rem',
+          fontWeight: 600,
+          letterSpacing: '0.05em',
+          zIndex: 2,
+        }}>
+          v{packageJson.version}
+        </div>
         {/* Resume content */}
         <div className="screen resume-screen" style={{ position: 'relative', zIndex: 1 }}>
           <div className="resume-content">
