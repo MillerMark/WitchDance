@@ -803,7 +803,9 @@ export function PlaybackScreen({
             transition: 'opacity 0.6s ease',
             pointerEvents: trainingMode ? 'auto' : 'none',
           }}
+          onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <p style={{
             color: 'rgba(255,200,80,1)',
