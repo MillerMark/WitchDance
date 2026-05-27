@@ -97,7 +97,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
             }
             const ctx = canvas.getContext('2d')
             if (ctx) {
-              const barY = H / 2
+              const barY = 20
               const filledW = W * pct / 100
 
               ctx.clearRect(0, 0, W, H)
@@ -144,7 +144,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               // Update + draw particles
               const DT = 1 / 60
               particlesRef.current = particlesRef.current.filter(
-                p => p.life > 0 && p.y > -H * 0.5 && p.y < H * 1.5
+                p => p.life > 0 && p.y > -H * 0.5 && p.y < H
               )
               for (const p of particlesRef.current) {
                 p.life -= DT / p.maxLife
@@ -315,7 +315,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
         bottom: '2.2em',
         left: 0,
         right: 0,
-        zIndex: 1,
+        zIndex: 2,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -340,22 +340,10 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               marginBottom: '-2.0em',
             }}>{currentTrackName}</p>
 
-            {/* Mystic particle canvas progress bar */}
-            <div style={{
-              width: '100%',
-              maxWidth: '360px',
-              height: '80px',
-              position: 'relative',
-              zIndex: 1,
-              marginBottom: '-2.8em',
-            }}>
-              <canvas
-                ref={canvasRef}
-                style={{ width: '100%', height: '100%', display: 'block' }}
-              />
-            </div>
+            {/* Spacer so next-up sits below the bar line */}
+            <div style={{ height: '80px', width: '100%' }} />
 
-            {/* Next up — pulled up close to the bar */}
+            {/* Next up */}
             {nextTrackName && (
               <p style={{
                 color: 'rgba(255,255,255,0.5)',
@@ -375,6 +363,24 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
           </>
         )}
       </div>
+
+      {/* Particle canvas — full-height so particles can fall to bottom */}
+      {showPlayback && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: 'calc(80px + 2.2em + 2rem)',
+            display: 'block',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+      )}
 
       {/* Credit line — independently pinned to screen bottom */}
       <p style={{
