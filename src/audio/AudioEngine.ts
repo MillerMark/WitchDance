@@ -350,7 +350,6 @@ export class AudioEngine {
     if (!this.ctx || !this.currentNode) return
     const buffer = this.currentNode.source.buffer
     if (!buffer) return
-    const engine = this
     const seekTime = Math.max(0, Math.min(timeSeconds, buffer.duration))
     
     // Stop current playback
