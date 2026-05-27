@@ -1068,7 +1068,7 @@ export function PlaybackScreen({
         </div>
       </div>
 
-      {/* Bottom info section — song title, spacer, next up */}
+      {/* Bottom info section — song title, progress bar, next up */}
       <div style={{
         position: 'absolute',
         bottom: '1.5em',
