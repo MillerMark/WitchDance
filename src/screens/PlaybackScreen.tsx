@@ -876,7 +876,7 @@ export function PlaybackScreen({
         {/* Next up */}
         {!isFillerMode && nextTrackName && (
           <p style={{
-            color: 'rgba(255,255,255,0.5)',
+            color: 'rgba(255,255,255,0.88)',
             fontSize: '0.8rem',
             margin: 0,
             marginTop: 'calc(0.5em - 16px)',
@@ -886,7 +886,7 @@ export function PlaybackScreen({
             position: 'relative',
             zIndex: 2,
           }}>
-            <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
+            <span style={{ opacity: 0.75, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
             {nextTrackName}
           </p>
         )}
@@ -977,7 +977,7 @@ export function PlaybackScreen({
         fontWeight: 500,
         letterSpacing: '0.04em',
         textShadow: '0 1px 6px rgba(0,0,0,0.8)',
-        opacity: 0.6,
+        opacity: 0.5,
         margin: 0,
         whiteSpace: 'nowrap',
         pointerEvents: 'none',
