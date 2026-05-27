@@ -330,6 +330,47 @@ export class AudioEngine {
     })
   }
 
+  pausePlayback(): void {
+    if (!this._mediaEl || this._intentionallyStopped) return
+    this._mediaEl.pause()
+    if (this.ctx?.state === 'running') void this.ctx.suspend()
+  }
+
+  resumePlayback(): void {
+    if (!this._mediaEl || this._intentionallyStopped) return
+    if (this.ctx?.state === 'suspended') void this.ctx.resume()
+    this._mediaEl.play().catch(() => {})
+  }
+
+  isPaused(): boolean {
+    return !!this._mediaEl?.paused && !this._intentionallyStopped
+  }
+
+  seekToTrackStart(): void {
+    if (!this.ctx || !this.tracks.length) return
+    const ctx = this.ctx
+    const seekIndex = this._currentIndex
+    const savedFadeOutAfterThis = this._fadeOutAfterThis
+    const savedFadeOutMode = this.fadeOutMode
+
+    this._reset()
+
+    this._streamDest = ctx.createMediaStreamDestination()
+    this._mediaEl = new Audio()
+    this._mediaEl.srcObject = this._streamDest.stream
+
+    this._intentionallyStopped = false
+    this._mediaEl.play().catch(() => {})
+
+    this._fadeOutAfterThis = savedFadeOutAfterThis
+    this.fadeOutMode = savedFadeOutMode
+    if (savedFadeOutAfterThis) this._fadeOutFinalIndex = seekIndex
+
+    void this._playTrack(seekIndex, 1, 0).then(() => {
+      this._preload(this._next(seekIndex))
+    })
+  }
+
   /** Safe slow-poll recovery: call from a ~2s interval; won't cause double audio. */
   ensurePlaying(): void {
     if (this._mediaEl && this._mediaEl.paused && !this._intentionallyStopped) {

@@ -128,6 +128,7 @@ export function PlaybackScreen({
 
   const [showDebug, setShowDebug] = useState(false)
   const [debugLog, setDebugLog] = useState<string[]>([])
+  const [trainingPaused, setTrainingPaused] = useState(false)
 
   // ── Tap-reveal controls state ───────────────────────────────────────────
   const [controlsVisible, setControlsVisible] = useState(false)
@@ -140,6 +141,14 @@ export function PlaybackScreen({
       setControlsVisible(false)
     }, 4000)
   }, [])
+
+  // Resume playback if training mode is turned off while paused
+  useEffect(() => {
+    if (!trainingMode && trainingPaused) {
+      engineRef.current.resumePlayback()
+      setTrainingPaused(false)
+    }
+  }, [trainingMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Direct-DOM refs for RAF (no re-renders at 60fps) ───────────────────
   const progressFillRef = useRef<HTMLDivElement>(null)
@@ -495,6 +504,23 @@ export function PlaybackScreen({
 
   function handleSkipToEnd() {
     engineRef.current.seekToNearEnd(10)
+    setTrainingPaused(false)
+  }
+
+  function handleTrainingPause() {
+    const engine = engineRef.current
+    if (engine.isPaused()) {
+      engine.resumePlayback()
+      setTrainingPaused(false)
+    } else {
+      engine.pausePlayback()
+      setTrainingPaused(true)
+    }
+  }
+
+  function handleTrainingRewind() {
+    engineRef.current.seekToTrackStart()
+    setTrainingPaused(false)
   }
 
   function handleEnterFiller() {
@@ -694,20 +720,23 @@ export function PlaybackScreen({
         </div>
 
         {/* Training mode row — always visible when on */}
-        <div style={{
-          width: '100%',
-          maxWidth: '480px',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingLeft: '12px',
-          paddingRight: '12px',
-          marginTop: '2px',
-          opacity: trainingMode ? 1 : 0,
-          transition: 'opacity 0.6s ease',
-          pointerEvents: trainingMode ? 'auto' : 'none',
-        }}>
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '480px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingLeft: '12px',
+            paddingRight: '12px',
+            marginTop: '2px',
+            opacity: trainingMode ? 1 : 0,
+            transition: 'opacity 0.6s ease',
+            pointerEvents: trainingMode ? 'auto' : 'none',
+          }}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
           <p style={{
             color: 'rgba(255,200,80,1)',
             fontSize: '0.85rem',
@@ -719,13 +748,36 @@ export function PlaybackScreen({
           }}>
             Training Mode
           </p>
-          <button
-            className="btn-test-skip"
-            onClick={(e) => { e.stopPropagation(); handleSkipToEnd() }}
-            style={{ margin: 0 }}
-          >
-            ⏭ Skip to End
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '6px' }}>
+            {[
+              { icon: '⏮', label: 'Rewind', onClick: () => handleTrainingRewind() },
+              { icon: trainingPaused ? '▶' : '⏸', label: 'Pause/Play', onClick: () => handleTrainingPause() },
+              { icon: '⏭', label: 'Skip to End', onClick: () => handleSkipToEnd() },
+            ].map(({ icon, label, onClick }) => (
+              <button
+                key={label}
+                aria-label={label}
+                onClick={(e) => { e.stopPropagation(); onClick() }}
+                style={{
+                  background: 'rgba(0,0,0,0.85)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'rgba(255,200,80,1)',
+                  fontSize: '1.3rem',
+                  width: '44px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  WebkitTapHighlightColor: 'transparent',
+                } as React.CSSProperties}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
