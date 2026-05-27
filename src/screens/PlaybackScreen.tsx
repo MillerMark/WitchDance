@@ -1095,7 +1095,7 @@ export function PlaybackScreen({
           position: 'relative',
           zIndex: 2,
           marginBottom: '-1.2em',
-          marginTop: '1.5em', // Push title down without affecting container height
+          transform: 'translateY(2.2em)', // Move title down visually without affecting layout/touch targets
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
