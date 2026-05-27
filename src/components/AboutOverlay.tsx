@@ -15,12 +15,6 @@ function displayName(track: Track | undefined): string {
   return track.name.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-function formatTime(secs: number): string {
-  if (!isFinite(secs) || secs < 0) return '0:00'
-  const m = Math.floor(secs / 60)
-  const s = Math.floor(secs % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
 
 function hexToRgb(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16)
