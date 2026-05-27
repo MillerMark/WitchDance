@@ -145,6 +145,7 @@ export function App() {
           }}
           engine={playbackEngineRef.current}
           tracks={playlist}
+          fillerTrack={fillerTrackId ? library.find(t => t.id === fillerTrackId) ?? null : null}
         />
       )}
       {screen === 'library' && (

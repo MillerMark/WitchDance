@@ -8,6 +8,7 @@ interface Props {
   onToggleTraining: () => void
   engine?: AudioEngine | null
   tracks?: Track[]
+  fillerTrack?: Track | null
 }
 
 function displayName(track: Track | undefined): string {
@@ -39,7 +40,7 @@ interface Particle {
   size: number
 }
 
-export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, tracks }: Props) {
+export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, tracks, fillerTrack }: Props) {
   const lastTapRef = useRef<number>(0)
 
   // Live playback state
@@ -48,19 +49,43 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
   const particlesRef = useRef<Particle[]>([])
   const lastEmitRef = useRef(0)
   const lastTrackIdxRef = useRef(-1)
+  const fillerTrackRef = useRef(fillerTrack)
   const [currentTrackName, setCurrentTrackName] = useState('')
   const [nextTrackName, setNextTrackName] = useState('')
+
+  // Keep filler track ref fresh without restarting RAF
+  useEffect(() => { fillerTrackRef.current = fillerTrack }, [fillerTrack])
 
   // RAF loop for live playback info + particle canvas
   useEffect(() => {
     if (!engine || !tracks?.length) return
     const tick = () => {
-      const state = engine.getPlaybackState()
-      if (state) {
-        const pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
+      let pct = 0
 
+      if (engine.isInFillerMode()) {
+        const fs = engine.getFillerState()
+        if (fs) {
+          pct = fs.duration > 0 ? (fs.elapsed / fs.duration) * 100 : 0
+          if (lastTrackIdxRef.current !== -999) {
+            lastTrackIdxRef.current = -999
+            setCurrentTrackName(fillerTrackRef.current ? displayName(fillerTrackRef.current) : '')
+            setNextTrackName(displayName(tracks[fs.resumeNextIndex]))
+          }
+        }
+      } else {
+        const state = engine.getPlaybackState()
+        if (state) {
+          pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
+          if (state.currentTrackIndex !== lastTrackIdxRef.current) {
+            lastTrackIdxRef.current = state.currentTrackIndex
+            setCurrentTrackName(displayName(tracks[state.currentTrackIndex]))
+            const nextIdx = (state.currentTrackIndex + 1) % tracks.length
+            setNextTrackName(displayName(tracks[nextIdx]))
+          }
+        }
+      }
 
-        // Canvas particle bar
+      {
         const canvas = canvasRef.current
         if (canvas) {
           const W = canvas.offsetWidth
@@ -148,22 +173,26 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
           }
         }
 
-        if (state.currentTrackIndex !== lastTrackIdxRef.current) {
-          lastTrackIdxRef.current = state.currentTrackIndex
-          setCurrentTrackName(displayName(tracks[state.currentTrackIndex]))
-          const nextIdx = (state.currentTrackIndex + 1) % tracks.length
-          setNextTrackName(displayName(tracks[nextIdx]))
-        }
-      }
+      }  // end canvas block
+
       rafHandleRef.current = requestAnimationFrame(tick)
     }
     // Init names immediately
-    const initState = engine.getPlaybackState()
-    if (initState) {
-      lastTrackIdxRef.current = initState.currentTrackIndex
-      setCurrentTrackName(displayName(tracks[initState.currentTrackIndex]))
-      const nextIdx = (initState.currentTrackIndex + 1) % tracks.length
-      setNextTrackName(displayName(tracks[nextIdx]))
+    if (engine.isInFillerMode()) {
+      const fs = engine.getFillerState()
+      if (fs) {
+        lastTrackIdxRef.current = -999
+        setCurrentTrackName(fillerTrackRef.current ? displayName(fillerTrackRef.current) : '')
+        setNextTrackName(displayName(tracks[fs.resumeNextIndex]))
+      }
+    } else {
+      const initState = engine.getPlaybackState()
+      if (initState) {
+        lastTrackIdxRef.current = initState.currentTrackIndex
+        setCurrentTrackName(displayName(tracks[initState.currentTrackIndex]))
+        const nextIdx = (initState.currentTrackIndex + 1) % tracks.length
+        setNextTrackName(displayName(tracks[nextIdx]))
+      }
     }
     rafHandleRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafHandleRef.current)

@@ -344,6 +344,15 @@ export class AudioEngine {
     return this.ctx.currentTime - this._fillerStartCtxTime + this._fillerSessionOffset
   }
 
+  getFillerState(): { elapsed: number; duration: number; resumeNextIndex: number } | null {
+    if (!this._inFillerMode || !this._fillerBuffer) return null
+    return {
+      elapsed: this.getFillerOffset(),
+      duration: this._fillerBuffer.duration,
+      resumeNextIndex: this._resumeNextIndex,
+    }
+  }
+
   async enterFillerMode(
     fillerTrack: Track,
     fillerOffset: number,
