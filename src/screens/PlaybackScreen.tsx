@@ -462,7 +462,7 @@ export function PlaybackScreen({
               ctx.restore()
             }
 
-            // Draw scrub-position time label above the progress handle
+            // Draw scrub-position time label well above the title (above finger)
             if (isScrubbing) {
               const m = Math.floor(elapsedSecs / 60)
               const sRem = elapsedSecs % 60
@@ -477,7 +477,8 @@ export function PlaybackScreen({
               ctx.shadowColor = 'rgba(0,0,0,0.85)'
               ctx.shadowBlur = 5
               ctx.fillStyle = 'rgba(255,255,255,0.95)'
-              ctx.fillText(timeStr, labelX, barY - 10)
+              // Position 90px above progress bar (64px above title + ~26px for title height)
+              ctx.fillText(timeStr, labelX, barY - 90)
               ctx.restore()
             }
           }
@@ -1077,7 +1078,7 @@ export function PlaybackScreen({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '8px',
+        gap: '4px',
         padding: '0 24px',
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
@@ -1092,7 +1093,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '-1.2em',
+          marginBottom: '-0.6em',
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
@@ -1231,7 +1232,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — full height so particles fall to screen bottom */}
+      {/* Particle canvas — extended height to allow particles above title */}
       <canvas
         ref={canvasRef}
         style={{
@@ -1240,7 +1241,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(30px + 0.5em + 2rem)',
+          height: 'calc(130px + 0.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
