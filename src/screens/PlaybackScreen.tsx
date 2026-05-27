@@ -995,7 +995,7 @@ export function PlaybackScreen({
               className="btn-resume-playlist"
               onClick={(e) => { e.stopPropagation(); handleExitFiller() }}
             >
-              ▶&nbsp;&nbsp;Resume Playlist
+              ▶&nbsp;&nbsp;Resume Performance
             </button>
           </div>
         </div>
