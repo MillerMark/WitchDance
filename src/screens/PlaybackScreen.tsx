@@ -986,7 +986,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 48px)',
             left: 0,
             right: 0,
             zIndex: 3,
@@ -1013,7 +1013,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 48px)',
             left: 0,
             right: 0,
             zIndex: 3,
@@ -1039,7 +1039,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(0.5em + 1rem + 30px + 20px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 48px)',
             left: 0,
             right: 0,
             zIndex: 3,
