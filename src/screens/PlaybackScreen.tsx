@@ -920,7 +920,7 @@ export function PlaybackScreen({
         </div>
 
         {/* Next up */}
-        {!isFillerMode && nextTrackName && (
+        {nextTrackName && (
           <p style={{
             color: 'rgba(255,255,255,0.88)',
             fontSize: '0.8rem',
