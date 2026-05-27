@@ -1094,7 +1094,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '-1.2em',
+          marginBottom: '-0.1em',
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
