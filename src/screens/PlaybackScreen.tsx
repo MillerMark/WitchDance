@@ -335,7 +335,7 @@ export function PlaybackScreen({
               if (state) pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
             }
 
-            const barY = 18
+            const barY = 23
             const filledW = W * pct / 100
 
             ctx.clearRect(0, 0, W, H)
@@ -843,8 +843,8 @@ export function PlaybackScreen({
             ref={elapsedRef}
             style={{
               position: 'absolute',
-              left: 0,
-              top: '8px',
+              left: -20,
+              top: '3px',
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
@@ -859,8 +859,8 @@ export function PlaybackScreen({
             ref={durationRef}
             style={{
               position: 'absolute',
-              right: 0,
-              top: '8px',
+              right: -20,
+              top: '3px',
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
