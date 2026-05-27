@@ -691,24 +691,38 @@ export function PlaybackScreen({
           paddingTop: 'max(env(safe-area-inset-top), 0px)',
         }}
         onClick={(e) => e.stopPropagation()}
-        onDoubleClick={handleTitleDoubleClick}
-        onTouchEnd={handleTitleTouchEnd}
       >
-        <img
-          src="/WitchDance/WitchDance.png"
-          alt="WitchDance"
-          style={{
-            width: '100%',
-            maxWidth: '480px',
-            display: 'block',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-          } as React.CSSProperties}
-          draggable={false}
-        />
+        {/* PNG wrapper — double-tap zone covers top 80% */}
+        <div style={{ position: 'relative', width: '100%', maxWidth: '480px' }}>
+          <img
+            src="/WitchDance/WitchDance.png"
+            alt="WitchDance"
+            style={{
+              width: '100%',
+              display: 'block',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+            } as React.CSSProperties}
+            draggable={false}
+          />
+          <div
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '80%' }}
+            onDoubleClick={handleTitleDoubleClick}
+            onTouchEnd={handleTitleTouchEnd}
+          />
+        </div>
 
-        {/* Version label — left-aligned under PNG */}
-        <div style={{ width: '100%', maxWidth: '480px', paddingLeft: '17px', marginTop: '-9px' }}>
+        {/* Version label + hint text — same baseline, left/right */}
+        <div style={{
+          width: '100%',
+          maxWidth: '480px',
+          paddingLeft: '22px',
+          paddingRight: '17px',
+          marginTop: '-14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }}>
           <span style={{
             fontSize: '0.65rem',
             fontFamily: 'monospace',
@@ -717,6 +731,16 @@ export function PlaybackScreen({
           }}>
             v1.0-{__COMMIT_HASH__}
           </span>
+          {!trainingMode && (
+            <span style={{
+              fontSize: '0.65rem',
+              fontFamily: 'monospace',
+              color: 'rgba(255,200,80,0.75)',
+              letterSpacing: '0.04em',
+            }}>
+              double tap for training mode
+            </span>
+          )}
         </div>
 
         {/* Training mode row — always visible when on */}
