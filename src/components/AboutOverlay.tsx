@@ -309,10 +309,10 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
         </p>
       </div>
 
-      {/* Bottom section: Now Playing info + credit, stacked at the bottom */}
+      {/* Bottom section: Now Playing info stacked at the bottom */}
       <div style={{
         position: 'absolute',
-        bottom: '1em',
+        bottom: '2.2em',
         left: 0,
         right: 0,
         zIndex: 1,
@@ -361,6 +361,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
                 color: 'rgba(255,255,255,0.5)',
                 fontSize: '0.8rem',
                 margin: 0,
+                marginTop: '0.5em',
                 width: '100%',
                 textAlign: 'center',
                 textShadow: '0 1px 4px rgba(0,0,0,0.8)',
@@ -373,22 +374,28 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
             )}
           </>
         )}
-
-        {/* Credit line — pinned to bottom, shifted down slightly */}
-        <p style={{
-          color: 'white',
-          fontSize: '0.76rem',
-          fontWeight: 500,
-          letterSpacing: '0.04em',
-          textShadow: '0 1px 6px rgba(0,0,0,0.8)',
-          opacity: 0.6,
-          margin: 0,
-          marginTop: '2.0em',
-          whiteSpace: 'nowrap',
-        }}>
-          Created by the Wayward Witches of Connecticut
-        </p>
       </div>
+
+      {/* Credit line — independently pinned to screen bottom */}
+      <p style={{
+        position: 'absolute',
+        bottom: '0.3em',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        color: 'white',
+        fontSize: '0.76rem',
+        fontWeight: 500,
+        letterSpacing: '0.04em',
+        textShadow: '0 1px 6px rgba(0,0,0,0.8)',
+        opacity: 0.6,
+        margin: 0,
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }}>
+        Created by the Wayward Witches of Connecticut
+      </p>
     </div>
   )
 }
