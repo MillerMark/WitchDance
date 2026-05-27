@@ -85,10 +85,14 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
   const progressFillRef = useRef<HTMLDivElement>(null)
   const elapsedRef = useRef<HTMLSpanElement>(null)
   const durationRef = useRef<HTMLSpanElement>(null)
+  const fillerBtnRef = useRef<HTMLButtonElement>(null)
   const rafRef = useRef(0)
   const xfadeTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const lastPosSaveRef = useRef(0)
   const lastEnsureRef = useRef(0)
+  // Crossfade timing for filler-button visibility
+  const xfadeStartWallRef = useRef(0)
+  const xfadeDurationMsRef = useRef(0)
 
   function startTitleAnimation(incomingIdx: number, durationMs: number) {
     xfadeTimersRef.current.forEach(clearTimeout)
@@ -134,6 +138,8 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
       },
       onCrossfadeStart: (incomingIdx, durationMs) => {
         setIsCrossfading(true)
+        xfadeStartWallRef.current = Date.now()
+        xfadeDurationMsRef.current = durationMs
         startTitleAnimation(incomingIdx, durationMs)
       },
       onLoopEnd: () => onStopRef.current(),
@@ -161,6 +167,24 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
         if (durationRef.current) {
           const remaining = state.duration > 0 ? Math.max(0, state.duration - state.elapsed) : 0
           durationRef.current.textContent = `-${formatTime(remaining)}`
+
+          // Filler button visibility: fade in at 15s remaining, fade out at xfade midpoint
+          if (fillerBtnRef.current) {
+            const SHOW_WINDOW = 15
+            const FADE_IN_SECS = 2
+            let opacity = 0
+            if (state.crossfading) {
+              const xfadeElapsedMs = Date.now() - xfadeStartWallRef.current
+              const halfwayMs = xfadeDurationMsRef.current / 2
+              // Fade out from 1→0 over the first half of the crossfade
+              opacity = Math.max(0, 1 - xfadeElapsedMs / halfwayMs)
+            } else {
+              // Fade in: 0 at 15s remaining, 1 at (15-FADE_IN_SECS)s remaining
+              opacity = Math.min(1, Math.max(0, (SHOW_WINDOW - remaining) / FADE_IN_SECS))
+            }
+            fillerBtnRef.current.style.opacity = String(opacity)
+            fillerBtnRef.current.style.pointerEvents = opacity < 0.05 ? 'none' : 'auto'
+          }
         }
 
         // Throttle position saves to once per second
@@ -512,9 +536,11 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
               {fillerTrack && (
                 <button
+                  ref={fillerBtnRef}
                   className="btn-enter-filler"
                   onClick={handleEnterFiller}
                   disabled={isPanelOpen}
+                  style={{ opacity: 0, pointerEvents: 'none' }}
                 >
                   <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
                     <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
