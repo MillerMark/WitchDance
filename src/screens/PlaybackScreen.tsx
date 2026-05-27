@@ -584,6 +584,7 @@ export function PlaybackScreen({
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     console.log('[SCRUB] touchStart', { trainingMode, trainingPaused })
+    alert('[SCRUB] touchStart - trainingMode: ' + trainingMode + ', paused: ' + trainingPaused)
     if (!trainingMode || !trainingPaused) return
     e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
@@ -1013,10 +1014,12 @@ export function PlaybackScreen({
         <div 
           ref={progressBarRef}
           style={{
-            height: '30px',
+            height: '50px', // Larger touch target
             width: '100%',
             position: 'relative',
             cursor: (trainingMode && trainingPaused) ? 'pointer' : 'default',
+            background: (trainingMode && trainingPaused) ? 'rgba(255,0,0,0.1)' : 'transparent', // Visual indicator
+            border: (trainingMode && trainingPaused) ? '2px solid rgba(255,0,0,0.3)' : 'none', // Visual border
           }}
           onTouchStart={handleProgressBarTouchStart}
           onTouchMove={handleProgressBarTouchMove}
