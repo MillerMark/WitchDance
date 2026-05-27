@@ -133,6 +133,7 @@ export function PlaybackScreen({
   // ── Tap-reveal controls state ───────────────────────────────────────────
   const [controlsVisible, setControlsVisible] = useState(false)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const controlsJustShownRef = useRef(false)
 
   const showControls = useCallback(() => {
     setControlsVisible(true)
@@ -140,6 +141,11 @@ export function PlaybackScreen({
     controlsTimerRef.current = setTimeout(() => {
       setControlsVisible(false)
     }, 4000)
+  }, [])
+
+  const hideControlsNow = useCallback(() => {
+    if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
+    setControlsVisible(false)
   }, [])
 
   // Resume playback if training mode is turned off while paused
@@ -596,8 +602,24 @@ export function PlaybackScreen({
     onToggleTraining()
   }
 
-  function handleScreenTap() {
-    if (!isFillerMode) showControls()
+  function handleScreenTouchStart() {
+    if (isFillerMode) return
+    if (!controlsVisible) {
+      controlsJustShownRef.current = true
+      showControls()
+    } else {
+      controlsJustShownRef.current = false
+    }
+  }
+
+  function handleScreenClick() {
+    if (isFillerMode) return
+    if (controlsVisible && !controlsJustShownRef.current) {
+      hideControlsNow()
+    } else if (!controlsVisible) {
+      showControls()
+    }
+    controlsJustShownRef.current = false
   }
 
   // ── Derived values ────────────────────────────────────────────────────
@@ -615,7 +637,7 @@ export function PlaybackScreen({
     return (
       <div
         style={{ position: 'fixed', inset: 0, zIndex: 10000 }}
-        onClick={handleScreenTap}
+        onClick={handleScreenClick}
       >
         {/* Background */}
         <img
@@ -659,8 +681,8 @@ export function PlaybackScreen({
         alignItems: 'center',
         overflow: 'hidden',
       }}
-      onClick={handleScreenTap}
-      onTouchStart={handleScreenTap}
+      onClick={handleScreenClick}
+      onTouchStart={handleScreenTouchStart}
     >
       {/* Background image */}
       <img
