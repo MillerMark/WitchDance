@@ -1113,36 +1113,34 @@ export function PlaybackScreen({
           onClick={(e) => e.stopPropagation()}
         >
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%' }}>
-                <button
-                  ref={fillerBtnRef}
-                  className="btn-enter-filler"
-                  onClick={handleEnterFiller}
-                  disabled={isPanelOpen || !fillerTrack}
-                  style={{ opacity: 0, pointerEvents: 'none' }}
-                >
-                  <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
-                    <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
-                    <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
-                  </svg>
-                  Pause and Fill...
-                </button>
-                <button
-                  className="btn-stop-immediate"
-                  onClick={handleChangeSong}
-                  disabled={isPanelOpen}
-                >
-                  Change Song...
-                </button>
-              </div>
-              <button
-                className="btn-stop-immediate btn-destructive"
-                onClick={handleStopButton}
-                disabled={isPanelOpen}
-                style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: 'calc(56px + 6px)' }}
-              >
-                Stop Performance...
-              </button>
+          <button
+            className="btn-stop-immediate"
+            onClick={handleChangeSong}
+            disabled={isPanelOpen}
+          >
+            Change Song...
+          </button>
+          <button
+            ref={fillerBtnRef}
+            className="btn-enter-filler"
+            onClick={handleEnterFiller}
+            disabled={isPanelOpen || !fillerTrack}
+            style={{ opacity: 0, pointerEvents: 'none' }}
+          >
+            <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
+              <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
+              <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
+            </svg>
+            Pause and Fill...
+          </button>
+          <button
+            className="btn-stop-immediate btn-destructive"
+            onClick={handleStopButton}
+            disabled={isPanelOpen}
+            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: 'calc(56px + 6px)' }}
+          >
+            Stop Performance...
+          </button>
         </div>
       )}
 
