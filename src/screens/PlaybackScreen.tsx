@@ -662,7 +662,24 @@ export function PlaybackScreen({
     onToggleTraining()
   }
 
-  function handleScreenTouchStart() {
+  function handleScreenTouchStart(e: React.TouchEvent) {
+    // If scrubbing is enabled (training mode + paused) and touch is on progress bar, let it through
+    if (trainingMode && trainingPaused && progressBarRef.current) {
+      const touch = e.touches[0]
+      const rect = progressBarRef.current.getBoundingClientRect()
+      
+      // Check if touch is within the progress bar area
+      if (
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom
+      ) {
+        // Touch is on progress bar - don't toggle controls, let scrubbing handle it
+        return
+      }
+    }
+    
     if (!controlsVisible) {
       controlsJustShownRef.current = true
       showControls()
