@@ -819,8 +819,8 @@ export function PlaybackScreen({
           <div style={{ display: 'flex', flexDirection: 'row', gap: '6px' }}>
             {(() => {
               const btnStyle: React.CSSProperties = {
-                background: 'rgba(0,0,0,0.85)',
-                border: 'none',
+                background: 'rgba(20,16,4,0.85)',
+                border: '1px solid rgba(255,200,80,0.35)',
                 borderRadius: '8px',
                 width: '44px',
                 height: '36px',
