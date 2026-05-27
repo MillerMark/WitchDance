@@ -337,7 +337,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               textShadow: '0 1px 6px rgba(0,0,0,0.9)',
               position: 'relative',
               zIndex: 2,
-              marginBottom: '-2.2em',
+              marginBottom: '-3.2em',
             }}>{currentTrackName}</p>
 
             {/* Mystic particle canvas progress bar */}
@@ -347,7 +347,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               height: '80px',
               position: 'relative',
               zIndex: 1,
-              marginBottom: '-1.8em',
+              marginBottom: '-2.8em',
             }}>
               <canvas
                 ref={canvasRef}
@@ -383,7 +383,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
           textShadow: '0 1px 6px rgba(0,0,0,0.8)',
           opacity: 0.6,
           margin: 0,
-          marginTop: '0.5em',
+          marginTop: '1.5em',
           whiteSpace: 'nowrap',
         }}>
           Created by the Wayward Witches of Connecticut
