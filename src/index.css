@@ -416,7 +416,7 @@ button:disabled {
 
 /* ── Destructive action style ───────────────────────── */
 .btn-destructive {
-  background: #7a1428 !important;
+  background: rgba(98, 16, 32, 0.85) !important;
   color: #fff !important;
   border-color: transparent !important;
 }
@@ -655,7 +655,7 @@ button:disabled {
 
 .btn-fade-out {
   width: 75%;
-  background: #3d1570;
+  background: rgba(49, 17, 90, 0.85);
   color: #fff;
   font-size: 1.125rem;
   font-weight: 600;
@@ -711,7 +711,7 @@ button:disabled {
 
 .btn-stop-immediate {
   width: 75%;
-  background: #1a3a78;
+  background: rgba(21, 46, 96, 0.85);
   color: #fff;
   font-size: 1.125rem;
   font-weight: 600;
@@ -1101,7 +1101,7 @@ button:disabled {
 
 .btn-resume-playlist {
   width: 100%;
-  background: #000;
+  background: rgba(0, 0, 0, 0.85);
   color: rgba(255,200,80,1);
   border: 1px solid rgba(255,200,80,0.5);
   font-size: 1.5rem;
@@ -1114,7 +1114,7 @@ button:disabled {
 }
 
 .btn-resume-playlist:hover {
-  background: #1a1a00;
+  background: rgba(26, 26, 0, 0.85);
   border-color: rgba(255,200,80,0.8);
 }
 
