@@ -100,6 +100,8 @@ export function PlaybackScreen({
   const [fadeOutFinalIndex, setFadeOutFinalIndex] = useState(-1)
   const [showFadePicker, setShowFadePicker] = useState(false)
   const [isFillerMode, setIsFillerMode] = useState(false)
+  const [fillerElapsed, setFillerElapsed] = useState(0)
+  const fillerStartTimeRef = useRef(0)
   const fillerOffsetRef = useRef(loadFillerOffset())
   const lastFillerSaveRef = useRef(0)
   const fillerResumeIndexRef = useRef(0)
@@ -152,6 +154,16 @@ export function PlaybackScreen({
       setTrainingPaused(false)
     }
   }, [trainingMode]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update filler elapsed time every second
+  useEffect(() => {
+    if (!isFillerMode) return
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - fillerStartTimeRef.current) / 1000)
+      setFillerElapsed(elapsed)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [isFillerMode])
 
   // ── Direct-DOM refs for RAF (no re-renders at 60fps) ───────────────────
   const progressFillRef = useRef<HTMLDivElement>(null)
@@ -525,6 +537,8 @@ export function PlaybackScreen({
     const engine = engineRef.current
     const resumeNextIndex = (engine.getCurrentIndex() + 1) % tracks.length
     fillerResumeIndexRef.current = resumeNextIndex
+    fillerStartTimeRef.current = Date.now()
+    setFillerElapsed(0)
     setIsFillerMode(true)
     void engine.enterFillerMode(fillerTrack, fillerOffsetRef.current, resumeNextIndex)
   }
@@ -535,6 +549,7 @@ export function PlaybackScreen({
     fillerOffsetRef.current = fillerOffset
     saveFillerOffset(fillerOffset)
     setIsFillerMode(false)
+    setFillerElapsed(0)
   }
 
   function handleBackToPlaylist() {
@@ -993,8 +1008,27 @@ export function PlaybackScreen({
             <button
               className="btn-resume-playlist"
               onClick={(e) => { e.stopPropagation(); handleExitFiller() }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                paddingTop: '20px',
+                paddingBottom: '20px',
+              }}
             >
-              ▶&nbsp;&nbsp;Resume Performance
+              <div style={{
+                color: 'white',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                letterSpacing: '0.05em',
+              }}>
+                Fill: {Math.floor(fillerElapsed / 60)}:{String(fillerElapsed % 60).padStart(2, '0')}
+              </div>
+              <div style={{ fontSize: '1.5rem' }}>
+                ▶&nbsp;&nbsp;Resume Performance
+              </div>
             </button>
           </div>
         </div>
