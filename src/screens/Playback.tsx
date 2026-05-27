@@ -15,6 +15,7 @@ interface Props {
   onResumeConsumed?: () => void
   fillerTrack: Track | null
   debugMode?: boolean
+  onEngineReady?: (engine: AudioEngine) => void
 }
 
 function formatTime(secs: number): string {
@@ -33,10 +34,11 @@ function displayName(track: Track | undefined): string {
 
 type TitlePhase = 'stable' | 'dim' | 'swap'
 
-export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack, debugMode }: Props) {
+export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack, debugMode, onEngineReady }: Props) {
   const engineRef = useRef(new AudioEngine())
   const onStopRef = useRef(onStop)
   useEffect(() => { onStopRef.current = onStop })
+  useEffect(() => { onEngineReady?.(engineRef.current) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   type ConfirmAction =
     | { type: 'restart'; index: number; name: string }

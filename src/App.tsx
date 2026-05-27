@@ -3,6 +3,7 @@ import { Library } from './screens/Library'
 import { Playlist } from './screens/Playlist'
 import { Playback } from './screens/Playback'
 import { AboutOverlay } from './components/AboutOverlay'
+import type { AudioEngine } from './audio/AudioEngine'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
 import { saveLibrary, loadLibrary } from './storage/libraryDb'
@@ -23,6 +24,7 @@ export function App() {
   const [debugMode, setDebugMode] = useState(() => loadDebugMode())
   const [showAbout, setShowAbout] = useState(false)
   const audioCtxRef = useRef<AudioContext | null>(null)
+  const playbackEngineRef = useRef<AudioEngine | null>(null)
 
   // Restore state from storage on mount
   useEffect(() => {
@@ -141,6 +143,8 @@ export function App() {
             setDebugMode(next)
             saveDebugMode(next)
           }}
+          engine={playbackEngineRef.current}
+          tracks={playlist}
         />
       )}
       {screen === 'library' && (
@@ -171,6 +175,7 @@ export function App() {
           onResumeConsumed={() => setResumePos(null)}
           fillerTrack={library.find((t) => t.id === fillerTrackId) ?? null}
           debugMode={debugMode}
+          onEngineReady={(e) => { playbackEngineRef.current = e }}
         />
       )}
     </div>
