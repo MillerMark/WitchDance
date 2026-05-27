@@ -1299,8 +1299,19 @@ export function PlaybackScreen({
 
 
       {showFadePicker && (
-        <div className="confirm-overlay" style={{ zIndex: 5 }} onClick={() => setShowFadePicker(false)}>
-          <div className="confirm-dialog fade-picker-dialog" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="confirm-overlay" 
+          style={{ zIndex: 5 }} 
+          onClick={() => setShowFadePicker(false)}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="confirm-dialog fade-picker-dialog" 
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
             <p className="confirm-message">End Performance:</p>
             <div className="fade-picker-options">
               <button className="btn-fade-option btn-fade-after" onClick={handleFadeAfterThis}>
