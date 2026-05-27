@@ -33,7 +33,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
   // Live playback state
   const progressFillRef = useRef<HTMLDivElement>(null)
   const elapsedRef = useRef<HTMLSpanElement>(null)
-  const durationRef = useRef<HTMLSpanElement>(null)
   const rafHandleRef = useRef(0)
   const lastTrackIdxRef = useRef(-1)
   const [currentTrackName, setCurrentTrackName] = useState('')
@@ -63,7 +62,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         const pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
         if (progressFillRef.current) progressFillRef.current.style.width = `${pct}%`
         if (elapsedRef.current) elapsedRef.current.textContent = formatTime(state.elapsed)
-        if (durationRef.current) durationRef.current.textContent = formatTime(state.duration)
         if (state.currentTrackIndex !== lastTrackIdxRef.current) {
           lastTrackIdxRef.current = state.currentTrackIndex
           setCurrentTrackName(displayName(tracks[state.currentTrackIndex]))
@@ -239,17 +237,13 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
               </p>
             )}
 
-            {/* Elapsed / Duration */}
+            {/* Elapsed time only */}
             <div style={{
-              display: 'flex',
-              gap: '6px',
               color: 'rgba(255,255,255,0.55)',
               fontSize: '0.75rem',
               fontFamily: 'monospace',
             }}>
               <span ref={elapsedRef}>0:00</span>
-              <span>/</span>
-              <span ref={durationRef}>0:00</span>
             </div>
 
             {/* Progress bar */}
@@ -281,15 +275,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
               textAlign: 'center',
               textShadow: '0 1px 6px rgba(0,0,0,0.9)',
             }}>{currentTrackName}</p>
-
-            <p style={{
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '0.7rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              margin: 0,
-              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-            }}>Now Playing</p>
           </>
         )}
       </div>
