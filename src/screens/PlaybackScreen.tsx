@@ -1093,9 +1093,9 @@ export function PlaybackScreen({
           textAlign: 'center',
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
-          zIndex: 2,
+          zIndex: 1, // Below progress bar in stacking context
           marginBottom: '-1.2em',
-          transform: 'translateY(2.2em)', // Move title down visually without affecting layout/touch targets
+          transform: 'translateY(1.1em)', // Move title down by ~1 line height
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
@@ -1110,6 +1110,7 @@ export function PlaybackScreen({
             height: '50px', // Larger touch target
             width: '100%',
             position: 'relative',
+            zIndex: 3, // Above title in stacking context to ensure touches reach it
             cursor: (trainingMode && (scrubStateRef.current !== 'locked' || engineRef.current.isPaused())) ? 'pointer' : 'default',
           }}
           onTouchStart={handleProgressBarTouchStart}
