@@ -865,7 +865,7 @@ button:disabled {
 }
 
 .confirm-dialog {
-  background: #2e1a1a;
+  background: #0a0505;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   padding: 28px 24px 20px;
@@ -960,6 +960,14 @@ button:disabled {
 .btn-fade-option:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.22);
+}
+
+.btn-fade-after {
+  background: #2e1a1a;
+}
+
+.btn-fade-after:hover {
+  background: #3a2020;
 }
 
 .fade-option-title {
