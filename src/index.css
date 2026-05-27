@@ -742,7 +742,7 @@ button:disabled {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--surface);
+  background: #080e1c;
   border-radius: 16px 16px 0 0;
   padding: 16px 16px max(28px, env(safe-area-inset-bottom));
   transform: translateY(100%);
@@ -763,7 +763,7 @@ button:disabled {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #4a6a9a;
   padding-bottom: 12px;
 }
 
@@ -781,20 +781,20 @@ button:disabled {
   justify-content: space-between;
   min-height: 48px;
   padding: 0 14px;
-  background: var(--bg);
+  background: #0d1628;
   border-radius: var(--radius);
   font-size: 1rem;
   font-weight: 400;
   color: var(--text);
   text-align: left;
-  border: 1px solid var(--border);
+  border: 1px solid #1a2a4a;
   transition: background 150ms;
 }
 
 .restart-track-row.active {
-  background: var(--surface-hi);
-  color: var(--accent);
-  border-color: var(--accent);
+  background: #0f2a5c;
+  color: #60a5fa;
+  border-color: #2563eb;
 }
 
 .restart-track-name {
@@ -808,7 +808,7 @@ button:disabled {
 .restart-track-playing {
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--accent);
+  color: #60a5fa;
   flex-shrink: 0;
 }
 
