@@ -603,7 +603,6 @@ export function PlaybackScreen({
   }
 
   function handleScreenTouchStart() {
-    if (isFillerMode) return
     if (!controlsVisible) {
       controlsJustShownRef.current = true
       showControls()
@@ -613,7 +612,6 @@ export function PlaybackScreen({
   }
 
   function handleScreenClick() {
-    if (isFillerMode) return
     if (controlsVisible && !controlsJustShownRef.current) {
       hideControlsNow()
     } else if (!controlsVisible) {
@@ -894,7 +892,7 @@ export function PlaybackScreen({
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
-              opacity: controlsVisible && !isFillerMode ? 1 : 0,
+              opacity: controlsVisible ? 1 : 0,
               transition: 'opacity 0.3s ease',
               pointerEvents: 'none',
             }}
@@ -910,7 +908,7 @@ export function PlaybackScreen({
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
-              opacity: controlsVisible && !isFillerMode ? 1 : 0,
+              opacity: controlsVisible ? 1 : 0,
               transition: 'opacity 0.3s ease',
               pointerEvents: 'none',
             }}
