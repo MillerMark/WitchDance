@@ -96,7 +96,7 @@ export function PlaybackScreen({
   const [stoppedAtIndex, setStoppedAtIndex] = useState(0)
   const [pendingAction, setPendingAction] = useState<ConfirmAction | null>(null)
   const [isFadeOut, setIsFadeOut] = useState(false)
-  const [, setIsFadeAfterThis] = useState(false)
+  const [fadeAfterThis, setFadeAfterThis] = useState(false)
   const [fadeOutFinalIndex, setFadeOutFinalIndex] = useState(-1)
   const [showFadePicker, setShowFadePicker] = useState(false)
   const [isFillerMode, setIsFillerMode] = useState(false)
@@ -454,14 +454,14 @@ export function PlaybackScreen({
     const engine = engineRef.current
     engine.fadeOutAfterThisSong()
     setIsFadeOut(true)
-    setIsFadeAfterThis(true)
+    setFadeAfterThis(true)
     setFadeOutFinalIndex(engine.getFadeOutFinalIndex())
   }
 
   function handleCancelFadeOut() {
     engineRef.current.cancelFadeOut()
     setIsFadeOut(false)
-    setIsFadeAfterThis(false)
+    setFadeAfterThis(false)
     setFadeOutFinalIndex(-1)
   }
 
@@ -777,7 +777,7 @@ export function PlaybackScreen({
             paddingRight: '12px',
             marginTop: '2px',
             opacity: trainingMode ? 1 : 0,
-            transition: 'opacity 0.6s ease',
+            transition: 'opacity 0.3s ease',
             pointerEvents: trainingMode ? 'auto' : 'none',
           }}
           onTouchStart={(e) => e.stopPropagation()}
@@ -1046,9 +1046,24 @@ export function PlaybackScreen({
             flexDirection: 'column',
             alignItems: 'center',
             padding: '0 24px',
+            gap: '12px',
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          <div
+            style={{
+              background: 'rgba(0, 0, 0, 0.85)',
+              color: 'rgba(255, 255, 255, 0.95)',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontSize: '0.95rem',
+              fontWeight: 500,
+              textAlign: 'center',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {fadeAfterThis ? 'Stopping performance after this song...' : 'Stopping performance now...'}
+          </div>
           <button
             className="btn-cancel-fade"
             onClick={handleCancelFadeOut}
@@ -1100,7 +1115,7 @@ export function PlaybackScreen({
                   onClick={handleChangeSong}
                   disabled={isPanelOpen}
                 >
-                  Change Song
+                  Change Song...
                 </button>
               </div>
               <button
@@ -1109,43 +1124,50 @@ export function PlaybackScreen({
                 disabled={isPanelOpen}
                 style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: 'calc(56px + 6px)' }}
               >
-                Stop
+                Stop Performance...
               </button>
         </div>
       )}
 
       {/* ── Restart selector panel────────────────────────────────────── */}
-      <div
-        className={`restart-panel${isPanelOpen ? ' visible' : ''}`}
-        style={{ zIndex: 4 }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="restart-panel-header">RESTART FROM</p>
-        <div className="restart-track-list">
-          {tracks.map((track, idx) => (
-            <button
-              key={track.id}
-              className={`restart-track-row${idx === stoppedAtIndex ? ' active' : ''}`}
-              onClick={() => void handleRestartFrom(idx)}
-            >
-              <span className="restart-track-name">{displayName(track)}</span>
-              {idx === stoppedAtIndex && (
-                <span className="restart-track-playing">● playing</span>
+      {isPanelOpen && (
+        <div 
+          className="confirm-overlay" 
+          style={{ zIndex: 4 }} 
+          onClick={() => { setIsPanelOpen(false); setIsChangeSongMode(false) }}
+        >
+          <div
+            className={`restart-panel visible`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="restart-panel-header">RESTART FROM</p>
+            <div className="restart-track-list">
+              {tracks.map((track, idx) => (
+                <button
+                  key={track.id}
+                  className={`restart-track-row${idx === stoppedAtIndex ? ' active' : ''}`}
+                  onClick={() => void handleRestartFrom(idx)}
+                >
+                  <span className="restart-track-name">{displayName(track)}</span>
+                  {idx === stoppedAtIndex && (
+                    <span className="restart-track-playing">● playing</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="restart-panel-footer">
+              {!isChangeSongMode && (
+                <button className="btn-back-playlist btn-destructive" onClick={handleBackToPlaylist}>
+                  ← Back to Playlist
+                </button>
               )}
-            </button>
-          ))}
+              <button className="btn-restart-cancel" onClick={() => { setIsPanelOpen(false); setIsChangeSongMode(false) }}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="restart-panel-footer">
-          {!isChangeSongMode && (
-            <button className="btn-back-playlist btn-destructive" onClick={handleBackToPlaylist}>
-              ← Back to Playlist
-            </button>
-          )}
-          <button className="btn-restart-cancel" onClick={() => { setIsPanelOpen(false); setIsChangeSongMode(false) }}>
-            Cancel
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* ── Confirm dialogs ───────────────────────────────────────────── */}
       {pendingAction && (

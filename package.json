@@ -1,7 +1,7 @@
 {
   "name": "witchdance",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.54",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
