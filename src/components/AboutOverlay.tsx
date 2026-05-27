@@ -97,18 +97,19 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
 
               ctx.clearRect(0, 0, W, H)
 
-              // Track (unfilled) line
-              ctx.fillStyle = 'rgba(255,255,255,0.12)'
-              ctx.fillRect(0, barY - 1, W, 2)
+              // Track (unfilled) — gray rectangle at ~50% opacity
+              ctx.fillStyle = 'rgba(160,160,160,0.5)'
+              ctx.fillRect(filledW > 0 ? filledW : 0, barY - 1.5, W - (filledW > 0 ? filledW : 0), 3)
 
-              // Filled portion with purple glow gradient
+              // Filled portion — brighter glow gradient
               if (filledW > 0) {
                 const grad = ctx.createLinearGradient(0, 0, filledW, 0)
-                grad.addColorStop(0, 'rgba(80,50,150,0.4)')
-                grad.addColorStop(0.7, 'rgba(180,80,240,0.7)')
-                grad.addColorStop(1, 'rgba(255,180,255,0.95)')
+                grad.addColorStop(0, 'rgba(100,60,200,0.6)')
+                grad.addColorStop(0.6, 'rgba(210,90,255,0.9)')
+                grad.addColorStop(0.88, 'rgba(255,160,255,1.0)')
+                grad.addColorStop(1, 'rgba(255,240,255,1.0)')
                 ctx.fillStyle = grad
-                ctx.fillRect(0, barY - 1, filledW, 2)
+                ctx.fillRect(0, barY - 1.5, filledW, 3)
               }
 
               // Emit particles at right edge of fill
@@ -314,13 +315,15 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         {/* Live playback info — only when music is playing */}
         {showPlayback && (
           <>
-            {/* Song name — above progress bar */}
+            {/* Song name — above progress bar, right-aligned toward emitter */}
             <p style={{
               color: 'white',
               fontSize: '1.1rem',
               fontWeight: 600,
               margin: 0,
-              textAlign: 'center',
+              width: '100%',
+              maxWidth: '360px',
+              textAlign: 'right',
               textShadow: '0 1px 6px rgba(0,0,0,0.9)',
             }}>{currentTrackName}</p>
 
@@ -358,7 +361,7 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         {/* Credit line — pinned to bottom */}
         <p style={{
           color: 'white',
-          fontSize: '0.95rem',
+          fontSize: '0.76rem',
           fontWeight: 500,
           letterSpacing: '0.04em',
           textShadow: '0 1px 6px rgba(0,0,0,0.8)',
