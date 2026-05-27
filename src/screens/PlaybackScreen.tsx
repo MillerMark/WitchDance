@@ -779,10 +779,10 @@ export function PlaybackScreen({
             <span style={{
               fontSize: '0.65rem',
               fontFamily: 'monospace',
-              color: 'rgba(255,200,80,0.75)',
+              color: 'rgba(255,255,255,0.45)',
               letterSpacing: '0.04em',
             }}>
-              double tap for training mode
+              (double tap for training mode)
             </span>
           )}
         </div>
