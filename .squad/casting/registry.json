@@ -1,0 +1,22 @@
+{
+  "agents": {
+    "ione-vale": {
+      "name": "Ione Vale",
+      "handle": "ione-vale",
+      "universe": "SquadDash Universe",
+      "role": "Frontend / Audio Engineer",
+      "status": "active",
+      "hired": "2026-05-23",
+      "charter": "agents/ione-vale/charter.md"
+    },
+    "lyra-morn": {
+      "name": "Lyra Morn",
+      "handle": "lyra-morn",
+      "universe": "SquadDash Universe",
+      "role": "UX / UI Designer",
+      "status": "active",
+      "hired": "2026-05-23",
+      "charter": "agents/lyra-morn/charter.md"
+    }
+  }
+}

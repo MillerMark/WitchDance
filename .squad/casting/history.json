@@ -1,0 +1,22 @@
+{
+  "universe_usage_history": [
+    {
+      "universe": "SquadDash Universe",
+      "date": "2026-05-23",
+      "action": "hire",
+      "agent": "ione-vale"
+    },
+    {
+      "universe": "SquadDash Universe",
+      "date": "2026-05-23",
+      "action": "hire",
+      "agent": "lyra-morn"
+    }
+  ],
+  "assignment_cast_snapshots": {
+    "2026-05-23": {
+      "ione-vale": "SquadDash Universe",
+      "lyra-morn": "SquadDash Universe"
+    }
+  }
+}

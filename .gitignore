@@ -1,0 +1,18 @@
+# Squad: ignore runtime state (logs, inbox, sessions)
+.squad/orchestration-log/
+.squad/log/
+.squad/decisions/inbox/
+.squad/sessions/
+.squad/.scratch/
+# Squad: SubSquad activation file (local to this machine)
+.squad-workstream
+
+# SquadDash — maintenance state (auto-managed)
+maintenance-state.json
+
+# SquadDash — maintenance reports (runtime, not for version control)
+.squad/maintenance-reports/
+
+# Node / build artifacts
+node_modules/
+dist/
