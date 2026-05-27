@@ -891,15 +891,29 @@ export function PlaybackScreen({
           </p>
         )}
 
-        {/* Filler mode: always-visible resume */}
-        {isFillerMode && (
+      </div>
+
+      {/* Filler mode centered overlay */}
+      {isFillerMode && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '8px',
+            gap: '16px',
             pointerEvents: 'auto',
-            marginTop: '0.5em',
           }}>
             <p style={{
               color: 'rgba(255,200,80,1)',
@@ -912,15 +926,6 @@ export function PlaybackScreen({
             }}>
               FILLER MODE
             </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.8rem',
-              margin: 0,
-              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-            }}>
-              <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Resumes: </span>
-              {displayName(tracks[fillerResumeIndexRef.current])}
-            </p>
             <button
               className="btn-resume-playlist"
               onClick={(e) => { e.stopPropagation(); handleExitFiller() }}
@@ -928,8 +933,8 @@ export function PlaybackScreen({
               ▶&nbsp;&nbsp;Resume Playlist
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Particle canvas — full height so particles fall to screen bottom */}
       <canvas
