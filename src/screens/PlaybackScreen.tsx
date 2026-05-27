@@ -147,11 +147,18 @@ export function PlaybackScreen({
     setControlsVisible(false)
   }, [])
 
-  // Resume playback if training mode is turned off while paused
+  // Resume playback if training mode is turned off while paused; lock scrubbing
   useEffect(() => {
     if (!trainingMode && trainingPaused) {
       engineRef.current.resumePlayback()
       setTrainingPaused(false)
+    }
+    if (!trainingMode) {
+      scrubStateRef.current = 'locked'
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current)
+        cooldownTimerRef.current = null
+      }
     }
   }, [trainingMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -178,6 +185,8 @@ export function PlaybackScreen({
   const xfadeStartWallRef = useRef(0)
   const xfadeDurationMsRef = useRef(0)
   const isScrubbingRef = useRef(false)
+  const scrubStateRef = useRef<'locked' | 'unlocked' | 'cooldown'>('locked')
+  const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Particle canvas refs ────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -223,6 +232,12 @@ export function PlaybackScreen({
         updateMediaSession(
           tracks[idx]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance',
         )
+        // Song change → lock scrubbing
+        scrubStateRef.current = 'locked'
+        if (cooldownTimerRef.current) {
+          clearTimeout(cooldownTimerRef.current)
+          cooldownTimerRef.current = null
+        }
       },
       onCrossfadeStart: (incomingIdx, durationMs) => {
         setIsCrossfading(true)
@@ -480,6 +495,7 @@ export function PlaybackScreen({
       clearMediaSession()
       void releaseWakeLock()
       engine.stop()
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -596,9 +612,9 @@ export function PlaybackScreen({
     setFillerElapsed(0)
   }
 
-  // ── Scrubbing (training mode when paused) ────────────────────────────────
+  // ── Scrubbing (training mode state machine) ──────────────────────────────
   function handleProgressBarInteraction(clientX: number) {
-    if (!trainingMode || !trainingPaused) return
+    if (!trainingMode || scrubStateRef.current === 'locked') return
     if (!progressBarRef.current) return
 
     const engine = engineRef.current
@@ -614,8 +630,18 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
-    if (!trainingMode || !trainingPaused) return
-    e.stopPropagation() // Don't let screen handler see this
+    if (!trainingMode) return
+    const engine = engineRef.current
+    if (scrubStateRef.current === 'locked') {
+      // LOCKED → UNLOCKED: only when paused
+      if (!engine.isPaused()) return
+      scrubStateRef.current = 'unlocked'
+    } else if (scrubStateRef.current === 'cooldown') {
+      // COOLDOWN → COOLDOWN: reset the 20s timer
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
+      cooldownTimerRef.current = null
+    }
+    e.stopPropagation()
     e.preventDefault()
     isScrubbingRef.current = true
     handleProgressBarInteraction(e.touches[0].clientX)
@@ -629,13 +655,36 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
-    e.stopPropagation() // Don't let screen handler see this
+    e.stopPropagation()
     e.preventDefault()
     isScrubbingRef.current = false
+    if (!trainingMode || scrubStateRef.current === 'locked') return
+    // Release: resume playback, transition to COOLDOWN with 20s timer
+    const engine = engineRef.current
+    if (engine.isPaused()) {
+      engine.resumePlayback()
+      setTrainingPaused(false)
+    }
+    scrubStateRef.current = 'cooldown'
+    if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
+    cooldownTimerRef.current = setTimeout(() => {
+      scrubStateRef.current = 'locked'
+      cooldownTimerRef.current = null
+    }, 20000)
   }
 
   function handleProgressBarMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    if (!trainingMode || !trainingPaused) return
+    if (!trainingMode) return
+    const engine = engineRef.current
+    if (scrubStateRef.current === 'locked') {
+      // LOCKED → UNLOCKED: only when paused
+      if (!engine.isPaused()) return
+      scrubStateRef.current = 'unlocked'
+    } else if (scrubStateRef.current === 'cooldown') {
+      // COOLDOWN → COOLDOWN: reset the 20s timer
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
+      cooldownTimerRef.current = null
+    }
     isScrubbingRef.current = true
     handleProgressBarInteraction(e.clientX)
     
@@ -644,6 +693,19 @@ export function PlaybackScreen({
     }
     const handleMouseUp = () => {
       isScrubbingRef.current = false
+      if (trainingMode && scrubStateRef.current !== 'locked') {
+        const eng = engineRef.current
+        if (eng.isPaused()) {
+          eng.resumePlayback()
+          setTrainingPaused(false)
+        }
+        scrubStateRef.current = 'cooldown'
+        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
+        cooldownTimerRef.current = setTimeout(() => {
+          scrubStateRef.current = 'locked'
+          cooldownTimerRef.current = null
+        }, 20000)
+      }
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
@@ -708,8 +770,8 @@ export function PlaybackScreen({
   }
 
   function handleScreenTouchStart(e: React.TouchEvent) {
-    // If scrubbing is enabled (training mode + paused) and touch is on progress bar, let it through
-    if (trainingMode && trainingPaused && progressBarRef.current) {
+    // If scrubbing is enabled (training mode + unlocked/cooldown, or about to unlock when paused) and touch is on progress bar, let it through
+    if (trainingMode && (scrubStateRef.current !== 'locked' || engineRef.current.isPaused()) && progressBarRef.current) {
       const touch = e.touches[0]
       const rect = progressBarRef.current.getBoundingClientRect()
       
@@ -1045,7 +1107,7 @@ export function PlaybackScreen({
             height: '50px', // Larger touch target
             width: '100%',
             position: 'relative',
-            cursor: (trainingMode && trainingPaused) ? 'pointer' : 'default',
+            cursor: (trainingMode && (scrubStateRef.current !== 'locked' || engineRef.current.isPaused())) ? 'pointer' : 'default',
           }}
           onTouchStart={handleProgressBarTouchStart}
           onTouchMove={handleProgressBarTouchMove}
