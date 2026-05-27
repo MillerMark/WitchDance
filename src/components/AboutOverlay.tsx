@@ -195,107 +195,103 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         </p>
       </div>
 
-      {/* Live playback info — shown when on playback screen */}
-      {showPlayback && (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: 0,
-          right: 0,
-          transform: 'translateY(-50%)',
-          zIndex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '10px',
-          pointerEvents: 'none',
-          padding: '0 24px',
-        }}>
-          <p style={{
-            color: 'rgba(255,255,255,0.6)',
-            fontSize: '0.7rem',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            margin: 0,
-            textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-          }}>Now Playing</p>
-          <p style={{
-            color: 'white',
-            fontSize: '1.1rem',
-            fontWeight: 600,
-            margin: 0,
-            textAlign: 'center',
-            textShadow: '0 1px 6px rgba(0,0,0,0.9)',
-          }}>{currentTrackName}</p>
-
-          {/* Progress bar */}
-          <div style={{
-            width: '100%',
-            maxWidth: '360px',
-            height: '3px',
-            background: 'rgba(255,255,255,0.2)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}>
-            <div
-              ref={progressFillRef}
-              style={{
-                height: '100%',
-                width: '0%',
-                background: 'rgba(255,255,255,0.75)',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-
-          {/* Elapsed / Duration */}
-          <div style={{
-            display: 'flex',
-            gap: '6px',
-            color: 'rgba(255,255,255,0.55)',
-            fontSize: '0.75rem',
-            fontFamily: 'monospace',
-          }}>
-            <span ref={elapsedRef}>0:00</span>
-            <span>/</span>
-            <span ref={durationRef}>0:00</span>
-          </div>
-
-          {/* Next up */}
-          {nextTrackName && (
-            <p style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.8rem',
-              margin: 0,
-              textAlign: 'center',
-              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-            }}>
-              <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
-              {nextTrackName}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Bottom credit text */}
+      {/* Bottom section: Now Playing info + credit, stacked at the bottom */}
       <div style={{
         position: 'absolute',
-        bottom: 'max(env(safe-area-inset-bottom), 24px)',
+        bottom: '1em',
         left: 0,
         right: 0,
-        textAlign: 'center',
         zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '0 24px',
         pointerEvents: 'none',
       }}>
+        {/* Credit line */}
         <p style={{
           color: 'white',
           fontSize: '0.95rem',
           fontWeight: 500,
           letterSpacing: '0.04em',
           textShadow: '0 1px 6px rgba(0,0,0,0.8)',
+          opacity: 0.8,
+          margin: 0,
         }}>
           Created by the Wayward Witches of Connecticut
         </p>
+
+        {/* Live playback info — only when music is playing */}
+        {showPlayback && (
+          <>
+            {/* Next up */}
+            {nextTrackName && (
+              <p style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.8rem',
+                margin: 0,
+                textAlign: 'center',
+                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+              }}>
+                <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
+                {nextTrackName}
+              </p>
+            )}
+
+            {/* Elapsed / Duration */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              color: 'rgba(255,255,255,0.55)',
+              fontSize: '0.75rem',
+              fontFamily: 'monospace',
+            }}>
+              <span ref={elapsedRef}>0:00</span>
+              <span>/</span>
+              <span ref={durationRef}>0:00</span>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{
+              width: '100%',
+              maxWidth: '360px',
+              height: '3px',
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '2px',
+              overflow: 'hidden',
+            }}>
+              <div
+                ref={progressFillRef}
+                style={{
+                  height: '100%',
+                  width: '0%',
+                  background: 'rgba(255,255,255,0.75)',
+                  borderRadius: '2px',
+                }}
+              />
+            </div>
+
+            {/* Song name */}
+            <p style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              margin: 0,
+              textAlign: 'center',
+              textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+            }}>{currentTrackName}</p>
+
+            <p style={{
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '0.7rem',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              margin: 0,
+              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+            }}>Now Playing</p>
+          </>
+        )}
       </div>
     </div>
   )
