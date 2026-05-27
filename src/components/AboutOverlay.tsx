@@ -297,16 +297,17 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
         {/* Live playback info — only when music is playing */}
         {showPlayback && (
           <>
-            {/* Song name — above progress bar, right-aligned toward emitter */}
+            {/* Song name — centered, dropped down to overlap top of canvas */}
             <p style={{
               color: 'white',
               fontSize: '1.1rem',
               fontWeight: 600,
               margin: 0,
-              width: '100%',
-              maxWidth: '360px',
-              textAlign: 'right',
+              textAlign: 'center',
               textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+              position: 'relative',
+              zIndex: 2,
+              marginBottom: '-1.4em',
             }}>{currentTrackName}</p>
 
             {/* Mystic particle canvas progress bar */}
@@ -315,8 +316,8 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               maxWidth: '360px',
               height: '80px',
               position: 'relative',
-              marginTop: '-8px',
-              marginBottom: '-28px',
+              zIndex: 1,
+              marginBottom: '-1.2em',
             }}>
               <canvas
                 ref={canvasRef}
@@ -324,7 +325,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               />
             </div>
 
-            {/* Next up — below progress bar */}
+            {/* Next up — pulled up close to the bar */}
             {nextTrackName && (
               <p style={{
                 color: 'rgba(255,255,255,0.5)',
@@ -332,6 +333,8 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
                 margin: 0,
                 textAlign: 'center',
                 textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                position: 'relative',
+                zIndex: 2,
               }}>
                 <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
                 {nextTrackName}
