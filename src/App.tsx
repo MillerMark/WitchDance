@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { Library } from './screens/Library'
 import { Playlist } from './screens/Playlist'
-import { Playback } from './screens/Playback'
-import { AboutOverlay } from './components/AboutOverlay'
+import { PlaybackScreen } from './screens/PlaybackScreen'
 import type { AudioEngine } from './audio/AudioEngine'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
@@ -22,7 +21,6 @@ export function App() {
   const [resumePos, setResumePos] = useState<{ trackIndex: number; elapsed: number } | null>(null)
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
   const [trainingMode, setTrainingMode] = useState(() => loadDebugMode())
-  const [showAbout, setShowAbout] = useState(false)
   const audioCtxRef = useRef<AudioContext | null>(null)
   const playbackEngineRef = useRef<AudioEngine | null>(null)
 
@@ -126,28 +124,13 @@ export function App() {
           fontSize: '10px',
           color: trainingMode ? 'rgba(255,200,0,0.6)' : 'rgba(255,255,255,0.35)',
           fontFamily: 'monospace',
-          cursor: 'pointer',
           zIndex: 9999,
           userSelect: 'none',
+          pointerEvents: 'none',
         }}
-        onClick={() => setShowAbout(true)}
       >
         WitchDance v1.0-{__COMMIT_HASH__}
       </div>
-      {showAbout && (
-        <AboutOverlay
-          trainingMode={trainingMode}
-          onClose={() => setShowAbout(false)}
-          onToggleTraining={() => {
-            const next = !trainingMode
-            setTrainingMode(next)
-            saveDebugMode(next)
-          }}
-          engine={playbackEngineRef.current}
-          tracks={playlist}
-          fillerTrack={fillerTrackId ? library.find(t => t.id === fillerTrackId) ?? null : null}
-        />
-      )}
       {screen === 'library' && (
         <Library
           library={library}
@@ -168,7 +151,7 @@ export function App() {
         />
       )}
       {screen === 'playback' && (
-        <Playback
+        <PlaybackScreen
           tracks={playlist}
           audioCtx={audioCtxRef.current}
           onStop={handleStop}
@@ -176,6 +159,11 @@ export function App() {
           onResumeConsumed={() => setResumePos(null)}
           fillerTrack={library.find((t) => t.id === fillerTrackId) ?? null}
           trainingMode={trainingMode}
+          onToggleTraining={() => {
+            const next = !trainingMode
+            setTrainingMode(next)
+            saveDebugMode(next)
+          }}
           onEngineReady={(e) => { playbackEngineRef.current = e }}
         />
       )}
