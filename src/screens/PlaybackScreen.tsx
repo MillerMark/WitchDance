@@ -288,14 +288,14 @@ export function PlaybackScreen({
             // Filler button visibility
             if (fillerBtnRef.current) {
               const SHOW_WINDOW = 15
-              const FADE_IN_SECS = 2
               let opacity = 0
               if (state.crossfading) {
                 const xfadeElapsedMs = Date.now() - xfadeStartWallRef.current
                 const halfwayMs = xfadeDurationMsRef.current / 2
                 opacity = Math.max(0, 1 - xfadeElapsedMs / halfwayMs)
-              } else {
-                opacity = Math.min(1, Math.max(0, (SHOW_WINDOW - remaining) / FADE_IN_SECS))
+              } else if (remaining <= SHOW_WINDOW) {
+                // Button is available - show at full opacity
+                opacity = 1
               }
               fillerBtnRef.current.style.opacity = String(opacity)
               fillerBtnRef.current.style.pointerEvents = opacity < 0.05 ? 'none' : 'auto'
@@ -1125,13 +1125,13 @@ export function PlaybackScreen({
             className="btn-enter-filler"
             onClick={handleEnterFiller}
             disabled={isPanelOpen || !fillerTrack}
-            style={{ opacity: 0, pointerEvents: 'none' }}
+            style={{ opacity: 0, pointerEvents: 'none', width: '85%' }}
           >
             <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
               <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
               <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
             </svg>
-            Pause and Fill...
+            Pause & Fill
           </button>
           <button
             className="btn-stop-immediate btn-destructive"
