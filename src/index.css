@@ -1054,7 +1054,7 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(98, 16, 32, 0.85);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 0.9rem;
+  font-size: 1.125rem;
   cursor: pointer;
 }
 
@@ -1123,13 +1123,13 @@ button:disabled {
 }
 
 .btn-enter-filler {
-  width: 75%;
+  width: 64%;
   background: rgba(0, 0, 0, 0.85);
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.25);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  min-height: 48px;
+  min-height: 56px;
   border-radius: 12px;
   transition: background 150ms ease-out, border-color 150ms ease-out;
 }
