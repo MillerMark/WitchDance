@@ -55,7 +55,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
 
   // Live playback state
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const elapsedRef = useRef<HTMLSpanElement>(null)
   const rafHandleRef = useRef(0)
   const particlesRef = useRef<Particle[]>([])
   const lastEmitRef = useRef(0)
@@ -85,7 +84,7 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
       const state = engine.getPlaybackState()
       if (state) {
         const pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
-        if (elapsedRef.current) elapsedRef.current.textContent = formatTime(state.elapsed)
+
 
         // Canvas particle bar
         const canvas = canvasRef.current
@@ -321,28 +320,15 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         {/* Live playback info — only when music is playing */}
         {showPlayback && (
           <>
-            {/* Next up */}
-            {nextTrackName && (
-              <p style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '0.8rem',
-                margin: 0,
-                textAlign: 'center',
-                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-              }}>
-                <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
-                {nextTrackName}
-              </p>
-            )}
-
-            {/* Elapsed time */}
-            <div style={{
-              color: 'rgba(255,255,255,0.55)',
-              fontSize: '0.75rem',
-              fontFamily: 'monospace',
-            }}>
-              <span ref={elapsedRef}>0:00</span>
-            </div>
+            {/* Song name — above progress bar */}
+            <p style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              margin: 0,
+              textAlign: 'center',
+              textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+            }}>{currentTrackName}</p>
 
             {/* Mystic particle canvas progress bar */}
             <div style={{
@@ -359,15 +345,19 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
               />
             </div>
 
-            {/* Song name */}
-            <p style={{
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              margin: 0,
-              textAlign: 'center',
-              textShadow: '0 1px 6px rgba(0,0,0,0.9)',
-            }}>{currentTrackName}</p>
+            {/* Next up — below progress bar */}
+            {nextTrackName && (
+              <p style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.8rem',
+                margin: 0,
+                textAlign: 'center',
+                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+              }}>
+                <span style={{ opacity: 0.6, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
+                {nextTrackName}
+              </p>
+            )}
           </>
         )}
 
