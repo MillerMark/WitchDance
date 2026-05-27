@@ -627,7 +627,8 @@ export function PlaybackScreen({
     const pct = Math.max(0, Math.min(1, x / rect.width))
     const seekTime = pct * state.duration
 
-    engine.seek(seekTime)
+    // Pass isActiveScrubbing=true so audio plays during drag
+    engine.seek(seekTime, isScrubbingRef.current)
   }
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
@@ -1093,7 +1094,7 @@ export function PlaybackScreen({
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 2,
-          marginBottom: '-1.2em',
+          marginBottom: '0.2em',
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
@@ -1232,7 +1233,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — height allows particles to rise */}
+      {/* Particle canvas — extended to allow particles above title */}
       <canvas
         ref={canvasRef}
         style={{
@@ -1241,7 +1242,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(30px + 0.5em + 2rem)',
+          height: 'calc(100px + 0.5em + 2rem)',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,

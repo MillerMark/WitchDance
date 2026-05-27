@@ -346,8 +346,8 @@ export class AudioEngine {
     return !!this._mediaEl?.paused && !this._intentionallyStopped
   }
 
-  seek(timeSeconds: number): void {
-    console.log('[AudioEngine] seek() called with timeSeconds:', timeSeconds)
+  seek(timeSeconds: number, isActiveScrubbing = false): void {
+    console.log('[AudioEngine] seek() called with timeSeconds:', timeSeconds, 'isActiveScrubbing:', isActiveScrubbing)
     if (!this.ctx || !this.currentNode) {
       console.log('[AudioEngine] seek() blocked - no ctx or currentNode')
       return
@@ -384,10 +384,14 @@ export class AudioEngine {
     console.log('[AudioEngine] Starting new source at offset', seekTime)
     src.start(0, seekTime)
     
-    // Re-pause if we're paused
-    if (this._mediaEl?.paused) {
-      console.log('[AudioEngine] Re-suspending context (was paused)')
+    // Re-pause only if paused AND not actively scrubbing
+    if (this._mediaEl?.paused && !isActiveScrubbing) {
+      console.log('[AudioEngine] Re-suspending context (was paused, not scrubbing)')
       if (ctx.state === 'running') void ctx.suspend()
+    } else if (isActiveScrubbing && ctx.state === 'suspended') {
+      // Resume context for scrubbing to hear audio
+      console.log('[AudioEngine] Resuming context for scrubbing')
+      void ctx.resume()
     }
   }
 
