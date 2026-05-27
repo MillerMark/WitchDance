@@ -345,12 +345,19 @@ export function PlaybackScreen({
           if (ctx) {
             // Determine fill pct for canvas
             let pct = 0
+            let elapsedSecs = 0
             if (engine.isInFillerMode()) {
               const fs = engine.getFillerState()
-              if (fs) pct = fs.duration > 0 ? (fs.elapsed / fs.duration) * 100 : 0
+              if (fs) {
+                pct = fs.duration > 0 ? (fs.elapsed / fs.duration) * 100 : 0
+                elapsedSecs = fs.elapsed
+              }
             } else {
               const state = engine.getPlaybackState()
-              if (state) pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
+              if (state) {
+                pct = state.duration > 0 ? (state.elapsed / state.duration) * 100 : 0
+                elapsedSecs = state.elapsed
+              }
             }
 
             const barY = 23
@@ -374,21 +381,37 @@ export function PlaybackScreen({
             }
 
             // Emit particles at right edge of fill
+            const isScrubbing = isScrubbingRef.current
+            const isPausedNow = engine.isPaused()
+            // 3× rate while scrubbing (15 ms), 75% rate while paused (60 ms), normal 45 ms
+            const emitInterval = isScrubbing ? 15 : isPausedNow ? 60 : 45
             const now = Date.now()
-            if (filledW > 2 && now - lastEmitRef.current > 45) {
+            if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
               for (let i = 0; i < 4; i++) {
                 const family = COLOR_FAMILIES[Math.floor(Math.random() * COLOR_FAMILIES.length)]
-                const goDown = Math.random() < 0.28
-                const speed = 0.4 + Math.random() * 1.8
-                const angle = goDown
-                  ? (Math.PI * 0.3 + Math.random() * Math.PI * 0.6)
-                  : (-Math.PI * 0.1 - Math.random() * Math.PI * 0.9)
+                let vx: number, vy: number
+                if (isScrubbing && Math.random() < 2 / 3) {
+                  // 2/3 of scrubbing particles shoot straight up
+                  const speed = 0.4 + Math.random() * 1.8
+                  vx = (Math.random() - 0.5) * 0.15
+                  vy = -speed
+                } else {
+                  const goDown = Math.random() < 0.28
+                  const speed = 0.4 + Math.random() * 1.8
+                  const angle = goDown
+                    ? (Math.PI * 0.3 + Math.random() * Math.PI * 0.6)
+                    : (-Math.PI * 0.1 - Math.random() * Math.PI * 0.9)
+                  // 50% velocity while paused (and not scrubbing)
+                  const velMult = (isPausedNow && !isScrubbing) ? 0.5 : 1
+                  vx = Math.cos(angle) * speed * 0.5 * velMult
+                  vy = Math.sin(angle) * speed * velMult
+                }
                 particlesRef.current.push({
                   x: filledW + (Math.random() - 0.5) * 4,
                   y: barY + (Math.random() - 0.5) * 3,
-                  vx: Math.cos(angle) * speed * 0.5,
-                  vy: Math.sin(angle) * speed,
+                  vx,
+                  vy,
                   life: 1.0,
                   maxLife: 0.5 + Math.random() * 1.2,
                   family,
@@ -421,6 +444,25 @@ export function PlaybackScreen({
               ctx.beginPath()
               ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
               ctx.fill()
+              ctx.restore()
+            }
+
+            // Draw scrub-position time label above the progress handle
+            if (isScrubbing) {
+              const m = Math.floor(elapsedSecs / 60)
+              const sRem = elapsedSecs % 60
+              const sInt = Math.floor(sRem)
+              const tenths = Math.floor((sRem - sInt) * 10)
+              const timeStr = `${m}:${sInt.toString().padStart(2, '0')}.${tenths}`
+              const labelX = Math.min(Math.max(filledW, 22), W - 22)
+              ctx.save()
+              ctx.font = 'bold 13px sans-serif'
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'bottom'
+              ctx.shadowColor = 'rgba(0,0,0,0.85)'
+              ctx.shadowBlur = 5
+              ctx.fillStyle = 'rgba(255,255,255,0.95)'
+              ctx.fillText(timeStr, labelX, barY - 10)
               ctx.restore()
             }
           }
