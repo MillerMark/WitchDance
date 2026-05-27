@@ -297,17 +297,18 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
         {/* Live playback info — only when music is playing */}
         {showPlayback && (
           <>
-            {/* Song name — centered, dropped down to overlap top of canvas */}
+            {/* Song name — centered, overlapping top of canvas */}
             <p style={{
               color: 'white',
               fontSize: '1.1rem',
               fontWeight: 600,
               margin: 0,
+              width: '100%',
               textAlign: 'center',
               textShadow: '0 1px 6px rgba(0,0,0,0.9)',
               position: 'relative',
               zIndex: 2,
-              marginBottom: '-1.4em',
+              marginBottom: '-2.2em',
             }}>{currentTrackName}</p>
 
             {/* Mystic particle canvas progress bar */}
@@ -317,7 +318,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
               height: '80px',
               position: 'relative',
               zIndex: 1,
-              marginBottom: '-1.2em',
+              marginBottom: '-1.8em',
             }}>
               <canvas
                 ref={canvasRef}
@@ -331,6 +332,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
                 color: 'rgba(255,255,255,0.5)',
                 fontSize: '0.8rem',
                 margin: 0,
+                width: '100%',
                 textAlign: 'center',
                 textShadow: '0 1px 4px rgba(0,0,0,0.8)',
                 position: 'relative',
@@ -343,7 +345,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
           </>
         )}
 
-        {/* Credit line — pinned to bottom */}
+        {/* Credit line — pinned to bottom, shifted down slightly */}
         <p style={{
           color: 'white',
           fontSize: '0.76rem',
@@ -352,6 +354,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
           textShadow: '0 1px 6px rgba(0,0,0,0.8)',
           opacity: 0.6,
           margin: 0,
+          marginTop: '0.5em',
           whiteSpace: 'nowrap',
         }}>
           Created by the Wayward Witches of Connecticut
