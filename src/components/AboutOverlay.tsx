@@ -171,6 +171,7 @@ export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, 
 
   function handleOverlayTouchEnd(e: React.TouchEvent) {
     e.stopPropagation()
+    e.preventDefault() // suppress synthetic click so it doesn't fall through to buttons beneath
     onClose()
   }
 
