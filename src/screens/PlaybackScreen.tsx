@@ -556,35 +556,22 @@ export function PlaybackScreen({
 
   // ── Scrubbing (training mode when paused) ────────────────────────────────
   function handleProgressBarInteraction(clientX: number) {
-    console.log('[SCRUB] handleProgressBarInteraction called', { trainingMode, trainingPaused, clientX })
-    if (!trainingMode || !trainingPaused) {
-      console.log('[SCRUB] Blocked - trainingMode:', trainingMode, 'trainingPaused:', trainingPaused)
-      return
-    }
-    if (!progressBarRef.current) {
-      console.log('[SCRUB] Blocked - no progressBarRef')
-      return
-    }
-    
+    if (!trainingMode || !trainingPaused) return
+    if (!progressBarRef.current) return
+
     const engine = engineRef.current
     const state = engine.getPlaybackState()
-    if (!state || state.duration === 0) {
-      console.log('[SCRUB] Blocked - no state or zero duration', state)
-      return
-    }
-    
+    if (!state || state.duration === 0) return
+
     const rect = progressBarRef.current.getBoundingClientRect()
     const x = clientX - rect.left
     const pct = Math.max(0, Math.min(1, x / rect.width))
     const seekTime = pct * state.duration
-    
-    console.log('[SCRUB] Seeking to', seekTime, 'seconds (', Math.floor(pct * 100), '%)')
+
     engine.seek(seekTime)
   }
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
-    console.log('[SCRUB] touchStart', { trainingMode, trainingPaused })
-    alert('[SCRUB] touchStart - trainingMode: ' + trainingMode + ', paused: ' + trainingPaused)
     if (!trainingMode || !trainingPaused) return
     e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
@@ -593,7 +580,6 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarTouchMove(e: React.TouchEvent<HTMLDivElement>) {
-    console.log('[SCRUB] touchMove', { isScrubbing: isScrubbingRef.current })
     if (!isScrubbingRef.current) return
     e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
@@ -601,7 +587,6 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
-    console.log('[SCRUB] touchEnd')
     e.stopPropagation() // Don't let screen handler see this
     e.preventDefault()
     isScrubbingRef.current = false
@@ -1019,8 +1004,6 @@ export function PlaybackScreen({
             width: '100%',
             position: 'relative',
             cursor: (trainingMode && trainingPaused) ? 'pointer' : 'default',
-            background: (trainingMode && trainingPaused) ? 'rgba(255,0,0,0.1)' : 'transparent', // Visual indicator
-            border: (trainingMode && trainingPaused) ? '2px solid rgba(255,0,0,0.3)' : 'none', // Visual border
           }}
           onTouchStart={handleProgressBarTouchStart}
           onTouchMove={handleProgressBarTouchMove}
