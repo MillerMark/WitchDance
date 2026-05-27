@@ -21,7 +21,7 @@ export function App() {
   const [restored, setRestored] = useState(false)
   const [resumePos, setResumePos] = useState<{ trackIndex: number; elapsed: number } | null>(null)
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
-  const [debugMode, setDebugMode] = useState(() => loadDebugMode())
+  const [trainingMode, setTrainingMode] = useState(() => loadDebugMode())
   const [showAbout, setShowAbout] = useState(false)
   const audioCtxRef = useRef<AudioContext | null>(null)
   const playbackEngineRef = useRef<AudioEngine | null>(null)
@@ -124,7 +124,7 @@ export function App() {
           top: '8px',
           left: '10px',
           fontSize: '10px',
-          color: debugMode ? 'rgba(255,200,0,0.6)' : 'rgba(255,255,255,0.35)',
+          color: trainingMode ? 'rgba(255,200,0,0.6)' : 'rgba(255,255,255,0.35)',
           fontFamily: 'monospace',
           cursor: 'pointer',
           zIndex: 9999,
@@ -136,11 +136,11 @@ export function App() {
       </div>
       {showAbout && (
         <AboutOverlay
-          debugMode={debugMode}
+          trainingMode={trainingMode}
           onClose={() => setShowAbout(false)}
-          onToggleDebug={() => {
-            const next = !debugMode
-            setDebugMode(next)
+          onToggleTraining={() => {
+            const next = !trainingMode
+            setTrainingMode(next)
             saveDebugMode(next)
           }}
           engine={playbackEngineRef.current}
@@ -174,7 +174,7 @@ export function App() {
           resumePos={resumePos}
           onResumeConsumed={() => setResumePos(null)}
           fillerTrack={library.find((t) => t.id === fillerTrackId) ?? null}
-          debugMode={debugMode}
+          trainingMode={trainingMode}
           onEngineReady={(e) => { playbackEngineRef.current = e }}
         />
       )}

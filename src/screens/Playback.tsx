@@ -14,7 +14,7 @@ interface Props {
   resumePos?: { trackIndex: number; elapsed: number } | null
   onResumeConsumed?: () => void
   fillerTrack: Track | null
-  debugMode?: boolean
+  trainingMode?: boolean
   onEngineReady?: (engine: AudioEngine) => void
 }
 
@@ -34,7 +34,7 @@ function displayName(track: Track | undefined): string {
 
 type TitlePhase = 'stable' | 'dim' | 'swap'
 
-export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack, debugMode, onEngineReady }: Props) {
+export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed, fillerTrack, trainingMode, onEngineReady }: Props) {
   const engineRef = useRef(new AudioEngine())
   const onStopRef = useRef(onStop)
   useEffect(() => { onStopRef.current = onStop })
@@ -567,7 +567,7 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
             >
               Stop
             </button>
-            {debugMode && (
+            {trainingMode && (
             <button
               className="btn-test-skip"
               onClick={handleSkipToEnd}
@@ -671,7 +671,7 @@ export function Playback({ tracks, audioCtx, onStop, resumePos, onResumeConsumed
       )}
 
       {/* ── Debug overlay ────────────────────────────────── */}
-      {debugMode && (
+      {trainingMode && (
       <button
         onClick={() => { setDebugLog(engineRef.current.getDebugLog()); setShowDebug(v => !v) }}
         style={{

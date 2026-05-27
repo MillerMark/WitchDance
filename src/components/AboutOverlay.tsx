@@ -3,9 +3,9 @@ import type { AudioEngine } from '../audio/AudioEngine'
 import type { Track } from '../types/track'
 
 interface Props {
-  debugMode: boolean
+  trainingMode: boolean
   onClose: () => void
-  onToggleDebug: () => void
+  onToggleTraining: () => void
   engine?: AudioEngine | null
   tracks?: Track[]
 }
@@ -39,13 +39,8 @@ interface Particle {
   size: number
 }
 
-export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks }: Props) {
+export function AboutOverlay({ trainingMode, onClose, onToggleTraining, engine, tracks }: Props) {
   const lastTapRef = useRef<number>(0)
-
-  // Debug label: only visible briefly after toggle, hidden on open
-  const prevDebugRef = useRef<boolean | null>(null)
-  const [debugLabelVisible, setDebugLabelVisible] = useState(false)
-  const debugTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Live playback state
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -55,21 +50,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
   const lastTrackIdxRef = useRef(-1)
   const [currentTrackName, setCurrentTrackName] = useState('')
   const [nextTrackName, setNextTrackName] = useState('')
-
-  // Detect debugMode changes after mount → show toast
-  useEffect(() => {
-    if (prevDebugRef.current === null) {
-      prevDebugRef.current = debugMode
-      return
-    }
-    prevDebugRef.current = debugMode
-    setDebugLabelVisible(true)
-    if (debugTimerRef.current) clearTimeout(debugTimerRef.current)
-    debugTimerRef.current = setTimeout(() => setDebugLabelVisible(false), 3500)
-    return () => {
-      if (debugTimerRef.current) clearTimeout(debugTimerRef.current)
-    }
-  }, [debugMode])
 
   // RAF loop for live playback info + particle canvas
   useEffect(() => {
@@ -205,7 +185,7 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
 
   function handleTitleDoubleClick(e: React.MouseEvent) {
     e.stopPropagation()
-    onToggleDebug()
+    onToggleTraining()
   }
 
   function handleTitleTouchEnd(e: React.TouchEvent) {
@@ -213,7 +193,7 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
     e.preventDefault()
     const now = Date.now()
     if (now - lastTapRef.current < 450) {
-      onToggleDebug()
+      onToggleTraining()
     }
     lastTapRef.current = now
   }
@@ -282,19 +262,20 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
           } as React.CSSProperties}
           draggable={false}
         />
-        {/* Debug mode toast — only visible briefly after toggle */}
+        {/* Training mode label — fades in when on, fades out when off */}
         <p style={{
-          color: 'white',
+          color: 'rgba(255,200,80,1)',
           fontSize: '0.85rem',
           fontFamily: 'monospace',
           marginTop: '-10px',
-          letterSpacing: '0.05em',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
           textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-          opacity: debugLabelVisible ? 1 : 0,
-          transition: 'opacity 0.4s ease',
+          opacity: trainingMode ? 1 : 0,
+          transition: 'opacity 0.6s ease',
           pointerEvents: 'none',
         }}>
-          {debugMode ? 'Debug mode: ON' : 'Debug mode: OFF'}
+          Training Mode
         </p>
       </div>
 
