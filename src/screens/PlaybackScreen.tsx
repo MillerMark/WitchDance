@@ -1208,14 +1208,14 @@ export function PlaybackScreen({
       {showFadePicker && (
         <div className="confirm-overlay" style={{ zIndex: 5 }} onClick={() => setShowFadePicker(false)}>
           <div className="confirm-dialog fade-picker-dialog" onClick={(e) => e.stopPropagation()}>
-            <p className="confirm-message">How would you like to end the playlist?</p>
+            <p className="confirm-message">End the performance:</p>
             <div className="fade-picker-options">
               <button className="btn-fade-option btn-fade-after" onClick={handleFadeAfterThis}>
-                <span className="fade-option-title">Fade Out After This Song</span>
+                <span className="fade-option-title">After This Song</span>
                 <span className="fade-option-desc">Finish this song, then fade to silence</span>
               </button>
               <button className="btn-fade-option btn-fade-now btn-destructive" onClick={handleFadeNow}>
-                <span className="fade-option-title">Fade Out Now</span>
+                <span className="fade-option-title">Right Now</span>
                 <span className="fade-option-desc">Fade this song to silence immediately</span>
               </button>
             </div>

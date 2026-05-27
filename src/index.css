@@ -865,7 +865,7 @@ button:disabled {
 }
 
 .confirm-dialog {
-  background: #1a1a2e;
+  background: #2e1a1a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   padding: 28px 24px 20px;
@@ -986,7 +986,7 @@ button:disabled {
 }
 
 .btn-fade-after .fade-option-title {
-  color: #a78bfa;
+  color: #ff9999;
 }
 
 /* ── Resume screen ───────────────────────────────────── */
