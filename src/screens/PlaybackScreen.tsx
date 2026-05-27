@@ -5,7 +5,6 @@ import { iosAudioUnlock } from '../audio/iosUnlock'
 import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
 import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
-import packageJson from '../../package.json'
 
 declare const __COMMIT_HASH__: string
 
