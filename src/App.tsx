@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { Library } from './screens/Library'
 import { Playlist } from './screens/Playlist'
 import { Playback } from './screens/Playback'
+import { AboutOverlay } from './components/AboutOverlay'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
 import { saveLibrary, loadLibrary } from './storage/libraryDb'
@@ -20,8 +21,8 @@ export function App() {
   const [resumePos, setResumePos] = useState<{ trackIndex: number; elapsed: number } | null>(null)
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
   const [debugMode, setDebugMode] = useState(() => loadDebugMode())
+  const [showAbout, setShowAbout] = useState(false)
   const audioCtxRef = useRef<AudioContext | null>(null)
-  const lastTapRef = useRef<number>(0)
 
   // Restore state from storage on mount
   useEffect(() => {
@@ -127,23 +128,21 @@ export function App() {
           zIndex: 9999,
           userSelect: 'none',
         }}
-        onDoubleClick={() => {
-          const next = !debugMode
-          setDebugMode(next)
-          saveDebugMode(next)
-        }}
-        onTouchEnd={() => {
-          const now = Date.now()
-          if (now - lastTapRef.current < 350) {
-            const next = !debugMode
-            setDebugMode(next)
-            saveDebugMode(next)
-          }
-          lastTapRef.current = now
-        }}
+        onClick={() => setShowAbout(true)}
       >
         WitchDance v1.0-{__COMMIT_HASH__}
       </div>
+      {showAbout && (
+        <AboutOverlay
+          debugMode={debugMode}
+          onClose={() => setShowAbout(false)}
+          onToggleDebug={() => {
+            const next = !debugMode
+            setDebugMode(next)
+            saveDebugMode(next)
+          }}
+        />
+      )}
       {screen === 'library' && (
         <Library
           library={library}
