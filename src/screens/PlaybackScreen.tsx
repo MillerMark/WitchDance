@@ -651,7 +651,7 @@ export function PlaybackScreen({
           letterSpacing: '0.05em',
           zIndex: 2,
         }}>
-          v{packageJson.version}
+          v1.0-{__COMMIT_HASH__}
         </div>
         {/* Resume content */}
         <div className="screen resume-screen" style={{ position: 'relative', zIndex: 1 }}>
