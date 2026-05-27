@@ -167,6 +167,7 @@ export function PlaybackScreen({
 
   // ── Direct-DOM refs for RAF (no re-renders at 60fps) ───────────────────
   const progressFillRef = useRef<HTMLDivElement>(null)
+  const progressBarRef = useRef<HTMLDivElement>(null)
   const elapsedRef = useRef<HTMLSpanElement>(null)
   const durationRef = useRef<HTMLSpanElement>(null)
   const fillerBtnRef = useRef<HTMLButtonElement>(null)
@@ -176,6 +177,7 @@ export function PlaybackScreen({
   const lastEnsureRef = useRef(0)
   const xfadeStartWallRef = useRef(0)
   const xfadeDurationMsRef = useRef(0)
+  const isScrubbingRef = useRef(false)
 
   // ── Particle canvas refs ────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -552,6 +554,55 @@ export function PlaybackScreen({
     setFillerElapsed(0)
   }
 
+  // ── Scrubbing (training mode when paused) ────────────────────────────────
+  function handleProgressBarInteraction(clientX: number) {
+    if (!trainingMode || !trainingPaused) return
+    if (!progressBarRef.current) return
+    
+    const engine = engineRef.current
+    const state = engine.getPlaybackState()
+    if (!state || state.duration === 0) return
+    
+    const rect = progressBarRef.current.getBoundingClientRect()
+    const x = clientX - rect.left
+    const pct = Math.max(0, Math.min(1, x / rect.width))
+    const seekTime = pct * state.duration
+    
+    engine.seek(seekTime)
+  }
+
+  function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    if (!trainingMode || !trainingPaused) return
+    isScrubbingRef.current = true
+    handleProgressBarInteraction(e.touches[0].clientX)
+  }
+
+  function handleProgressBarTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    if (!isScrubbingRef.current) return
+    handleProgressBarInteraction(e.touches[0].clientX)
+  }
+
+  function handleProgressBarTouchEnd() {
+    isScrubbingRef.current = false
+  }
+
+  function handleProgressBarMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    if (!trainingMode || !trainingPaused) return
+    isScrubbingRef.current = true
+    handleProgressBarInteraction(e.clientX)
+    
+    const handleMouseMove = (me: MouseEvent) => {
+      if (isScrubbingRef.current) handleProgressBarInteraction(me.clientX)
+    }
+    const handleMouseUp = () => {
+      isScrubbingRef.current = false
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
   function handleBackToPlaylist() {
     setPendingAction({ type: 'backToPlaylist' })
   }
@@ -912,11 +963,19 @@ export function PlaybackScreen({
         </p>
 
         {/* Elapsed / countdown flank the bar — only when controls are visible */}
-        <div style={{
-          height: '30px',
-          width: '100%',
-          position: 'relative',
-        }}>
+        <div 
+          ref={progressBarRef}
+          style={{
+            height: '30px',
+            width: '100%',
+            position: 'relative',
+            cursor: (trainingMode && trainingPaused) ? 'pointer' : 'default',
+          }}
+          onTouchStart={handleProgressBarTouchStart}
+          onTouchMove={handleProgressBarTouchMove}
+          onTouchEnd={handleProgressBarTouchEnd}
+          onMouseDown={handleProgressBarMouseDown}
+        >
           {/* Elapsed left, countdown right — overlaid on top of canvas area */}
           <span
             ref={elapsedRef}

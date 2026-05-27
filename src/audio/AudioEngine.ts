@@ -346,6 +346,40 @@ export class AudioEngine {
     return !!this._mediaEl?.paused && !this._intentionallyStopped
   }
 
+  seek(timeSeconds: number): void {
+    if (!this.ctx || !this.currentNode) return
+    const buffer = this.currentNode.source.buffer
+    if (!buffer) return
+    const engine = this
+    const seekTime = Math.max(0, Math.min(timeSeconds, buffer.duration))
+    
+    // Stop current playback
+    try {
+      this.currentNode.source.stop()
+    } catch (e) {
+      // Ignore if already stopped
+    }
+    
+    // Create new source at seek position
+    const ctx = this.ctx
+    const src = ctx.createBufferSource()
+    src.buffer = buffer
+    const gain = ctx.createGain()
+    src.connect(gain)
+    gain.connect(this._streamDest!)
+    
+    this.currentNode = { source: src, gain }
+    this.currentStartCtxTime = ctx.currentTime - seekTime
+    this.currentDuration = buffer.duration
+    
+    src.start(0, seekTime)
+    
+    // Re-pause if we're paused
+    if (this._mediaEl?.paused) {
+      if (ctx.state === 'running') void ctx.suspend()
+    }
+  }
+
   seekToTrackStart(): void {
     if (!this.ctx || !this.tracks.length) return
     const ctx = this.ctx
