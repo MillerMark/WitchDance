@@ -318,19 +318,6 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
         padding: '0 24px',
         pointerEvents: 'none',
       }}>
-        {/* Credit line */}
-        <p style={{
-          color: 'white',
-          fontSize: '0.95rem',
-          fontWeight: 500,
-          letterSpacing: '0.04em',
-          textShadow: '0 1px 6px rgba(0,0,0,0.8)',
-          opacity: 0.8,
-          margin: 0,
-        }}>
-          Created by the Wayward Witches of Connecticut
-        </p>
-
         {/* Live playback info — only when music is playing */}
         {showPlayback && (
           <>
@@ -383,6 +370,20 @@ export function AboutOverlay({ debugMode, onClose, onToggleDebug, engine, tracks
             }}>{currentTrackName}</p>
           </>
         )}
+
+        {/* Credit line — pinned to bottom */}
+        <p style={{
+          color: 'white',
+          fontSize: '0.95rem',
+          fontWeight: 500,
+          letterSpacing: '0.04em',
+          textShadow: '0 1px 6px rgba(0,0,0,0.8)',
+          opacity: 0.6,
+          margin: 0,
+          whiteSpace: 'nowrap',
+        }}>
+          Created by the Wayward Witches of Connecticut
+        </p>
       </div>
     </div>
   )
