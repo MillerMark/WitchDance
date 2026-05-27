@@ -990,7 +990,7 @@ export function PlaybackScreen({
         alignItems: 'center',
         gap: '8px',
         padding: '0 24px',
-        pointerEvents: 'none',
+        pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
         {/* Song name */}
         <p style={{
@@ -1004,6 +1004,7 @@ export function PlaybackScreen({
           position: 'relative',
           zIndex: 2,
           marginBottom: '-1.2em',
+          pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
             ? (fillerTrack ? displayName(fillerTrack) : '')
