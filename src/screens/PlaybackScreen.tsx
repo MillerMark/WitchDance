@@ -611,7 +611,12 @@ export function PlaybackScreen({
     } else {
       engine.seekToNearEnd(10)
     }
-    setTrainingPaused(false)
+    // If paused, auto-resume when skipping
+    if (trainingPaused) {
+      setTrainingPaused(false)
+      trainingPausedRef.current = false
+      engine.resumePlayback()
+    }
   }
 
   function handleTrainingPause() {
