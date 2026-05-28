@@ -587,42 +587,28 @@ export function PlaybackScreen({
           setMediaSessionPlaybackState('paused')
         },
         () => {
-          // Next track - use engineRef to get current state
+          // Next track - use crossfadeTo for smooth transition
           const engine = engineRef.current
           const currentIdx = engine.getCurrentIndex()
           const nextIdx = (currentIdx + 1) % tracks.length
           engine.crossfadeTo(nextIdx)
         },
         () => {
-          // Previous track - smart behavior like in-app rewind button
+          // Previous track - ALWAYS go to previous track (no restart logic)
+          // This prevents iOS from switching to seek mode (±10 seconds)
           const engine = engineRef.current
-          const state = engine.getPlaybackState()
-          const elapsed = state?.elapsed ?? 0
           const currentIdx = engine.getCurrentIndex()
-          
-          if (elapsed < 3) {
-            // Near start — go to previous track
-            const prevIdx = (currentIdx - 1 + tracks.length) % tracks.length
-            engine.seekToTrackIndex(prevIdx, 0)
-            setCurrentIndex(prevIdx)
-            setNextUpIndex((prevIdx + 1) % tracks.length)
-          } else {
-            // Past 3 seconds — restart current track
-            engine.seekToTrackStart()
-          }
-          
-          // Resume if paused
-          if (trainingPausedRef.current) {
-            engine.resumePlayback()
-            setTrainingPaused(false)
-            trainingPausedRef.current = false
-            setMediaSessionPlaybackState('playing')
-          }
+          const prevIdx = (currentIdx - 1 + tracks.length) % tracks.length
+          engine.crossfadeTo(prevIdx)
         },
       )
     } else {
-      // Performance mode - CRITICAL: explicitly disable ALL handlers to prevent pausing during live performance
+      // Performance mode - CRITICAL: disable ALL handlers AND playback state
       updateMediaSession(trackName, null, null, null, null)
+      // Force playback state to 'none' to prevent default browser pause behavior
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'none'
+      }
     }
   }, [trainingMode, currentIndex, tracks])
 

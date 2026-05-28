@@ -689,7 +689,9 @@ export class AudioEngine {
         artist: 'WitchDance',
         album: '',
       })
-      navigator.mediaSession.playbackState = 'playing'
+      // playbackState now controlled by PlaybackScreen based on training mode
+      // Setting it here would override performance mode's 'none' state
+      // navigator.mediaSession.playbackState = 'playing'
     }
 
     this._scheduleXfade()
