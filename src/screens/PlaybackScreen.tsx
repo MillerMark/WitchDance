@@ -1850,7 +1850,7 @@ export function PlaybackScreen({
             className="btn-enter-filler"
             onClick={handleEnterFiller}
             disabled={isPanelOpen || !fillerTrack}
-            style={{ opacity: 0, pointerEvents: 'none' }}
+            style={{ opacity: 0, pointerEvents: 'none', marginTop: '112px' }}
           >
             <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
               <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
@@ -1862,7 +1862,7 @@ export function PlaybackScreen({
             className="btn-stop-immediate btn-destructive"
             onClick={handleStopButton}
             disabled={isPanelOpen}
-            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: '12px' }}
+            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: '112px' }}
           >
             <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
               <rect x="1" y="1" width="16" height="16" rx="2" fill="rgba(255,255,255,0.5)" />
