@@ -136,6 +136,12 @@ export function PlaybackScreen({
   // Bookmark swipe-to-delete state
   const [bookmarkSwipeStartY, setBookmarkSwipeStartY] = useState<number | null>(null)
   const [bookmarkSwipeDeltaY, setBookmarkSwipeDeltaY] = useState(0)
+
+  // Bookmark crossfade animation state
+  const [bookmarkXfadeOpacity, setBookmarkXfadeOpacity] = useState(1)
+  const [bookmarkXfadeDuration, setBookmarkXfadeDuration] = useState(200)
+  const bookmarkFadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevFillerScheduledRef = useRef(false)
   
   // Debug logging for particle emission state
   const lastEmissionStateRef = useRef<string>('')
@@ -208,6 +214,25 @@ export function PlaybackScreen({
     return () => clearInterval(interval)
   }, [fillerScheduled, isFillerMode, fillerTrack])
 
+  // Fade bookmark out when fill is scheduled; fade back in if cancelled before start
+  useEffect(() => {
+    if (fillerScheduled) {
+      if (bookmarkFadeTimerRef.current) clearTimeout(bookmarkFadeTimerRef.current)
+      setBookmarkXfadeDuration(800)
+      setBookmarkXfadeOpacity(0)
+    } else if (prevFillerScheduledRef.current && !isFillerMode) {
+      // Fill was cancelled before it started — restore bookmark visibility
+      if (bookmarkFadeTimerRef.current) clearTimeout(bookmarkFadeTimerRef.current)
+      setBookmarkXfadeDuration(600)
+      setBookmarkXfadeOpacity(1)
+      bookmarkFadeTimerRef.current = setTimeout(() => {
+        setBookmarkXfadeDuration(200)
+        bookmarkFadeTimerRef.current = null
+      }, 600)
+    }
+    prevFillerScheduledRef.current = fillerScheduled
+  }, [fillerScheduled, isFillerMode]) // eslint-disable-line react-hooks/exhaustive-deps
+
 
   // ── Direct-DOM refs for RAF (no re-renders at 60fps) ───────────────────
   const progressFillRef = useRef<HTMLDivElement>(null)
@@ -276,12 +301,24 @@ export function PlaybackScreen({
           clearTimeout(cooldownTimerRef.current)
           cooldownTimerRef.current = null
         }
+        // Fade in new track's bookmark
+        if (bookmarkFadeTimerRef.current) clearTimeout(bookmarkFadeTimerRef.current)
+        setBookmarkXfadeDuration(1500)
+        setBookmarkXfadeOpacity(1)
+        bookmarkFadeTimerRef.current = setTimeout(() => {
+          setBookmarkXfadeDuration(200)
+          bookmarkFadeTimerRef.current = null
+        }, 1500)
       },
       onCrossfadeStart: (incomingIdx, durationMs) => {
         setIsCrossfading(true)
         xfadeStartWallRef.current = Date.now()
         xfadeDurationMsRef.current = durationMs
         startTitleAnimation(incomingIdx, durationMs)
+        // Fade out current bookmark as crossfade begins
+        if (bookmarkFadeTimerRef.current) clearTimeout(bookmarkFadeTimerRef.current)
+        setBookmarkXfadeDuration(Math.min(Math.round(durationMs / 2), 2000))
+        setBookmarkXfadeOpacity(0)
       },
       onLoopEnd: () => onStopRef.current(),
     }
@@ -1360,7 +1397,7 @@ export function PlaybackScreen({
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
         {/* Bookmark indicator - positioned above progress bar */}
-        {trainingMode && currentTrack.bookmark !== undefined && (() => {
+        {trainingMode && !isFillerMode && !fillerScheduled && currentTrack.bookmark !== undefined && (() => {
           const engine = engineRef.current
           const state = engine.getPlaybackState()
           const duration = state?.duration ?? currentTrack.duration ?? 0
@@ -1409,10 +1446,10 @@ export function PlaybackScreen({
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '0',
-                pointerEvents: 'auto',
+                pointerEvents: bookmarkXfadeOpacity < 0.05 ? 'none' : 'auto',
                 zIndex: 4,
-                opacity: swipeOpacity,
-                transition: bookmarkSwipeStartY === null ? 'opacity 0.2s ease' : 'none',
+                opacity: swipeOpacity * bookmarkXfadeOpacity,
+                transition: bookmarkSwipeStartY === null ? `opacity ${bookmarkXfadeDuration}ms ease` : 'none',
               }}
             >
               {/* Bookmark indicator with swipe-to-delete - includes pin head and extension lines */}
@@ -1562,7 +1599,7 @@ export function PlaybackScreen({
           minHeight: '2.2rem',  // Reserve space for 2 lines
         }}>
           <p style={{
-            color: 'white',
+            color: 'hsl(290, 100%, 93%)',
             fontSize: '1.1rem',
             fontWeight: 600,
             margin: 0,

@@ -694,7 +694,7 @@ button:disabled {
 .btn-stop-immediate {
   width: 56%;
   background: rgba(62, 21, 96, 0.85);
-  color: hsl(290, 100%, 90%);
+  color: hsl(290, 100%, 93%);
   font-size: 1.125rem;
   font-weight: 600;
   min-height: 56px;
