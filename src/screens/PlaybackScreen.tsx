@@ -1182,23 +1182,32 @@ export function PlaybackScreen({
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
         {/* Song name - bottom aligned just above progress bar */}
-        <p style={{
-          color: 'white',
-          fontSize: '1.1rem',
-          fontWeight: 600,
-          margin: 0,
-          marginBottom: '8px',  // 8px gap above progress bar
+        <div style={{
           width: '100%',
-          textAlign: 'center',
-          textShadow: '0 1px 6px rgba(0,0,0,0.9)',
-          position: 'relative',
-          zIndex: 1, // Below progress bar in stacking context
-          pointerEvents: 'none', // Text shouldn't block touches
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-end',  // Bottom-align content
+          marginBottom: '4px',  // Small gap above progress bar
+          minHeight: '2.2rem',  // Reserve space for 2 lines
         }}>
-          {isFillerMode
-            ? (fillerTrack ? displayName(fillerTrack) : '')
-            : currentTrackName}
-        </p>
+          <p style={{
+            color: 'white',
+            fontSize: '1.1rem',
+            fontWeight: 600,
+            margin: 0,
+            width: '100%',
+            textAlign: 'center',
+            textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+            position: 'relative',
+            zIndex: 1,
+            pointerEvents: 'none',
+          }}>
+            {isFillerMode
+              ? (fillerTrack ? displayName(fillerTrack) : '')
+              : currentTrackName}
+          </p>
+        </div>
 
         {/* Elapsed / countdown flank the bar — only when controls are visible */}
         <div 
@@ -1252,20 +1261,29 @@ export function PlaybackScreen({
 
         {/* Next up - top aligned just below progress bar */}
         {nextTrackName && (
-          <p style={{
-            color: 'rgba(255,255,255,0.88)',
-            fontSize: '0.8rem',
-            margin: 0,
-            marginTop: '8px',  // 8px gap below progress bar
+          <div style={{
             width: '100%',
-            textAlign: 'center',
-            textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-            position: 'relative',
-            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',  // Top-align content
+            marginTop: '4px',  // Small gap below progress bar
+            minHeight: '2rem',  // Reserve space for 2 lines
           }}>
-            <span style={{ opacity: 0.75, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
-            {nextTrackName}
-          </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.88)',
+              fontSize: '0.8rem',
+              margin: 0,
+              width: '100%',
+              textAlign: 'center',
+              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+              position: 'relative',
+              zIndex: 2,
+            }}>
+              <span style={{ opacity: 0.75, fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next up </span>
+              {nextTrackName}
+            </p>
+          </div>
         )}
 
       </div>
