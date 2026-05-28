@@ -687,7 +687,6 @@ export function PlaybackScreen({
   function handleProgressBarMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     console.log('[SCRUB-MOUSE] MouseDown - trainingMode:', trainingMode, 'scrubState:', scrubStateRef.current, 'paused:', trainingPaused)
     if (!trainingMode) return
-    const engine = engineRef.current
     if (scrubStateRef.current === 'locked') {
       // LOCKED → UNLOCKED: only when paused
       if (!trainingPaused) {
