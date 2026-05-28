@@ -635,9 +635,13 @@ export function PlaybackScreen({
     if (!trainingMode) return
     const engine = engineRef.current
     if (scrubStateRef.current === 'locked') {
-      // LOCKED → UNLOCKED: only when paused
-      if (!engine.isPaused()) return
+      // LOCKED → UNLOCKED: allow scrubbing (will auto-pause if playing)
       scrubStateRef.current = 'unlocked'
+      // Pause playback if currently playing - scrubbing will resume it
+      if (!engine.isPaused()) {
+        engine.pausePlayback()
+        setTrainingPaused(true)
+      }
     } else if (scrubStateRef.current === 'cooldown') {
       // COOLDOWN → COOLDOWN: reset the 20s timer
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
