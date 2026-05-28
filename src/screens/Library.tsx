@@ -7,6 +7,7 @@ interface Props {
   playlist: Track[]
   onImport: (merged: Track[]) => void
   onAddToPlaylist: (selected: Track[]) => void
+  onDeleteTrack: (trackId: string) => void
 }
 
 function formatBytes(bytes: number): string {
@@ -14,7 +15,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function Library({ library, playlist, onImport, onAddToPlaylist }: Props) {
+export function Library({ library, playlist, onImport, onAddToPlaylist, onDeleteTrack }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
@@ -57,6 +58,16 @@ export function Library({ library, playlist, onImport, onAddToPlaylist }: Props)
   function handleAddToPlaylist() {
     const selected = library.filter((t) => selectedIds.has(t.id))
     onAddToPlaylist(selected)
+  }
+
+  function handleDelete(e: React.MouseEvent, trackId: string) {
+    e.stopPropagation()
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(trackId)
+      return next
+    })
+    onDeleteTrack(trackId)
   }
 
   const selectedCount = library.filter((t) => selectedIds.has(t.id)).length
@@ -112,6 +123,14 @@ export function Library({ library, playlist, onImport, onAddToPlaylist }: Props)
                     <div className="track-name">{track.name}</div>
                     <div className="track-meta">{formatBytes(track.file.size)}</div>
                   </div>
+                  <button
+                    className="btn-delete-track"
+                    onClick={(e) => handleDelete(e, track.id)}
+                    aria-label="Delete track"
+                    title="Delete track"
+                  >
+                    🗑️
+                  </button>
                 </div>
               )
             })}

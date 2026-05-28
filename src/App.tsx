@@ -81,6 +81,19 @@ export function App() {
     saveLibrary(tracks.map((t) => ({ id: t.id, name: t.name, file: t.file }))).catch(() => {})
   }
 
+  function handleDeleteTrack(trackId: string) {
+    const updatedLibrary = library.filter((t) => t.id !== trackId)
+    setLibrary(updatedLibrary)
+    saveLibrary(updatedLibrary.map((t) => ({ id: t.id, name: t.name, file: t.file }))).catch(() => {})
+    
+    // Also remove from playlist if present
+    const updatedPlaylist = playlist.filter((t) => t.id !== trackId)
+    if (updatedPlaylist.length !== playlist.length) {
+      setPlaylist(updatedPlaylist)
+      savePlaylist(updatedPlaylist.map((t) => t.id))
+    }
+  }
+
   function handleAddToPlaylist(selected: Track[]) {
     setPlaylist(selected)
     savePlaylist(selected.map((t) => t.id))
@@ -137,6 +150,7 @@ export function App() {
           playlist={playlist}
           onImport={handleImport}
           onAddToPlaylist={handleAddToPlaylist}
+          onDeleteTrack={handleDeleteTrack}
         />
       )}
       {screen === 'playlist' && (
