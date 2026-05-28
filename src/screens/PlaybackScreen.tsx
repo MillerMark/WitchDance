@@ -1266,10 +1266,10 @@ export function PlaybackScreen({
         ref={canvasRef}
         style={{
           position: 'absolute',
-          left: 0,
-          right: 0,
+          left: '24px',  // Match container padding
+          right: '24px',  // Match container padding
           bottom: '1.7em',  // Fine-tuned position between title and "Next up"
-          width: '100%',
+          width: 'calc(100% - 48px)',  // Account for left+right padding
           height: '200px',  // Taller to show particles shooting up
           display: 'block',
           pointerEvents: 'none',
