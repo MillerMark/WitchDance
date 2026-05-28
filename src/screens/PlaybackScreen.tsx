@@ -1280,7 +1280,7 @@ export function PlaybackScreen({
             <div 
               style={{
                 position: 'absolute',
-                bottom: '50px',
+                bottom: '98px',  // Moved up by bookmark height (48px)
                 left: `${bookmarkLeft}px`,
                 transform: 'translateX(-24px)',  // Center the 48px wide element
                 display: 'flex',
