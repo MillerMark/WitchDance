@@ -380,7 +380,7 @@ export function PlaybackScreen({
             }
 
             // Draw progress bar at bottom of canvas (canvas is 60vh tall, bar offset to align with original position)
-            const barY = H - 55
+            const barY = H - 51
             const filledW = W * pct / 100
             
             ctx.clearRect(0, 0, W, H)
