@@ -1173,6 +1173,16 @@ export function PlaybackScreen({
               }
               const Y = 'rgba(255,200,80,1)'
               return (<>
+                {/* Set Bookmark - only when paused */}
+                {trainingPaused && (
+                  <button 
+                    aria-label="Set Bookmark" 
+                    style={btnStyle}
+                    onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
+                  >
+                    <span style={{ fontSize: '16px' }}>📍+</span>
+                  </button>
+                )}
                 {/* Rewind to start */}
                 <button aria-label="Rewind" style={btnStyle}
                   onClick={(e) => { e.stopPropagation(); handleTrainingRewind() }}>
@@ -1205,39 +1215,6 @@ export function PlaybackScreen({
               </>)
             })()}
           </div>
-          {/* Set Bookmark button - centered below play/pause */}
-          {trainingPaused && (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              width: '100%',
-              marginTop: '8px',
-            }}>
-              <button 
-                aria-label="Set Bookmark" 
-                style={{
-                  background: 'rgba(20,16,4,0.85)',
-                  border: '1px solid rgba(255,200,80,0.35)',
-                  borderRadius: '8px',
-                  paddingLeft: '14px',
-                  paddingRight: '14px',
-                  height: '36px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  letterSpacing: '0.02em',
-                  color: 'rgba(255,200,80,1)',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-                onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
-              >
-                📍 Bookmark
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
