@@ -1268,9 +1268,9 @@ export function PlaybackScreen({
           position: 'absolute',
           left: 0,
           right: 0,
-          top: '60vh',  // Start at 60vh from top, extends to bottom (40vh tall)
           bottom: 0,
           width: '100%',
+          height: '200px',  // Taller to show particles shooting up
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
