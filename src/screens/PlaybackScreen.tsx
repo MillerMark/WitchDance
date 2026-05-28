@@ -1165,7 +1165,7 @@ export function PlaybackScreen({
             {(() => {
               const btnStyle: React.CSSProperties = {
                 background: 'rgba(20,16,4,0.85)',
-                border: '1px solid rgba(255,200,80,0.35)',
+                border: '1px solid rgba(225,111,251,0.35)',  // Purple border for bookmark button
                 borderRadius: '8px',
                 width: '44px',
                 height: '36px',
@@ -1177,15 +1177,22 @@ export function PlaybackScreen({
                 WebkitTapHighlightColor: 'transparent',
               }
               const Y = 'rgba(255,200,80,1)'
+              const P = 'rgba(225,111,251,1)'  // Purple for bookmark
               return (<>
                 {/* Set Bookmark - only when paused */}
                 {trainingPaused && (
                   <button 
                     aria-label="Set Bookmark" 
-                    style={btnStyle}
+                    style={{
+                      ...btnStyle,
+                      border: '1px solid rgba(225,111,251,0.5)',  // Purple border
+                    }}
                     onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
                   >
-                    <span style={{ fontSize: '16px' }}>📍+</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 2 L10 18 M14 6 L10 2 L6 6" stroke={P} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="10" cy="15" r="2" fill={P}/>
+                    </svg>
                   </button>
                 )}
                 {/* Rewind to start */}
@@ -1333,8 +1340,8 @@ export function PlaybackScreen({
                   }
                 }}
                 style={{
-                  background: 'rgba(0,0,0,0.5)',
-                  border: '2px solid rgba(255,255,255,0.25)',
+                  background: 'rgba(82,42,156,0.7)',  // Purple outer color with higher opacity
+                  border: '2px solid rgba(225,111,251,0.6)',  // Purple mid color for border
                   borderRadius: '8px',
                   width: '48px',
                   height: '48px',
@@ -1345,12 +1352,15 @@ export function PlaybackScreen({
                   padding: 0,
                   fontSize: '1.7rem',
                   WebkitTapHighlightColor: 'transparent',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                  boxShadow: '0 2px 8px rgba(82,42,156,0.6)',  // Purple shadow
                   transform: swipeTransform,
                   transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
                 }}
               >
-                📍
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }}>
+                  <path d="M16 4 L16 28 M22 10 L16 4 L10 10" stroke="rgba(225,111,251,1)" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="16" cy="24" r="3.5" fill="rgba(225,111,251,1)"/>
+                </svg>
               </button>
             </div>
           )
