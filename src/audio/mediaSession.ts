@@ -3,10 +3,10 @@
 
 export function updateMediaSession(
   trackName: string,
-  onPlay?: () => void,
-  onPause?: () => void,
-  onNextTrack?: () => void,
-  onPreviousTrack?: () => void,
+  onPlay?: (() => void) | null,
+  onPause?: (() => void) | null,
+  onNextTrack?: (() => void) | null,
+  onPreviousTrack?: (() => void) | null,
 ): void {
   if (!('mediaSession' in navigator)) return
 
@@ -16,8 +16,10 @@ export function updateMediaSession(
     album: '',
   })
 
-  if (onPlay) navigator.mediaSession.setActionHandler('play', onPlay)
-  if (onPause) navigator.mediaSession.setActionHandler('pause', onPause)
+  // CRITICAL: Always set handlers (null to disable in performance mode)
+  // If we don't explicitly set to null, old handlers remain active!
+  navigator.mediaSession.setActionHandler('play', onPlay || null)
+  navigator.mediaSession.setActionHandler('pause', onPause || null)
   
   // Enable/disable skip actions based on whether handlers are provided
   // In training mode: handlers provided (allow changing songs)

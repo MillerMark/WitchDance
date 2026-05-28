@@ -587,19 +587,22 @@ export function PlaybackScreen({
           setMediaSessionPlaybackState('paused')
         },
         () => {
-          // Next track
-          const nextIdx = (currentIndex + 1) % tracks.length
-          engineRef.current.crossfadeTo(nextIdx)
+          // Next track - use engineRef to get current state
+          const engine = engineRef.current
+          const currentIdx = engine.getCurrentIndex()
+          const nextIdx = (currentIdx + 1) % tracks.length
+          engine.crossfadeTo(nextIdx)
         },
         () => {
           // Previous track - smart behavior like in-app rewind button
           const engine = engineRef.current
           const state = engine.getPlaybackState()
           const elapsed = state?.elapsed ?? 0
+          const currentIdx = engine.getCurrentIndex()
           
           if (elapsed < 3) {
             // Near start — go to previous track
-            const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length
+            const prevIdx = (currentIdx - 1 + tracks.length) % tracks.length
             engine.seekToTrackIndex(prevIdx, 0)
             setCurrentIndex(prevIdx)
             setNextUpIndex((prevIdx + 1) % tracks.length)
@@ -618,8 +621,8 @@ export function PlaybackScreen({
         },
       )
     } else {
-      // Performance mode - disable skip buttons and play/pause
-      updateMediaSession(trackName)
+      // Performance mode - CRITICAL: explicitly disable ALL handlers to prevent pausing during live performance
+      updateMediaSession(trackName, null, null, null, null)
     }
   }, [trainingMode, currentIndex, tracks])
 
