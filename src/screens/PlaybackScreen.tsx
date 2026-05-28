@@ -103,11 +103,14 @@ export function PlaybackScreen({
   const [showFadePicker, setShowFadePicker] = useState(false)
   const [isFillerMode, setIsFillerMode] = useState(false)
   const [fillerElapsed, setFillerElapsed] = useState(0)
+  const [fillerScheduled, setFillerScheduled] = useState(false) // New: scheduled fill state
+  const [fillerCountdown, setFillerCountdown] = useState(0) // New: countdown to fill start
   const fillerStartTimeRef = useRef(0)
   const fillerOffsetRef = useRef(loadFillerOffset())
   const lastFillerSaveRef = useRef(0)
   const fillerResumeIndexRef = useRef(0)
   const fillerTrackRef = useRef(fillerTrack)
+  const fillerScheduleTimeRef = useRef(0) // New: when fill was scheduled
   useEffect(() => { fillerTrackRef.current = fillerTrack }, [fillerTrack])
 
   // ── Title crossfade animation ───────────────────────────────────────────
@@ -340,13 +343,29 @@ export function PlaybackScreen({
             const remaining = state.duration > 0 ? Math.max(0, state.duration - state.elapsed) : 0
             durationRef.current.textContent = `-${formatTime(remaining)}`
 
-            // Filler button visibility
+            // Update filler countdown if scheduled
+            if (fillerScheduled && !isFillerMode) {
+              const countdown = Math.max(0, Math.floor(remaining))
+              setFillerCountdown(countdown)
+              
+              // Start fill when countdown reaches 0
+              if (countdown === 0 && fillerTrack) {
+                const engine = engineRef.current
+                fillerStartTimeRef.current = Date.now()
+                setFillerElapsed(0)
+                setIsFillerMode(true)
+                setFillerScheduled(false)
+                void engine.enterFillerMode(fillerTrack, fillerOffsetRef.current, fillerResumeIndexRef.current)
+              }
+            }
+
+            // Filler button visibility - show when within last 2 minutes
             if (fillerBtnRef.current) {
-              const SHOW_WINDOW = 15
+              const SHOW_WINDOW = 120 // 2 minutes in seconds
               let opacity = 0
               const isScrubbing = isScrubbingRef.current
               
-              // FIX #4: Always show during scrubbing if near end
+              // FIX #4: Always show during scrubbing if within last 2 minutes
               if (isScrubbing && remaining <= SHOW_WINDOW) {
                 opacity = 1
               } else if (state.crossfading) {
@@ -709,22 +728,44 @@ export function PlaybackScreen({
   function handleEnterFiller() {
     if (!fillerTrack) return
     const engine = engineRef.current
-    // Use React state instead of engine.getCurrentIndex() for consistency
-    const resumeNextIndex = (currentIndex + 1) % tracks.length
-    fillerResumeIndexRef.current = resumeNextIndex
-    fillerStartTimeRef.current = Date.now()
-    setFillerElapsed(0)
-    setIsFillerMode(true)
-    void engine.enterFillerMode(fillerTrack, fillerOffsetRef.current, resumeNextIndex)
+    const state = engine.getPlaybackState()
+    if (!state) return
+    
+    const remaining = state.duration - state.elapsed
+    
+    // If within last 2 minutes, schedule the fill to start at song end
+    if (remaining <= 120) {
+      // Schedule fill - it will start when song ends
+      const resumeNextIndex = (currentIndex + 1) % tracks.length
+      fillerResumeIndexRef.current = resumeNextIndex
+      fillerScheduleTimeRef.current = Date.now()
+      setFillerScheduled(true)
+      setFillerCountdown(Math.max(0, Math.floor(remaining)))
+    }
   }
 
   function handleExitFiller() {
     const engine = engineRef.current
-    const { fillerOffset } = engine.exitFillerMode()
-    fillerOffsetRef.current = fillerOffset
-    saveFillerOffset(fillerOffset)
-    setIsFillerMode(false)
-    setFillerElapsed(0)
+    
+    // If scheduled but not yet started, just cancel the schedule
+    if (fillerScheduled && !isFillerMode) {
+      setFillerScheduled(false)
+      setFillerCountdown(0)
+      return
+    }
+    
+    // If actually in filler mode, exit it
+    if (isFillerMode) {
+      const { fillerOffset } = engine.exitFillerMode()
+      fillerOffsetRef.current = fillerOffset
+      saveFillerOffset(fillerOffset)
+      setIsFillerMode(false)
+      setFillerElapsed(0)
+    }
+    
+    // Clear scheduled state
+    setFillerScheduled(false)
+    setFillerCountdown(0)
   }
 
   // ── Scrubbing (training mode state machine) ──────────────────────────────
@@ -1607,8 +1648,8 @@ export function PlaybackScreen({
 
       </div>
 
-      {/* Filler mode centered overlay */}
-      {isFillerMode && (
+      {/* Filler mode centered overlay (scheduled or active) */}
+      {(fillerScheduled || isFillerMode) && (
         <div
           style={{
             position: 'absolute',
@@ -1638,7 +1679,7 @@ export function PlaybackScreen({
               textTransform: 'uppercase',
               textShadow: '0 1px 4px rgba(0,0,0,0.9)',
             }}>
-              FILLER MODE
+              {fillerScheduled && !isFillerMode ? 'FILL SCHEDULED' : 'FILLER MODE'}
             </p>
             <button
               className="btn-resume-playlist"
@@ -1659,7 +1700,13 @@ export function PlaybackScreen({
                 fontWeight: 500,
                 letterSpacing: '0.05em',
               }}>
-                Fill: {Math.floor(fillerElapsed / 60)}:{String(fillerElapsed % 60).padStart(2, '0')}
+                {fillerScheduled && !isFillerMode ? (
+                  // Countdown mode
+                  <>Starting fill in: {Math.floor(fillerCountdown / 60)}:{String(fillerCountdown % 60).padStart(2, '0')}</>
+                ) : (
+                  // Elapsed mode
+                  <>Fill: {Math.floor(fillerElapsed / 60)}:{String(fillerElapsed % 60).padStart(2, '0')}</>
+                )}
               </div>
               <div style={{ fontSize: '1.5rem' }}>
                 ▶&nbsp;&nbsp;Resume Performance
