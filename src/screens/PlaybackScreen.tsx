@@ -1252,7 +1252,7 @@ export function PlaybackScreen({
                       top: '20px',
                       width: '2px',
                       height: '15px',
-                      transform: 'translateX(-8px)',
+                      transform: 'translateX(-6px)',
                       pointerEvents: 'none',
                       zIndex: 0,
                     }}>
