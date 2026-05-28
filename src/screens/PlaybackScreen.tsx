@@ -1185,38 +1185,37 @@ export function PlaybackScreen({
                     style={{
                       ...btnStyle,
                       border: '1px solid rgba(225,111,251,0.5)',  // Purple border
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '2px',
+                      position: 'relative',
+                      overflow: 'visible',
                     }}
                     onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 512 640" style={{ position: 'relative', top: '-2px' }}>
                       <defs>
-                        <radialGradient id="bodyGradient" cx="34%" cy="22%" r="72%">
-                          <stop offset="0%" stopColor="#e16ffb"/>
-                          <stop offset="18%" stopColor="#9b48d5"/>
-                          <stop offset="54%" stopColor="#522a9c"/>
-                          <stop offset="100%" stopColor="#2c145c"/>
+                        <radialGradient id="sphereFillBtn" cx="34%" cy="28%" r="72%">
+                          <stop offset="0%" stopColor="#f4b8ff"/>
+                          <stop offset="16%" stopColor="#e16ffb"/>
+                          <stop offset="48%" stopColor="#7b3ed0"/>
+                          <stop offset="82%" stopColor="#522a9c"/>
+                          <stop offset="100%" stopColor="#32145f"/>
                         </radialGradient>
-                        <linearGradient id="edgeGradient" x1="120" y1="40" x2="390" y2="470" gradientUnits="userSpaceOnUse">
-                          <stop offset="0%" stopColor="#f0a0ff" stopOpacity="0.85"/>
-                          <stop offset="35%" stopColor="#522a9c" stopOpacity="0.35"/>
-                          <stop offset="100%" stopColor="#1b0b3d" stopOpacity="0.75"/>
-                        </linearGradient>
-                        <radialGradient id="innerGradient" cx="35%" cy="28%" r="65%">
+                        <radialGradient id="highlightBtn" cx="50%" cy="50%" r="50%">
                           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
-                          <stop offset="22%" stopColor="#f5c8ff" stopOpacity="0.9"/>
-                          <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.45"/>
-                          <stop offset="100%" stopColor="#522a9c" stopOpacity="0.1"/>
+                          <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.35"/>
+                          <stop offset="100%" stopColor="#e16ffb" stopOpacity="0"/>
                         </radialGradient>
                       </defs>
-                      <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="url(#bodyGradient)"/>
-                      <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="none" stroke="url(#edgeGradient)" strokeWidth="10" strokeLinejoin="round"/>
-                      <circle cx="256" cy="188" r="76" fill="#291055" opacity="0.42"/>
-                      <circle cx="256" cy="184" r="68" fill="url(#innerGradient)"/>
+                      {/* Pin head sphere */}
+                      <circle cx="256" cy="200" r="120" fill="url(#sphereFillBtn)"/>
+                      <circle cx="256" cy="200" r="120" fill="none" stroke="#f2c7ff" strokeOpacity="0.95" strokeWidth="6"/>
+                      <circle cx="256" cy="200" r="114" fill="none" stroke="#ffffff" strokeOpacity="0.28" strokeWidth="2"/>
+                      <ellipse cx="213" cy="158" rx="45" ry="30" transform="rotate(-26 213 158)" fill="url(#highlightBtn)" opacity="0.9"/>
+                      <ellipse cx="198" cy="143" rx="14" ry="9" transform="rotate(-26 198 143)" fill="#ffffff" opacity="0.72"/>
+                      {/* Pin extension lines - short for button */}
+                      <line x1="255" y1="320" x2="255" y2="520" stroke="#000000" strokeOpacity="0.5" strokeWidth="2"/>
+                      <line x1="257" y1="320" x2="257" y2="520" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="2"/>
                     </svg>
-                    <span style={{ fontSize: '14px', color: Y }}>+</span>
+                    <span style={{ fontSize: '14px', color: Y, marginLeft: '2px' }}>+</span>
                   </button>
                 )}
                 {/* Rewind to start */}
@@ -1317,41 +1316,14 @@ export function PlaybackScreen({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '0',
                 pointerEvents: 'auto',
                 zIndex: 4,
                 opacity: swipeOpacity,
                 transition: bookmarkSwipeStartY === null ? 'opacity 0.2s ease' : 'none',
               }}
             >
-              {/* Pin extension lines from bookmark to progress bar */}
-              <div style={{
-                position: 'absolute',
-                top: '48px',  // Start below the button (button is 48px tall)
-                left: '23px',  // Center horizontally (24px center - 1px for two lines)
-                width: '2px',
-                height: '31px',  // Extend down to progress bar (98px bottom - 67px bar position = 31px)
-                pointerEvents: 'none',
-                zIndex: -1,
-              }}>
-                {/* Black line on left */}
-                <div style={{
-                  position: 'absolute',
-                  left: '0',
-                  width: '1px',
-                  height: '100%',
-                  background: 'rgba(0,0,0,0.5)',
-                }} />
-                {/* White line on right */}
-                <div style={{
-                  position: 'absolute',
-                  left: '1px',
-                  width: '1px',
-                  height: '100%',
-                  background: 'rgba(255,255,255,0.5)',
-                }} />
-              </div>
-              {/* Bookmark indicator with swipe-to-delete */}
+              {/* Bookmark indicator with swipe-to-delete - includes pin head and extension lines */}
               <div
                 role="button"
                 aria-label="Jump to Bookmark"
@@ -1396,9 +1368,9 @@ export function PlaybackScreen({
                   background: 'transparent',
                   border: 'none',
                   width: '48px',
-                  height: '48px',
+                  height: '79px',  // Extended to include pin lines
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   padding: 0,
@@ -1407,34 +1379,52 @@ export function PlaybackScreen({
                   transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="79" viewBox="0 0 512 840" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
                   <defs>
-                    <radialGradient id="bodyGradientLarge" cx="34%" cy="22%" r="72%">
-                      <stop offset="0%" stopColor="#e16ffb"/>
-                      <stop offset="18%" stopColor="#9b48d5"/>
-                      <stop offset="54%" stopColor="#522a9c"/>
-                      <stop offset="100%" stopColor="#2c145c"/>
+                    <radialGradient id="sphereFillLarge" cx="34%" cy="28%" r="72%">
+                      <stop offset="0%" stopColor="#f4b8ff"/>
+                      <stop offset="16%" stopColor="#e16ffb"/>
+                      <stop offset="48%" stopColor="#7b3ed0"/>
+                      <stop offset="82%" stopColor="#522a9c"/>
+                      <stop offset="100%" stopColor="#32145f"/>
                     </radialGradient>
-                    <linearGradient id="edgeGradientLarge" x1="120" y1="40" x2="390" y2="470" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#f0a0ff" stopOpacity="0.85"/>
-                      <stop offset="35%" stopColor="#522a9c" stopOpacity="0.35"/>
-                      <stop offset="100%" stopColor="#1b0b3d" stopOpacity="0.75"/>
-                    </linearGradient>
-                    <radialGradient id="innerGradientLarge" cx="35%" cy="28%" r="65%">
+                    <radialGradient id="highlightLarge" cx="50%" cy="50%" r="50%">
                       <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
-                      <stop offset="22%" stopColor="#f5c8ff" stopOpacity="0.9"/>
-                      <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.45"/>
-                      <stop offset="100%" stopColor="#522a9c" stopOpacity="0.1"/>
+                      <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.35"/>
+                      <stop offset="100%" stopColor="#e16ffb" stopOpacity="0"/>
                     </radialGradient>
+                    <filter id="outerGlowLarge" x="-55%" y="-55%" width="210%" height="210%">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur1"/>
+                      <feFlood floodColor="#f0b7ff" floodOpacity="0.95" result="glowColor1"/>
+                      <feComposite in="glowColor1" in2="blur1" operator="in" result="glow1"/>
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="38" result="blur2"/>
+                      <feFlood floodColor="#e16ffb" floodOpacity="0.45" result="glowColor2"/>
+                      <feComposite in="glowColor2" in2="blur2" operator="in" result="glow2"/>
+                      <feMerge>
+                        <feMergeNode in="glow2"/>
+                        <feMergeNode in="glow1"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                    <filter id="rimGlowLarge" x="-25%" y="-25%" width="150%" height="150%">
+                      <feGaussianBlur stdDeviation="3" result="soft"/>
+                      <feMerge>
+                        <feMergeNode in="soft"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
                   </defs>
-                  <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="url(#bodyGradientLarge)"/>
-                  <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="none" stroke="url(#edgeGradientLarge)" strokeWidth="10" strokeLinejoin="round"/>
-                  <circle cx="256" cy="188" r="76" fill="#291055" opacity="0.42"/>
-                  <circle cx="256" cy="184" r="68" fill="url(#innerGradientLarge)"/>
-                  <path d="M170 86c-36 30-55 73-55 118 0 37 15 78 39 121-10-42-11-78 0-111 16-51 51-89 101-106 38-13 75-9 108 4-46-49-128-67-193-26z" fill="#ffffff" opacity="0.16"/>
-                  <path d="M181 84c-25 18-44 43-54 72-4 12 9 22 20 16 33-20 73-34 115-35 10 0 14-13 5-18-27-17-59-28-86-35z" fill="#e16ffb" opacity="0.34"/>
-                  <path d="M199 100c-30 17-48 43-57 74" fill="none" stroke="#f3b0ff" strokeWidth="14" strokeLinecap="round" opacity="0.42"/>
-                  <circle cx="190" cy="105" r="17" fill="#f8d8ff" opacity="0.62"/>
+                  <g filter="url(#outerGlowLarge)">
+                    {/* Pin head sphere */}
+                    <circle cx="256" cy="256" r="150" fill="url(#sphereFillLarge)"/>
+                    <circle cx="256" cy="256" r="150" fill="none" stroke="#f2c7ff" strokeOpacity="0.95" strokeWidth="8" filter="url(#rimGlowLarge)"/>
+                    <circle cx="256" cy="256" r="143" fill="none" stroke="#ffffff" strokeOpacity="0.28" strokeWidth="3"/>
+                    <ellipse cx="203" cy="178" rx="56" ry="38" transform="rotate(-26 203 178)" fill="url(#highlightLarge)" opacity="0.9"/>
+                    <ellipse cx="185" cy="159" rx="18" ry="11" transform="rotate(-26 185 159)" fill="#ffffff" opacity="0.72"/>
+                  </g>
+                  {/* Pin extension lines from sphere center to progress bar */}
+                  <line x1="255" y1="406" x2="255" y2="840" stroke="#000000" strokeOpacity="0.5" strokeWidth="2"/>
+                  <line x1="257" y1="406" x2="257" y2="840" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="2"/>
                 </svg>
               </div>
             </div>
