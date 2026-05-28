@@ -1699,16 +1699,20 @@ export function PlaybackScreen({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                paddingTop: '20px',
-                paddingBottom: '20px',
+                position: 'relative',
+                padding: '4px 20px 20px 20px',
               }}
             >
               <div style={{
+                position: 'absolute',
+                top: '4px',
+                left: '20px',
+                right: '20px',
                 color: 'white',
                 fontSize: '0.95rem',
                 fontWeight: 500,
                 letterSpacing: '0.05em',
+                textAlign: 'left',
               }}>
                 {fillerScheduled && !isFillerMode ? (
                   // Countdown mode
