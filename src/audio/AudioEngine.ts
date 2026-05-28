@@ -347,16 +347,9 @@ export class AudioEngine {
   }
 
   seek(timeSeconds: number, isActiveScrubbing = false): void {
-    console.log('[AudioEngine] seek() called with timeSeconds:', timeSeconds, 'isActiveScrubbing:', isActiveScrubbing)
-    if (!this.ctx || !this.currentNode) {
-      console.log('[AudioEngine] seek() blocked - no ctx or currentNode')
-      return
-    }
+    if (!this.ctx || !this.currentNode) return
     const buffer = this.currentNode.source.buffer
-    if (!buffer) {
-      console.log('[AudioEngine] seek() blocked - no buffer')
-      return
-    }
+    if (!buffer) return
     
     // Clamp seek position to prevent entering fade-out zone
     const xfadeSecs = this._xfadeSecs(buffer.duration)
@@ -364,14 +357,10 @@ export class AudioEngine {
     const maxSeekTime = Math.max(0, fadeStartTime - 0.1) // Leave 0.1s margin
     const seekTime = Math.max(0, Math.min(timeSeconds, Math.min(maxSeekTime, buffer.duration)))
     
-    console.log('[AudioEngine] Seeking to', seekTime, '/', buffer.duration, '(fade starts at', fadeStartTime, ')')
-    
     // Stop current playback
     try {
       this.currentNode.source.stop()
-      console.log('[AudioEngine] Stopped current source')
-    } catch (e) {
-      console.log('[AudioEngine] Error stopping source:', e)
+    } catch {
       // Ignore if already stopped
     }
     
@@ -387,7 +376,6 @@ export class AudioEngine {
     this.currentStartCtxTime = ctx.currentTime - seekTime
     this.currentDuration = buffer.duration
     
-    console.log('[AudioEngine] Starting new source at offset', seekTime)
     src.start(0, seekTime)
     
     // Reschedule crossfade timer based on new position
@@ -395,11 +383,9 @@ export class AudioEngine {
     
     // Re-pause only if paused AND not actively scrubbing
     if (this._mediaEl?.paused && !isActiveScrubbing) {
-      console.log('[AudioEngine] Re-suspending context (was paused, not scrubbing)')
       if (ctx.state === 'running') void ctx.suspend()
     } else if (isActiveScrubbing && ctx.state === 'suspended') {
       // Resume context for scrubbing to hear audio
-      console.log('[AudioEngine] Resuming context for scrubbing')
       void ctx.resume()
     }
   }

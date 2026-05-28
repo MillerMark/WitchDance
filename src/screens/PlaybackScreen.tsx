@@ -357,7 +357,6 @@ export function PlaybackScreen({
           if (canvas.width !== W || canvas.height !== H) {
             canvas.width = W
             canvas.height = H
-            console.log('[CANVAS] Resized canvas - W:', W, 'H:', H)
           }
           const ctx = canvas.getContext('2d')
           if (ctx) {
@@ -408,8 +407,6 @@ export function PlaybackScreen({
             // Track state changes for particle emission adjustments
             const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
             if (currentState !== lastEmissionStateRef.current) {
-              const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
-              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms`)
               lastEmissionStateRef.current = currentState
             }
             
@@ -584,10 +581,8 @@ export function PlaybackScreen({
   }
 
   function handleTrainingPause() {
-    console.log('[PAUSE] handleTrainingPause called, trainingPaused:', trainingPaused)
     const engine = engineRef.current
     if (trainingPaused) {
-      console.log('[PAUSE] Resuming playback')
       engine.resumePlayback()
       setTrainingPaused(false)
       trainingPausedRef.current = false  // Sync ref for RAF loop
@@ -598,7 +593,6 @@ export function PlaybackScreen({
         cooldownTimerRef.current = null
       }
     } else {
-      console.log('[PAUSE] Pausing playback')
       engine.pausePlayback()
       setTrainingPaused(true)
       trainingPausedRef.current = true  // Sync ref for RAF loop
@@ -716,19 +710,13 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    console.log('[SCRUB-MOUSE] MouseDown - trainingMode:', trainingMode, 'scrubState:', scrubStateRef.current, 'paused:', trainingPaused)
     if (!trainingMode) return
     if (scrubStateRef.current === 'locked') {
       // LOCKED → UNLOCKED: only when paused
-      if (!trainingPaused) {
-        console.log('[SCRUB-MOUSE] Blocked: not paused')
-        return
-      }
-      console.log('[SCRUB-MOUSE] Unlocking scrubbing')
+      if (!trainingPaused) return
       scrubStateRef.current = 'unlocked'
     } else if (scrubStateRef.current === 'cooldown') {
       // COOLDOWN → COOLDOWN: reset the 20s timer
-      console.log('[SCRUB-MOUSE] Resetting cooldown timer')
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
       cooldownTimerRef.current = null
     }
