@@ -266,7 +266,8 @@ export function PlaybackScreen({
     // ── Unified RAF: engine polling + particle canvas ──────────────────
     const tick = () => {
       // ── Engine polling (from Playback.tsx) ──
-      if (engine.isInFillerMode()) {
+      // Use React state instead of engine.isInFillerMode() for consistency
+      if (isFillerMode) {
         // Filler mode: update splash names
         const fs = engine.getFillerState()
         if (fs) {
@@ -363,7 +364,8 @@ export function PlaybackScreen({
             // Determine fill pct for canvas
             let pct = 0
             let elapsedSecs = 0
-            if (engine.isInFillerMode()) {
+            // Use React state instead of engine.isInFillerMode() for consistency
+            if (isFillerMode) {
               const fs = engine.getFillerState()
               if (fs) {
                 pct = fs.duration > 0 ? (fs.elapsed / fs.duration) * 100 : 0
@@ -519,8 +521,8 @@ export function PlaybackScreen({
   // ── Handlers (from Playback.tsx, unchanged) ───────────────────────────
 
   function handleChangeSong() {
-    const engine = engineRef.current
-    setStoppedAtIndex(engine.getCurrentIndex())
+    // Use React state instead of engine.getCurrentIndex() for consistency
+    setStoppedAtIndex(currentIndex)
     setIsChangeSongMode(true)
     setIsPanelOpen(true)
   }
@@ -565,7 +567,8 @@ export function PlaybackScreen({
     const duration = state?.duration ?? 0
     if (duration > 0 && duration - elapsed <= 10) {
       // Already near end — jump to beginning of next track
-      const nextIdx = (engine.getCurrentIndex() + 1) % tracks.length
+      // Use React state instead of engine.getCurrentIndex() for consistency
+      const nextIdx = (currentIndex + 1) % tracks.length
       engine.seekToTrackIndex(nextIdx, 0)
       setCurrentIndex(nextIdx)
       setNextUpIndex((nextIdx + 1) % tracks.length)
@@ -599,11 +602,13 @@ export function PlaybackScreen({
     const engine = engineRef.current
     const state = engine.getPlaybackState()
     const elapsed = state?.elapsed ?? 0
-    const wasPaused = engine.isPaused()
+    // Use React state instead of engine.isPaused() to avoid race condition
+    const wasPaused = trainingPaused
     
     if (elapsed < 3) {
       // Near start — go to previous track
-      const prevIdx = (engine.getCurrentIndex() - 1 + tracks.length) % tracks.length
+      // Use React state instead of engine.getCurrentIndex() for consistency
+      const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length
       engine.seekToTrackIndex(prevIdx, 0)
       setCurrentIndex(prevIdx)
       setNextUpIndex((prevIdx + 1) % tracks.length)
@@ -621,7 +626,8 @@ export function PlaybackScreen({
   function handleEnterFiller() {
     if (!fillerTrack) return
     const engine = engineRef.current
-    const resumeNextIndex = (engine.getCurrentIndex() + 1) % tracks.length
+    // Use React state instead of engine.getCurrentIndex() for consistency
+    const resumeNextIndex = (currentIndex + 1) % tracks.length
     fillerResumeIndexRef.current = resumeNextIndex
     fillerStartTimeRef.current = Date.now()
     setFillerElapsed(0)
