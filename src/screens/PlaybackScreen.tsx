@@ -1220,7 +1220,37 @@ export function PlaybackScreen({
                     }}
                     onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 512 512" style={{ position: 'relative', top: '-5px' }}>
+                    {/* Pin extension lines - drawn behind sphere */}
+                    <div style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '20px',
+                      width: '2px',
+                      height: '15px',
+                      transform: 'translateX(-8px)',
+                      pointerEvents: 'none',
+                      zIndex: 0,
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: '0',
+                        top: '0',
+                        width: '1px',
+                        height: '100%',
+                        backgroundColor: '#32145f',
+                        opacity: 0.5,
+                      }}/>
+                      <div style={{
+                        position: 'absolute',
+                        left: '1px',
+                        top: '0',
+                        width: '1px',
+                        height: '100%',
+                        backgroundColor: '#f4b8ff',
+                        opacity: 0.5,
+                      }}/>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512" style={{ position: 'relative', top: '-3px', zIndex: 1 }}>
                       <defs>
                         <radialGradient id="sphereFillBtn" cx="34%" cy="28%" r="72%">
                           <stop offset="0%" stopColor="#f4b8ff"/>
@@ -1242,36 +1272,7 @@ export function PlaybackScreen({
                       <ellipse cx="203" cy="193" rx="68" ry="45" transform="rotate(-26 203 193)" fill="url(#highlightBtn)" opacity="0.9"/>
                       <ellipse cx="182" cy="172" rx="21" ry="14" transform="rotate(-26 182 172)" fill="#ffffff" opacity="0.72"/>
                     </svg>
-                    {/* Pin extension lines - manually drawn */}
-                    <div style={{
-                      position: 'absolute',
-                      left: '50%',
-                      top: '20px',
-                      width: '2px',
-                      height: '30px',
-                      transform: 'translateX(-1px)',
-                      pointerEvents: 'none',
-                    }}>
-                      <div style={{
-                        position: 'absolute',
-                        left: '0',
-                        top: '0',
-                        width: '1px',
-                        height: '100%',
-                        backgroundColor: '#000000',
-                        opacity: 0.5,
-                      }}/>
-                      <div style={{
-                        position: 'absolute',
-                        left: '1px',
-                        top: '0',
-                        width: '1px',
-                        height: '100%',
-                        backgroundColor: '#ffffff',
-                        opacity: 0.5,
-                      }}/>
-                    </div>
-                    <span style={{ fontSize: '14px', color: Y, marginLeft: '2px', position: 'relative', top: '2px' }}>+</span>
+                    <span style={{ fontSize: '14px', color: Y, marginLeft: '-1px', position: 'relative', top: '0px', zIndex: 1 }}>+</span>
                   </button>
                 )}
                 {/* Rewind to start */}
@@ -1437,7 +1438,7 @@ export function PlaybackScreen({
                   position: 'relative',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))', position: 'relative', top: '12px' }}>
                   <defs>
                     <radialGradient id="sphereFillLarge" cx="34%" cy="28%" r="72%">
                       <stop offset="0%" stopColor="#f4b8ff"/>
@@ -1485,9 +1486,9 @@ export function PlaybackScreen({
                 <div style={{
                   position: 'absolute',
                   left: '50%',
-                  top: '48px',
+                  top: '60px',
                   width: '2px',
-                  height: '31px',
+                  height: '48px',
                   transform: 'translateX(-1px)',
                   pointerEvents: 'none',
                 }}>
@@ -1497,7 +1498,7 @@ export function PlaybackScreen({
                     top: '0',
                     width: '1px',
                     height: '100%',
-                    backgroundColor: '#000000',
+                    backgroundColor: '#32145f',
                     opacity: 0.5,
                   }}/>
                   <div style={{
@@ -1506,7 +1507,7 @@ export function PlaybackScreen({
                     top: '0',
                     width: '1px',
                     height: '100%',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: '#f4b8ff',
                     opacity: 0.5,
                   }}/>
                 </div>
