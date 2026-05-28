@@ -183,7 +183,7 @@ export function PlaybackScreen({
     return () => clearInterval(interval)
   }, [isFillerMode])
 
-  // Update filler countdown every second and auto-start when reaches 0
+  // Update filler countdown every second and auto-start transition at 10 seconds
   useEffect(() => {
     if (!fillerScheduled || isFillerMode) return
     
@@ -194,8 +194,8 @@ export function PlaybackScreen({
         const remaining = Math.max(0, Math.floor(state.duration - state.elapsed))
         setFillerCountdown(remaining)
         
-        // Auto-start fill when countdown reaches 0
-        if (remaining === 0 && fillerTrack) {
+        // Start fill transition at 10 seconds (allows 6s xfade + 4s buffer)
+        if (remaining <= 10 && fillerTrack) {
           fillerStartTimeRef.current = Date.now()
           setFillerElapsed(0)
           setIsFillerMode(true)
