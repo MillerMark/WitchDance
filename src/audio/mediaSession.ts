@@ -30,6 +30,11 @@ export function updateMediaSession(
   } catch { /* ok */ }
 }
 
+export function setMediaSessionPlaybackState(state: 'playing' | 'paused'): void {
+  if (!('mediaSession' in navigator)) return
+  navigator.mediaSession.playbackState = state
+}
+
 export function clearMediaSession(): void {
   if (!('mediaSession' in navigator)) return
   navigator.mediaSession.metadata = null

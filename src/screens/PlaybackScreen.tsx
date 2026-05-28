@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { AudioEngine } from '../audio/AudioEngine'
 import type { Track } from '../types/track'
 import { iosAudioUnlock } from '../audio/iosUnlock'
-import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
+import { updateMediaSession, setMediaSessionPlaybackState, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
 import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
 
@@ -560,13 +560,32 @@ export function PlaybackScreen({
     
     const trackName = tracks[currentIndex]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance'
     
-    // In training mode: enable next/previous track buttons
+    // In training mode: enable next/previous track buttons and play/pause
     // In performance mode: disable them (current default behavior)
     if (trainingMode) {
       updateMediaSession(
         trackName,
-        undefined, // onPlay
-        undefined, // onPause
+        () => {
+          // Play handler - resume from training pause
+          const engine = engineRef.current
+          engine.resumePlayback()
+          setTrainingPaused(false)
+          trainingPausedRef.current = false
+          scrubStateRef.current = 'locked'
+          if (cooldownTimerRef.current) {
+            clearTimeout(cooldownTimerRef.current)
+            cooldownTimerRef.current = null
+          }
+          setMediaSessionPlaybackState('playing')
+        },
+        () => {
+          // Pause handler - pause in training mode
+          const engine = engineRef.current
+          engine.pausePlayback()
+          setTrainingPaused(true)
+          trainingPausedRef.current = true
+          setMediaSessionPlaybackState('paused')
+        },
         () => {
           // Next track
           const nextIdx = (currentIndex + 1) % tracks.length
@@ -579,10 +598,16 @@ export function PlaybackScreen({
         },
       )
     } else {
-      // Performance mode - disable skip buttons
+      // Performance mode - disable skip buttons and play/pause
       updateMediaSession(trackName)
     }
   }, [trainingMode, currentIndex, tracks])
+
+  // ── Sync media session playback state when training pause changes ────────
+  useEffect(() => {
+    if (!trainingMode) return
+    setMediaSessionPlaybackState(trainingPaused ? 'paused' : 'playing')
+  }, [trainingPaused, trainingMode])
 
   // ── Handlers (from Playback.tsx, unchanged) ───────────────────────────
 
