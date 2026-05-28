@@ -56,6 +56,7 @@ export class AudioEngine {
   // ── Filler mode ──────────────────────────────────────────────
   private _inFillerMode = false
   private _fillerBuffer: AudioBuffer | null = null
+  private _incomingFillerNode: AudioNode2 | null = null  // node started but not yet promoted to currentNode
   private _fillerSessionOffset = 0    // offset in file when current filler node started
   private _fillerStartCtxTime = 0     // ctx.currentTime when current filler node started
   private _resumeNextIndex = 0
@@ -541,6 +542,7 @@ export class AudioEngine {
     fillerNode.gain.gain.setValueAtTime(0, now)
     fillerNode.gain.gain.linearRampToValueAtTime(1, now + xfadeSecs)
     fillerNode.source.start(0, fillerOffset)
+    this._incomingFillerNode = fillerNode
 
     if (this.currentNode) {
       const g = this.currentNode.gain.gain
@@ -558,6 +560,7 @@ export class AudioEngine {
       if (!this.ctx) return
       this._teardown(oldNode)
       this.currentNode = fillerNode
+      this._incomingFillerNode = null
       this.currentDuration = buffer.duration
       this._fillerStartCtxTime = now
       this._inFillerMode = true
@@ -570,17 +573,29 @@ export class AudioEngine {
     const fillerOffset = this.getFillerOffset()
     this._dlog(`exitFillerMode at fillerOffset=${fillerOffset.toFixed(2)} resumeNext=${this._resumeNextIndex}`)
 
+    // Cancel all filler-related timers, including any pending enterFillerMode
+    // xfadeCompletionTimer that would re-set _inFillerMode = true after we clear it.
     this._clearTimer('fillerLoop')
     this._clearTimer('fillerLoopCompletion')
+    this._clearTimer('xfadeCompletion')
 
     if (!this.ctx || !this._streamDest) {
       this._inFillerMode = false
+      this._teardown(this._incomingFillerNode)
+      this._incomingFillerNode = null
       return { fillerOffset }
     }
 
     const resumeIdx = this._resumeNextIndex
     const oldFillerNode = this.currentNode
+    // Capture any node started by _beginFillerLoop or enterFillerMode that has
+    // not yet been promoted to currentNode — these would otherwise be orphaned
+    // and keep playing silently at full volume behind the playlist track.
+    const orphanedFillerNode = this._incomingFillerNode !== oldFillerNode
+      ? this._incomingFillerNode
+      : null
     this._inFillerMode = false
+    this._incomingFillerNode = null
 
     void this._load(this.tracks[resumeIdx]).then((buffer) => {
       if (!this.ctx || !this._streamDest) return
@@ -599,6 +614,14 @@ export class AudioEngine {
         g.linearRampToValueAtTime(0, now + xfadeSecs)
       }
 
+      // Fade out any orphaned incoming filler node so it doesn't bleed through.
+      if (orphanedFillerNode) {
+        const g = orphanedFillerNode.gain.gain
+        g.cancelScheduledValues(now)
+        g.setValueAtTime(g.value, now)
+        g.linearRampToValueAtTime(0, now + xfadeSecs)
+      }
+
       this.incomingNode = newNode
       this.incomingStartCtxTime = now
       this.callbacks.onCrossfadeStart?.(resumeIdx, xfadeSecs * 1000)
@@ -606,7 +629,12 @@ export class AudioEngine {
       this.xfadeCompletionTimer = setTimeout(() => {
         if (!this.ctx) return
         this._teardown(oldFillerNode)
-        if (this.currentNode === oldFillerNode) this.currentNode = newNode
+        this._teardown(orphanedFillerNode)
+        // Unconditional assignment — the guard `currentNode === oldFillerNode`
+        // was the bug: if currentNode changed during the async load (e.g., from
+        // a late enterFillerMode completion timer), the playlist node was never
+        // promoted and both tracks played simultaneously.
+        this.currentNode = newNode
         this.incomingNode = null
         this._currentIndex = resumeIdx
         this.currentStartCtxTime = now
@@ -646,6 +674,7 @@ export class AudioEngine {
     newFillerNode.gain.gain.setValueAtTime(0, now)
     newFillerNode.gain.gain.linearRampToValueAtTime(1, now + xfadeSecs)
     newFillerNode.source.start(0)
+    this._incomingFillerNode = newFillerNode
 
     const oldNode = this.currentNode
     if (oldNode) {
@@ -659,6 +688,7 @@ export class AudioEngine {
       if (!this.ctx) return
       this._teardown(oldNode)
       this.currentNode = newFillerNode
+      this._incomingFillerNode = null
       this._fillerSessionOffset = 0
       this._fillerStartCtxTime = now
       this._dlog(`fillerLoop restart from 0`)
@@ -915,8 +945,10 @@ export class AudioEngine {
     this._clearTimer('all')
     this._teardown(this.currentNode)
     this._teardown(this.incomingNode)
+    this._teardown(this._incomingFillerNode)
     this.currentNode = null
     this.incomingNode = null
+    this._incomingFillerNode = null
     this._crossfading = false
     this.fadeOutMode = false
     this._fadeOutFinalIndex = -1
