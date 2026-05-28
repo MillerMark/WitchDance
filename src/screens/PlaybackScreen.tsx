@@ -406,13 +406,16 @@ export function PlaybackScreen({
 
             // Emit particles at right edge of fill
             const isScrubbing = isScrubbingRef.current
-            const isPausedNow = engine.isPaused()
-            // 3× rate while scrubbing (15 ms), 75% rate while paused (60 ms), normal 45 ms
-            const emitInterval = isScrubbing ? 15 : isPausedNow ? 60 : 45
+            // Use React state instead of engine.isPaused() to avoid race condition
+            const isPausedNow = trainingPaused
+            // 3× rate while scrubbing (15 ms), much slower while paused (120 ms), normal 45 ms
+            const emitInterval = isScrubbing ? 15 : isPausedNow ? 120 : 45
             const now = Date.now()
             if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
-              for (let i = 0; i < 4; i++) {
+              // Emit fewer particles when paused (1 instead of 4)
+              const particleCount = isPausedNow && !isScrubbing ? 1 : 4
+              for (let i = 0; i < particleCount; i++) {
                 const family = COLOR_FAMILIES[Math.floor(Math.random() * COLOR_FAMILIES.length)]
                 let vx: number, vy: number
                 if (isScrubbing && Math.random() < 2 / 3) {
