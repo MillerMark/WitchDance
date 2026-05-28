@@ -1059,15 +1059,16 @@ button:disabled {
   margin: 112px auto 0;
   padding: 13px 0;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid transparent;
   background: rgba(98, 16, 32, 0.85);
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
   font-size: 1.125rem;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .btn-resume-cancel:hover {
-  background: rgba(120, 20, 40, 0.85);
+  background: rgba(120, 20, 40, 0.9);
   color: #fff;
 }
 
