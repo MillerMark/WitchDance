@@ -104,6 +104,10 @@ export class AudioEngine {
       this._mediaEl.srcObject = this._streamDest.stream
 
       if ('mediaSession' in navigator) {
+        // Media Session handlers are now set in PlaybackScreen to properly handle
+        // training mode pause/resume and performance mode behavior
+        // Keeping this code here would override those handlers
+        /*
         navigator.mediaSession.setActionHandler('pause', () => {
           // Intentionally swallow — WitchDance does not support pause
         })
@@ -113,6 +117,7 @@ export class AudioEngine {
         navigator.mediaSession.setActionHandler('previoustrack', null)
         navigator.mediaSession.setActionHandler('nexttrack', null)
         navigator.mediaSession.setActionHandler('stop', null)
+        */
       }
 
       this._intentionallyStopped = false

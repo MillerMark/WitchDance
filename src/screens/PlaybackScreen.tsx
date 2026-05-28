@@ -1463,7 +1463,37 @@ export function PlaybackScreen({
                   position: 'relative',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))', position: 'relative', top: '50px' }}>
+                {/* Pin extension lines - manually drawn, extend closer to progress bar */}
+                <div style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '60px',
+                  width: '2px',
+                  height: '70px',
+                  transform: 'translateX(-1px)',
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: '0',
+                    top: '0',
+                    width: '1px',
+                    height: '100%',
+                    backgroundColor: '#32145f',
+                    opacity: 0.5,
+                  }}/>
+                  <div style={{
+                    position: 'absolute',
+                    left: '1px',
+                    top: '0',
+                    width: '1px',
+                    height: '100%',
+                    backgroundColor: '#f4b8ff',
+                    opacity: 0.5,
+                  }}/>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))', position: 'relative', top: '50px', zIndex: 1 }}>
                   <defs>
                     <radialGradient id="sphereFillLarge" cx="34%" cy="28%" r="72%">
                       <stop offset="0%" stopColor="#f4b8ff"/>
@@ -1507,35 +1537,6 @@ export function PlaybackScreen({
                     <ellipse cx="185" cy="159" rx="18" ry="11" transform="rotate(-26 185 159)" fill="#ffffff" opacity="0.72"/>
                   </g>
                 </svg>
-                {/* Pin extension lines - manually drawn, extend closer to progress bar */}
-                <div style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '60px',
-                  width: '2px',
-                  height: '70px',
-                  transform: 'translateX(-1px)',
-                  pointerEvents: 'none',
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: '0',
-                    top: '0',
-                    width: '1px',
-                    height: '100%',
-                    backgroundColor: '#32145f',
-                    opacity: 0.5,
-                  }}/>
-                  <div style={{
-                    position: 'absolute',
-                    left: '1px',
-                    top: '0',
-                    width: '1px',
-                    height: '100%',
-                    backgroundColor: '#f4b8ff',
-                    opacity: 0.5,
-                  }}/>
-                </div>
               </div>
             </div>
           )
@@ -1559,7 +1560,7 @@ export function PlaybackScreen({
             textAlign: 'center',
             textShadow: '0 1px 6px rgba(0,0,0,0.9)',
             position: 'relative',
-            zIndex: 1,
+            zIndex: 5,
             pointerEvents: 'none',
           }}>
             {isFillerMode
