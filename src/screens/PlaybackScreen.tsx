@@ -560,9 +560,9 @@ export function PlaybackScreen({
   }
 
   function handleTrainingPause() {
-    console.log('[PAUSE] handleTrainingPause called, isPaused:', engineRef.current.isPaused())
+    console.log('[PAUSE] handleTrainingPause called, trainingPaused:', trainingPaused)
     const engine = engineRef.current
-    if (engine.isPaused()) {
+    if (trainingPaused) {
       console.log('[PAUSE] Resuming playback')
       engine.resumePlayback()
       setTrainingPaused(false)
