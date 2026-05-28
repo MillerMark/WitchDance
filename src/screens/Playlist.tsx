@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { Track } from '../types/track'
 import { saveFillerTrackId } from '../storage/sessionState'
+import { SwipeableRow } from '../components/SwipeableRow'
 
 interface Props {
   tracks: Track[]
@@ -109,37 +110,32 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
             {visualTracks.map((track, visualIndex) => {
               const isDragging = drag?.trackId === track.id
               return (
-                <div
+                <SwipeableRow
                   key={track.id}
-                  className={`playlist-row${isDragging ? ' dragging' : ''}`}
+                  onDelete={() => handleRemove(track.id)}
                 >
-                  {/* Drag handle */}
-                  <button
-                    className="drag-handle"
-                    aria-label="Drag to reorder"
-                    onPointerDown={(e) => handleDragStart(e, track.id)}
-                    onPointerMove={isDragging ? handleDragMove : undefined}
-                    onPointerUp={isDragging ? handleDragEnd : undefined}
-                    onPointerCancel={isDragging ? handleDragEnd : undefined}
+                  <div
+                    className={`playlist-row${isDragging ? ' dragging' : ''}`}
                   >
-                    ≡
-                  </button>
+                    {/* Drag handle */}
+                    <button
+                      className="drag-handle"
+                      aria-label="Drag to reorder"
+                      onPointerDown={(e) => handleDragStart(e, track.id)}
+                      onPointerMove={isDragging ? handleDragMove : undefined}
+                      onPointerUp={isDragging ? handleDragEnd : undefined}
+                      onPointerCancel={isDragging ? handleDragEnd : undefined}
+                    >
+                      ≡
+                    </button>
 
-                  {/* Index */}
-                  <div className="playlist-row-index">{visualIndex + 1}</div>
+                    {/* Index */}
+                    <div className="playlist-row-index">{visualIndex + 1}</div>
 
-                  {/* Title */}
-                  <div className="playlist-row-title">{formatTitle(track.name)}</div>
-
-                  {/* Delete */}
-                  <button
-                    className="btn-delete"
-                    aria-label={`Remove ${track.name}`}
-                    onClick={() => handleRemove(track.id)}
-                  >
-                    🗑
-                  </button>
-                </div>
+                    {/* Title */}
+                    <div className="playlist-row-title">{formatTitle(track.name)}</div>
+                  </div>
+                </SwipeableRow>
               )
             })}
           </div>

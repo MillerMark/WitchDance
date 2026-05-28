@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Track } from '../types/track'
 import { trackFromFile } from '../types/track'
+import { SwipeableRow } from '../components/SwipeableRow'
 
 interface Props {
   library: Track[]
@@ -60,8 +61,7 @@ export function Library({ library, playlist, onImport, onAddToPlaylist, onDelete
     onAddToPlaylist(selected)
   }
 
-  function handleDelete(e: React.MouseEvent, trackId: string) {
-    e.stopPropagation()
+  function handleDelete(trackId: string) {
     setSelectedIds((prev) => {
       const next = new Set(prev)
       next.delete(trackId)
@@ -107,31 +107,27 @@ export function Library({ library, playlist, onImport, onAddToPlaylist, onDelete
             {library.map((track) => {
               const isSelected = selectedIds.has(track.id)
               return (
-                <div
+                <SwipeableRow
                   key={track.id}
-                  className={`track-row${isSelected ? ' selected' : ''}`}
-                  onClick={() => toggleTrack(track.id)}
-                  role="checkbox"
-                  aria-checked={isSelected}
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === ' ' && toggleTrack(track.id)}
+                  onDelete={() => handleDelete(track.id)}
                 >
-                  <div className="track-checkbox">
-                    {isSelected && <div className="track-checkbox-dot" />}
-                  </div>
-                  <div className="track-info">
-                    <div className="track-name">{track.name}</div>
-                    <div className="track-meta">{formatBytes(track.file.size)}</div>
-                  </div>
-                  <button
-                    className="btn-delete-track"
-                    onClick={(e) => handleDelete(e, track.id)}
-                    aria-label="Delete track"
-                    title="Delete track"
+                  <div
+                    className={`track-row${isSelected ? ' selected' : ''}`}
+                    onClick={() => toggleTrack(track.id)}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === ' ' && toggleTrack(track.id)}
                   >
-                    🗑️
-                  </button>
-                </div>
+                    <div className="track-checkbox">
+                      {isSelected && <div className="track-checkbox-dot" />}
+                    </div>
+                    <div className="track-info">
+                      <div className="track-name">{track.name}</div>
+                      <div className="track-meta">{formatBytes(track.file.size)}</div>
+                    </div>
+                  </div>
+                </SwipeableRow>
               )
             })}
           </div>

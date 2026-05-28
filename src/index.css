@@ -159,30 +159,6 @@ button:disabled {
   transition: background 0.15s;
 }
 
-.btn-delete-track {
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  min-width: 40px;
-  min-height: 40px;
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.btn-delete-track:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--destructive);
-}
-
-.btn-delete-track:active {
-  background: rgba(239, 68, 68, 0.2);
-}
-
 .track-row.selected {
   background: var(--accent-dim);
   border-color: var(--accent);
@@ -361,25 +337,6 @@ button:disabled {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.btn-delete {
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  padding: 0;
-  min-height: 44px;
-  min-width: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 8px;
-  transition: color 0.15s;
-}
-
-.btn-delete:hover {
-  color: var(--destructive);
 }
 
 .playlist-loop-note {
@@ -1317,4 +1274,69 @@ button:disabled {
 .btn-filler-clear:hover {
   color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Swipeable Row (iOS-style swipe-to-delete) ───────────── */
+
+.swipeable-row {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.swipeable-content {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  touch-action: pan-y;
+  will-change: transform;
+}
+
+.swipeable-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 90px;
+  background: var(--destructive);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.15s;
+}
+
+.swipeable-delete:hover {
+  background: #dc2626;
+}
+
+.swipeable-delete:active {
+  background: #b91c1c;
+}
+
+/* Adjust track-list for swipeable rows */
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.track-list .swipeable-row {
+  margin-bottom: 8px;
+}
+
+.track-list .swipeable-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Adjust playlist-list for swipeable rows */
+.playlist-list .swipeable-row {
+  margin-bottom: 0;
 }
