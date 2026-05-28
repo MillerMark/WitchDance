@@ -183,6 +183,32 @@ export function PlaybackScreen({
     return () => clearInterval(interval)
   }, [isFillerMode])
 
+  // Update filler countdown every second and auto-start when reaches 0
+  useEffect(() => {
+    if (!fillerScheduled || isFillerMode) return
+    
+    const interval = setInterval(() => {
+      const engine = engineRef.current
+      const state = engine.getPlaybackState()
+      if (state) {
+        const remaining = Math.max(0, Math.floor(state.duration - state.elapsed))
+        setFillerCountdown(remaining)
+        
+        // Auto-start fill when countdown reaches 0
+        if (remaining === 0 && fillerTrack) {
+          fillerStartTimeRef.current = Date.now()
+          setFillerElapsed(0)
+          setIsFillerMode(true)
+          setFillerScheduled(false)
+          void engine.enterFillerMode(fillerTrack, fillerOffsetRef.current, fillerResumeIndexRef.current)
+        }
+      }
+    }, 1000)
+    
+    return () => clearInterval(interval)
+  }, [fillerScheduled, isFillerMode, fillerTrack])
+
+
   // ── Direct-DOM refs for RAF (no re-renders at 60fps) ───────────────────
   const progressFillRef = useRef<HTMLDivElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
@@ -342,22 +368,6 @@ export function PlaybackScreen({
           if (durationRef.current) {
             const remaining = state.duration > 0 ? Math.max(0, state.duration - state.elapsed) : 0
             durationRef.current.textContent = `-${formatTime(remaining)}`
-
-            // Update filler countdown if scheduled
-            if (fillerScheduled && !isFillerMode) {
-              const countdown = Math.max(0, Math.floor(remaining))
-              setFillerCountdown(countdown)
-              
-              // Start fill when countdown reaches 0
-              if (countdown === 0 && fillerTrack) {
-                const engine = engineRef.current
-                fillerStartTimeRef.current = Date.now()
-                setFillerElapsed(0)
-                setIsFillerMode(true)
-                setFillerScheduled(false)
-                void engine.enterFillerMode(fillerTrack, fillerOffsetRef.current, fillerResumeIndexRef.current)
-              }
-            }
 
             // Filler button visibility - show when within last 2 minutes
             if (fillerBtnRef.current) {
