@@ -1208,7 +1208,7 @@ export function PlaybackScreen({
             color: 'rgba(255,255,255,0.88)',
             fontSize: '0.8rem',
             margin: 0,
-            marginTop: 'calc(0.5em - 16px)',
+            marginTop: 'calc(0.5em - 20px)',
             width: '100%',
             textAlign: 'center',
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
