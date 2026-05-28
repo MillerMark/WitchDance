@@ -1268,7 +1268,7 @@ export function PlaybackScreen({
           position: 'absolute',
           left: 0,
           right: 0,
-          bottom: '2.2em',  // Position above "Next up" text
+          bottom: '1.7em',  // Fine-tuned position between title and "Next up"
           width: '100%',
           height: '200px',  // Taller to show particles shooting up
           display: 'block',
