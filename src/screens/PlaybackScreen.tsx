@@ -1125,23 +1125,22 @@ export function PlaybackScreen({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '8px',
+        gap: '0',  // Remove gap, use precise positioning instead
         padding: '0 24px',
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
-        {/* Song name */}
+        {/* Song name - bottom aligned just above progress bar */}
         <p style={{
           color: 'white',
           fontSize: '1.1rem',
           fontWeight: 600,
           margin: 0,
+          marginBottom: '8px',  // 8px gap above progress bar
           width: '100%',
           textAlign: 'center',
           textShadow: '0 1px 6px rgba(0,0,0,0.9)',
           position: 'relative',
           zIndex: 1, // Below progress bar in stacking context
-          marginBottom: '-1.2em',
-          transform: 'translateY(1.1em)', // Move title down by ~1 line height
           pointerEvents: 'none', // Text shouldn't block touches
         }}>
           {isFillerMode
@@ -1199,13 +1198,13 @@ export function PlaybackScreen({
           </span>
         </div>
 
-        {/* Next up */}
+        {/* Next up - top aligned just below progress bar */}
         {nextTrackName && (
           <p style={{
             color: 'rgba(255,255,255,0.88)',
             fontSize: '0.8rem',
             margin: 0,
-            marginTop: 'calc(0.5em - 24px)',  // Moved up 4px (was -20px)
+            marginTop: '8px',  // 8px gap below progress bar
             width: '100%',
             textAlign: 'center',
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
