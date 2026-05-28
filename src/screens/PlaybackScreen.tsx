@@ -128,6 +128,9 @@ export function PlaybackScreen({
   const [showDebug, setShowDebug] = useState(false)
   const [debugLog, setDebugLog] = useState<string[]>([])
   const [trainingPaused, setTrainingPaused] = useState(false)
+  
+  // Debug logging for particle emission state
+  const lastEmissionStateRef = useRef<string>('')
 
   // ── Tap-reveal controls state ───────────────────────────────────────────
   const [controlsVisible, setControlsVisible] = useState(false)
@@ -413,6 +416,14 @@ export function PlaybackScreen({
             // 5× rate while scrubbing (9 ms), 1/4 rate while paused (180 ms), normal 45 ms
             const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
             const now = Date.now()
+            
+            // Debug logging when state changes
+            const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
+            if (currentState !== lastEmissionStateRef.current) {
+              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms, trainingPaused: ${trainingPaused}`)
+              lastEmissionStateRef.current = currentState
+            }
+            
             if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
               // Emit more particles when scrubbing (6), fewer when paused (1), normal (4)
