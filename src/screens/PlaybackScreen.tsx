@@ -564,6 +564,12 @@ export function PlaybackScreen({
     if (engine.isPaused()) {
       engine.resumePlayback()
       setTrainingPaused(false)
+      // Manual resume → lock scrubbing and cancel cooldown
+      scrubStateRef.current = 'locked'
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current)
+        cooldownTimerRef.current = null
+      }
     } else {
       engine.pausePlayback()
       setTrainingPaused(true)
