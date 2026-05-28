@@ -1186,13 +1186,38 @@ export function PlaybackScreen({
                     style={{
                       ...btnStyle,
                       border: '1px solid rgba(225,111,251,0.5)',  // Purple border
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2px',
                     }}
                     onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
                   >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M10 2 L10 18 M14 6 L10 2 L6 6" stroke={P} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="10" cy="15" r="2" fill={P}/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+                      <defs>
+                        <radialGradient id="bodyGradient" cx="34%" cy="22%" r="72%">
+                          <stop offset="0%" stopColor="#e16ffb"/>
+                          <stop offset="18%" stopColor="#9b48d5"/>
+                          <stop offset="54%" stopColor="#522a9c"/>
+                          <stop offset="100%" stopColor="#2c145c"/>
+                        </radialGradient>
+                        <linearGradient id="edgeGradient" x1="120" y1="40" x2="390" y2="470" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#f0a0ff" stopOpacity="0.85"/>
+                          <stop offset="35%" stopColor="#522a9c" stopOpacity="0.35"/>
+                          <stop offset="100%" stopColor="#1b0b3d" stopOpacity="0.75"/>
+                        </linearGradient>
+                        <radialGradient id="innerGradient" cx="35%" cy="28%" r="65%">
+                          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
+                          <stop offset="22%" stopColor="#f5c8ff" stopOpacity="0.9"/>
+                          <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.45"/>
+                          <stop offset="100%" stopColor="#522a9c" stopOpacity="0.1"/>
+                        </radialGradient>
+                      </defs>
+                      <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="url(#bodyGradient)"/>
+                      <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="none" stroke="url(#edgeGradient)" strokeWidth="10" strokeLinejoin="round"/>
+                      <circle cx="256" cy="188" r="76" fill="#291055" opacity="0.42"/>
+                      <circle cx="256" cy="184" r="68" fill="url(#innerGradient)"/>
                     </svg>
+                    <span style={{ fontSize: '14px', color: P }}>+</span>
                   </button>
                 )}
                 {/* Rewind to start */}
@@ -1328,8 +1353,10 @@ export function PlaybackScreen({
                 }} />
               </div>
               {/* Bookmark indicator with swipe-to-delete */}
-              <button
+              <div
+                role="button"
                 aria-label="Jump to Bookmark"
+                tabIndex={0}
                 onClick={(e) => {
                   e.stopPropagation()
                   handleJumpToBookmark()
@@ -1367,9 +1394,8 @@ export function PlaybackScreen({
                   }
                 }}
                 style={{
-                  background: 'rgba(82,42,156,0.7)',  // Purple outer color with higher opacity
-                  border: '2px solid rgba(225,111,251,0.6)',  // Purple mid color for border
-                  borderRadius: '8px',
+                  background: 'transparent',
+                  border: 'none',
                   width: '48px',
                   height: '48px',
                   display: 'flex',
@@ -1377,15 +1403,41 @@ export function PlaybackScreen({
                   justifyContent: 'center',
                   cursor: 'pointer',
                   padding: 0,
-                  fontSize: '1.7rem',
                   WebkitTapHighlightColor: 'transparent',
-                  boxShadow: '0 2px 8px rgba(82,42,156,0.6)',  // Purple shadow
                   transform: swipeTransform,
                   transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
                 }}
               >
-                📍
-              </button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
+                  <defs>
+                    <radialGradient id="bodyGradientLarge" cx="34%" cy="22%" r="72%">
+                      <stop offset="0%" stopColor="#e16ffb"/>
+                      <stop offset="18%" stopColor="#9b48d5"/>
+                      <stop offset="54%" stopColor="#522a9c"/>
+                      <stop offset="100%" stopColor="#2c145c"/>
+                    </radialGradient>
+                    <linearGradient id="edgeGradientLarge" x1="120" y1="40" x2="390" y2="470" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#f0a0ff" stopOpacity="0.85"/>
+                      <stop offset="35%" stopColor="#522a9c" stopOpacity="0.35"/>
+                      <stop offset="100%" stopColor="#1b0b3d" stopOpacity="0.75"/>
+                    </linearGradient>
+                    <radialGradient id="innerGradientLarge" cx="35%" cy="28%" r="65%">
+                      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
+                      <stop offset="22%" stopColor="#f5c8ff" stopOpacity="0.9"/>
+                      <stop offset="55%" stopColor="#e16ffb" stopOpacity="0.45"/>
+                      <stop offset="100%" stopColor="#522a9c" stopOpacity="0.1"/>
+                    </radialGradient>
+                  </defs>
+                  <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="url(#bodyGradientLarge)"/>
+                  <path d="M256 24c-92.8 0-168 75.2-168 168 0 123.6 136.7 272.4 159.2 296.1 4.8 5 12.8 5 17.6 0C287.3 464.4 424 315.6 424 192 424 99.2 348.8 24 256 24z" fill="none" stroke="url(#edgeGradientLarge)" strokeWidth="10" strokeLinejoin="round"/>
+                  <circle cx="256" cy="188" r="76" fill="#291055" opacity="0.42"/>
+                  <circle cx="256" cy="184" r="68" fill="url(#innerGradientLarge)"/>
+                  <path d="M170 86c-36 30-55 73-55 118 0 37 15 78 39 121-10-42-11-78 0-111 16-51 51-89 101-106 38-13 75-9 108 4-46-49-128-67-193-26z" fill="#ffffff" opacity="0.16"/>
+                  <path d="M181 84c-25 18-44 43-54 72-4 12 9 22 20 16 33-20 73-34 115-35 10 0 14-13 5-18-27-17-59-28-86-35z" fill="#e16ffb" opacity="0.34"/>
+                  <path d="M199 100c-30 17-48 43-57 74" fill="none" stroke="#f3b0ff" strokeWidth="14" strokeLinecap="round" opacity="0.42"/>
+                  <circle cx="190" cy="105" r="17" fill="#f8d8ff" opacity="0.62"/>
+                </svg>
+              </div>
             </div>
           )
         })()}
