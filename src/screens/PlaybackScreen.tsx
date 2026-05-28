@@ -658,10 +658,10 @@ export function PlaybackScreen({
 
   function handleProgressBarTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     if (!trainingMode) return
-    const engine = engineRef.current
     if (scrubStateRef.current === 'locked') {
       // LOCKED → UNLOCKED: only when paused (prevents accidental swipes while playing)
-      if (!engine.isPaused()) return
+      // Use React state instead of engine.isPaused() to avoid race condition
+      if (!trainingPaused) return
       scrubStateRef.current = 'unlocked'
     } else if (scrubStateRef.current === 'cooldown') {
       // COOLDOWN → COOLDOWN: reset the 20s timer (allows scrubbing while playing within 20s window)
@@ -688,7 +688,8 @@ export function PlaybackScreen({
     if (!trainingMode || scrubStateRef.current === 'locked') return
     // Release: resume playback, transition to COOLDOWN with 20s timer
     const engine = engineRef.current
-    if (engine.isPaused()) {
+    // Use React state instead of engine.isPaused() to avoid race condition
+    if (trainingPaused) {
       engine.resumePlayback()
       setTrainingPaused(false)
     }
