@@ -1654,12 +1654,12 @@ export function PlaybackScreen({
           style={{
             position: 'absolute',
             inset: 0,
-            zIndex: 3,
+            zIndex: 10,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -1808,7 +1808,7 @@ export function PlaybackScreen({
       )}
 
       {/* ── Tap-reveal controls: Change Song, Stop ─────────── */}
-      {!isFillerMode && !isFadeOut && (
+      {!isFillerMode && !fillerScheduled && !isFadeOut && (
         <div
           style={{
             position: 'absolute',
