@@ -1252,7 +1252,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — full height so particles fall to screen bottom */}
+      {/* Particle canvas — extends higher to show particles shooting upward */}
       <canvas
         ref={canvasRef}
         style={{
@@ -1261,7 +1261,7 @@ export function PlaybackScreen({
           right: 0,
           bottom: 0,
           width: '100%',
-          height: 'calc(30px + 0.5em + 2rem)',
+          height: '40vh',
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
