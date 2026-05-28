@@ -192,6 +192,7 @@ export function PlaybackScreen({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
   const lastEmitRef = useRef(0)
+  const lastBarYLogRef = useRef(0)
 
   // ── Double-tap on PNG for training mode ────────────────────────────────
   const lastTapRef = useRef(0)
@@ -355,6 +356,7 @@ export function PlaybackScreen({
           if (canvas.width !== W || canvas.height !== H) {
             canvas.width = W
             canvas.height = H
+            console.log('[CANVAS] Resized canvas - W:', W, 'H:', H)
           }
           const ctx = canvas.getContext('2d')
           if (ctx) {
@@ -378,6 +380,12 @@ export function PlaybackScreen({
             // Draw progress bar at bottom of canvas (canvas is 40vh tall, bar should be 23px from bottom)
             const barY = H - 23
             const filledW = W * pct / 100
+            
+            // Log once per second to avoid spam
+            if (!lastBarYLogRef.current || Date.now() - lastBarYLogRef.current > 1000) {
+              console.log('[CANVAS] Drawing bar - H:', H, 'barY:', barY, 'filledW:', filledW.toFixed(1))
+              lastBarYLogRef.current = Date.now()
+            }
 
             ctx.clearRect(0, 0, W, H)
 
