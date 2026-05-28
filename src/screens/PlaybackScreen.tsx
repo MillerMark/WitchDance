@@ -125,8 +125,6 @@ export function PlaybackScreen({
   )
   const lastTrackIdxRef = useRef(-1)
 
-  const [showDebug, setShowDebug] = useState(false)
-  const [debugLog, setDebugLog] = useState<string[]>([])
   const [trainingPaused, setTrainingPaused] = useState(false)
   const trainingPausedRef = useRef(false)  // Sync ref for RAF loop access
   
@@ -250,7 +248,6 @@ export function PlaybackScreen({
         startTitleAnimation(incomingIdx, durationMs)
       },
       onLoopEnd: () => onStopRef.current(),
-      onDebugLog: () => setDebugLog(engine.getDebugLog()),
     }
 
     if (!resumePos) {
@@ -1518,32 +1515,6 @@ export function PlaybackScreen({
             </div>
             <button className="btn-confirm-cancel" onClick={() => setShowFadePicker(false)}>Cancel</button>
           </div>
-        </div>
-      )}
-
-      {/* ── Debug overlay (training mode only) ───────────────────────── */}
-      {trainingMode && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setDebugLog(engineRef.current.getDebugLog()); setShowDebug(v => !v) }}
-          style={{
-            position: 'fixed', bottom: 4, right: 4, zIndex: 9999,
-            fontSize: 10, padding: '2px 6px', opacity: 0.4,
-            background: '#333', color: '#fff', border: '1px solid #666', borderRadius: 4,
-          }}
-        >
-          dbg
-        </button>
-      )}
-      {showDebug && (
-        <div style={{
-          position: 'fixed', bottom: 30, right: 4, zIndex: 9999,
-          background: 'rgba(0,0,0,0.85)', color: '#0f0', fontFamily: 'monospace',
-          fontSize: 10, padding: '8px', borderRadius: 6, maxHeight: '50vh',
-          overflowY: 'auto', width: '90vw', maxWidth: 400,
-        }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {debugLog.map((line, i) => <div key={i}>{line}</div>)}
         </div>
       )}
     </div>
