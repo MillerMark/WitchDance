@@ -1379,7 +1379,7 @@ export function PlaybackScreen({
         <div
           style={{
             position: 'absolute',
-            bottom: 'calc(0.5em + 1rem + 30px + 48px)',
+            bottom: 'calc(0.5em + 1rem + 30px + 48px + 50px)',
             left: 0,
             right: 0,
             zIndex: 3,
