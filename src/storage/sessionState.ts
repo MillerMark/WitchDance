@@ -35,22 +35,22 @@ export function clearSession(): void {
 
 export function saveFillerTrackId(id: string | null): void {
   try {
-    if (id === null) sessionStorage.removeItem(KEY_FILLER_TRACK_ID)
-    else sessionStorage.setItem(KEY_FILLER_TRACK_ID, id)
+    if (id === null) localStorage.removeItem(KEY_FILLER_TRACK_ID)
+    else localStorage.setItem(KEY_FILLER_TRACK_ID, id)
   } catch { /* silent */ }
 }
 
 export function loadFillerTrackId(): string | null {
-  try { return sessionStorage.getItem(KEY_FILLER_TRACK_ID) } catch { return null }
+  try { return localStorage.getItem(KEY_FILLER_TRACK_ID) } catch { return null }
 }
 
 export function saveFillerOffset(offset: number): void {
-  try { sessionStorage.setItem(KEY_FILLER_OFFSET, String(offset)) } catch { /* silent */ }
+  try { localStorage.setItem(KEY_FILLER_OFFSET, String(offset)) } catch { /* silent */ }
 }
 
 export function loadFillerOffset(): number {
   try {
-    const raw = sessionStorage.getItem(KEY_FILLER_OFFSET)
+    const raw = localStorage.getItem(KEY_FILLER_OFFSET)
     const n = raw ? parseFloat(raw) : 0
     return isFinite(n) ? n : 0
   } catch { return 0 }
