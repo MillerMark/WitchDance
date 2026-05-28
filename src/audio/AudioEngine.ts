@@ -338,8 +338,22 @@ export class AudioEngine {
 
   resumePlayback(): void {
     if (!this._mediaEl || this._intentionallyStopped) return
+    
+    const stateBefore = this.getPlaybackState()
+    console.log('[SCRUB-DEBUG] resumePlayback() called:', {
+      elapsedBefore: stateBefore?.elapsed.toFixed(2),
+      ctxState: this.ctx?.state,
+      mediaPaused: this._mediaEl.paused,
+    })
+    
     if (this.ctx?.state === 'suspended') void this.ctx.resume()
     this._mediaEl.play().catch(() => {})
+    
+    const stateAfter = this.getPlaybackState()
+    console.log('[SCRUB-DEBUG] resumePlayback() complete:', {
+      elapsedAfter: stateAfter?.elapsed.toFixed(2),
+      ctxState: this.ctx?.state,
+    })
   }
 
   isPaused(): boolean {
@@ -687,6 +701,10 @@ export class AudioEngine {
     // This prevents premature crossfades when scrubbing near the end
     if (elapsed >= fadeStartTime - 0.05) {
       this._dlog(`_scheduleXfade() skipped: elapsed=${elapsed.toFixed(2)}s >= fadeStart=${fadeStartTime.toFixed(2)}s`)
+      console.log('[SCRUB-DEBUG] _scheduleXfade() SKIPPED - already past fade start:', {
+        elapsed: elapsed.toFixed(2),
+        fadeStartTime: fadeStartTime.toFixed(2),
+      })
       return
     }
     
@@ -694,10 +712,24 @@ export class AudioEngine {
     const delay = Math.max(50, delayMs)
     this.xfadeTimer = setTimeout(() => void this._beginXfade(), delay)
     this._dlog(`_scheduleXfade() scheduled in ${(delay/1000).toFixed(2)}s (elapsed=${elapsed.toFixed(2)}s, fadeStart=${fadeStartTime.toFixed(2)}s)`)
+    console.log('[SCRUB-DEBUG] _scheduleXfade() scheduled:', {
+      delaySeconds: (delay / 1000).toFixed(2),
+      elapsed: elapsed.toFixed(2),
+      fadeStartTime: fadeStartTime.toFixed(2),
+      currentIndex: this._currentIndex,
+    })
   }
 
   private async _beginXfade(): Promise<void> {
     if (!this.ctx) return
+    
+    console.log('[SCRUB-DEBUG] _beginXfade() FIRED:', {
+      currentIndex: this._currentIndex,
+      fadeOutAfterThis: this._fadeOutAfterThis,
+      currentTime: this.ctx.currentTime.toFixed(2),
+      currentStartCtxTime: this.currentStartCtxTime.toFixed(2),
+      elapsedAtFire: (this.ctx.currentTime - this.currentStartCtxTime).toFixed(2),
+    })
 
     if (this._fadeOutAfterThis) {
       const ctx = this.ctx
@@ -725,6 +757,12 @@ export class AudioEngine {
     this._crossfading = true
     this._incomingIndex = nextIdx
     this.incomingStartCtxTime = ctx.currentTime
+    
+    console.log('[SCRUB-DEBUG] _beginXfade() starting crossfade:', {
+      nextIndex: nextIdx,
+      incomingStartCtxTime: this.incomingStartCtxTime.toFixed(2),
+      xfadeSecs,
+    })
 
     const inNode = this._makeNode(nextBuf, 0)
     const now = ctx.currentTime
@@ -748,13 +786,26 @@ export class AudioEngine {
   }
 
   private _completeXfade(trackIndex: number, buffer: AudioBuffer): void {
+    console.log('[SCRUB-DEBUG] _completeXfade() FIRED:', {
+      trackIndex,
+      currentStartCtxTimeBefore: this.currentStartCtxTime.toFixed(2),
+      incomingStartCtxTime: this.incomingStartCtxTime.toFixed(2),
+      ctxCurrentTime: this.ctx?.currentTime.toFixed(2),
+    })
+    
     this._teardown(this.currentNode)
     this.currentNode = this.incomingNode
     this.incomingNode = null
     this._currentIndex = trackIndex
-    this.currentStartCtxTime = this.incomingStartCtxTime
+    this.currentStartCtxTime = this.incomingStartCtxTime  // ⚠️ THIS RESETS POSITION TO 0!
     this.currentDuration = buffer.duration
     this._crossfading = false
+    
+    const newElapsed = (this.ctx?.currentTime ?? 0) - this.currentStartCtxTime
+    console.log('[SCRUB-DEBUG] _completeXfade() NEW POSITION:', {
+      currentStartCtxTime: this.currentStartCtxTime.toFixed(2),
+      newElapsed: newElapsed.toFixed(2),
+    })
 
     this.callbacks.onTrackChange?.(trackIndex)
 

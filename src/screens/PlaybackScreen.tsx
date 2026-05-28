@@ -189,6 +189,7 @@ export function PlaybackScreen({
   const isScrubbingRef = useRef(false)
   const scrubStateRef = useRef<'locked' | 'unlocked' | 'cooldown'>('locked')
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastElapsedRef = useRef<number | undefined>(undefined)  // For detecting position jumps
 
   // ── Particle canvas refs ────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -298,6 +299,24 @@ export function PlaybackScreen({
       } else {
         const state = engine.getPlaybackState()
         if (state) {
+          // [SCRUB-DEBUG] Detect unexpected position jumps
+          const lastElapsed = lastElapsedRef.current
+          if (lastElapsed !== undefined && !isScrubbingRef.current && !trainingPausedRef.current) {
+            const deltaElapsed = state.elapsed - lastElapsed
+            // Normal playback should advance ~16ms per frame (60fps), allow up to 100ms tolerance
+            // But if position jumps backward or forward by > 1 second, log it
+            if (deltaElapsed < -0.1 || deltaElapsed > 1.0) {
+              console.log('[SCRUB-DEBUG] RAF: UNEXPECTED POSITION JUMP!', {
+                lastElapsed: lastElapsed.toFixed(2),
+                currentElapsed: state.elapsed.toFixed(2),
+                deltaElapsed: deltaElapsed.toFixed(2),
+                duration: state.duration.toFixed(2),
+                crossfading: state.crossfading,
+              })
+            }
+          }
+          lastElapsedRef.current = state.elapsed
+          
           // Update splash track names
           if (state.currentTrackIndex !== lastTrackIdxRef.current) {
             lastTrackIdxRef.current = state.currentTrackIndex
@@ -702,13 +721,30 @@ export function PlaybackScreen({
     e.preventDefault()
     isScrubbingRef.current = false
     if (!trainingMode || scrubStateRef.current === 'locked') return
-    // Release: resume playback, transition to COOLDOWN with 20s timer
+    
+    // [SCRUB-DEBUG] Log touch end state
     const engine = engineRef.current
+    const stateBeforeResume = engine.getPlaybackState()
+    console.log('[SCRUB-DEBUG] TouchEnd:', {
+      elapsed: stateBeforeResume?.elapsed.toFixed(2),
+      duration: stateBeforeResume?.duration.toFixed(2),
+      crossfading: stateBeforeResume?.crossfading,
+      trainingPaused,
+    })
+    
+    // Release: resume playback, transition to COOLDOWN with 20s timer
     // Use React state instead of engine.isPaused() to avoid race condition
     if (trainingPaused) {
+      console.log('[SCRUB-DEBUG] TouchEnd: resuming playback')
       engine.resumePlayback()
       setTrainingPaused(false)
       trainingPausedRef.current = false  // Sync ref for RAF loop
+      
+      const stateAfterResume = engine.getPlaybackState()
+      console.log('[SCRUB-DEBUG] TouchEnd after resume:', {
+        elapsed: stateAfterResume?.elapsed.toFixed(2),
+        duration: stateAfterResume?.duration.toFixed(2),
+      })
     }
     scrubStateRef.current = 'cooldown'
     if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
@@ -740,11 +776,27 @@ export function PlaybackScreen({
       isScrubbingRef.current = false
       if (trainingMode && scrubStateRef.current !== 'locked') {
         const eng = engineRef.current
+        
+        // [SCRUB-DEBUG] Log mouse up state
+        const stateBeforeResume = eng.getPlaybackState()
+        console.log('[SCRUB-DEBUG] MouseUp:', {
+          elapsed: stateBeforeResume?.elapsed.toFixed(2),
+          duration: stateBeforeResume?.duration.toFixed(2),
+          crossfading: stateBeforeResume?.crossfading,
+          trainingPaused,
+        })
+        
         if (trainingPaused) {
           console.log('[SCRUB-MOUSE] Resuming playback after scrub')
           eng.resumePlayback()
           setTrainingPaused(false)
           trainingPausedRef.current = false  // Sync ref for RAF loop
+          
+          const stateAfterResume = eng.getPlaybackState()
+          console.log('[SCRUB-DEBUG] MouseUp after resume:', {
+            elapsed: stateAfterResume?.elapsed.toFixed(2),
+            duration: stateAfterResume?.duration.toFixed(2),
+          })
         }
         scrubStateRef.current = 'cooldown'
         if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
