@@ -560,8 +560,10 @@ export function PlaybackScreen({
   }
 
   function handleTrainingPause() {
+    console.log('[PAUSE] handleTrainingPause called, isPaused:', engineRef.current.isPaused())
     const engine = engineRef.current
     if (engine.isPaused()) {
+      console.log('[PAUSE] Resuming playback')
       engine.resumePlayback()
       setTrainingPaused(false)
       // Manual resume → lock scrubbing and cancel cooldown
@@ -571,6 +573,7 @@ export function PlaybackScreen({
         cooldownTimerRef.current = null
       }
     } else {
+      console.log('[PAUSE] Pausing playback')
       engine.pausePlayback()
       setTrainingPaused(true)
     }
