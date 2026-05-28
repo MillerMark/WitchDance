@@ -860,6 +860,12 @@ export function PlaybackScreen({
       setFadeAfterThis(false)
       setFadeOutFinalIndex(-1)
       engine.crossfadeTo(action.index)
+      // If paused in training mode, auto-resume when switching songs
+      if (trainingPaused) {
+        setTrainingPaused(false)
+        trainingPausedRef.current = false
+        engine.resumePlayback()
+      }
     } else {
       engineRef.current.stop()
       onStopRef.current()
