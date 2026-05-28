@@ -385,7 +385,7 @@ export function PlaybackScreen({
 
             // Draw progress bar at bottom of canvas (canvas is 60vh tall, bar offset to align with original position)
             // Canvas is now full width, so indent progress bar by 24px on each side
-            const barY = H - 55  // Moved down 4px (was H - 51)
+            const barY = H - 67  // Moved down 12px more (was H - 55)
             const barInset = 24  // Match original container padding
             const barWidth = W - (barInset * 2)  // Inset on both sides
             const filledW = barWidth * pct / 100
@@ -450,7 +450,7 @@ export function PlaybackScreen({
                   vy = Math.sin(angle) * speed * velMult
                 }
                 particlesRef.current.push({
-                  x: filledW + (Math.random() - 0.5) * 4,
+                  x: barInset + filledW + (Math.random() - 0.5) * 4,  // Offset by barInset for canvas alignment
                   y: barY + (Math.random() - 0.5) * 3,
                   vx,
                   vy,
@@ -497,7 +497,8 @@ export function PlaybackScreen({
               const sInt = Math.floor(sRem)
               const tenths = Math.floor((sRem - sInt) * 10)
               const timeStr = `${m}:${sInt.toString().padStart(2, '0')}.${tenths}`
-              const labelX = Math.min(Math.max(filledW, 22), W - 22)
+              // Account for barInset when positioning scrub label
+              const labelX = Math.min(Math.max(barInset + filledW, barInset + 22), W - barInset - 22)
               ctx.save()
               ctx.font = 'bold 13px sans-serif'
               ctx.textAlign = 'center'
