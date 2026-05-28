@@ -1220,7 +1220,7 @@ export function PlaybackScreen({
                     }}
                     onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 512 640" style={{ position: 'relative', top: '-2px' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 512 512" style={{ position: 'relative', top: '-5px' }}>
                       <defs>
                         <radialGradient id="sphereFillBtn" cx="34%" cy="28%" r="72%">
                           <stop offset="0%" stopColor="#f4b8ff"/>
@@ -1235,17 +1235,43 @@ export function PlaybackScreen({
                           <stop offset="100%" stopColor="#e16ffb" stopOpacity="0"/>
                         </radialGradient>
                       </defs>
-                      {/* Pin head sphere */}
-                      <circle cx="256" cy="200" r="120" fill="url(#sphereFillBtn)"/>
-                      <circle cx="256" cy="200" r="120" fill="none" stroke="#f2c7ff" strokeOpacity="0.95" strokeWidth="6"/>
-                      <circle cx="256" cy="200" r="114" fill="none" stroke="#ffffff" strokeOpacity="0.28" strokeWidth="2"/>
-                      <ellipse cx="213" cy="158" rx="45" ry="30" transform="rotate(-26 213 158)" fill="url(#highlightBtn)" opacity="0.9"/>
-                      <ellipse cx="198" cy="143" rx="14" ry="9" transform="rotate(-26 198 143)" fill="#ffffff" opacity="0.72"/>
-                      {/* Pin extension lines - short for button */}
-                      <line x1="255" y1="320" x2="255" y2="520" stroke="#000000" strokeOpacity="0.5" strokeWidth="2"/>
-                      <line x1="257" y1="320" x2="257" y2="520" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="2"/>
+                      {/* Pin head sphere - 150% larger */}
+                      <circle cx="256" cy="256" r="180" fill="url(#sphereFillBtn)"/>
+                      <circle cx="256" cy="256" r="180" fill="none" stroke="#f2c7ff" strokeOpacity="0.95" strokeWidth="9"/>
+                      <circle cx="256" cy="256" r="171" fill="none" stroke="#ffffff" strokeOpacity="0.28" strokeWidth="3"/>
+                      <ellipse cx="203" cy="193" rx="68" ry="45" transform="rotate(-26 203 193)" fill="url(#highlightBtn)" opacity="0.9"/>
+                      <ellipse cx="182" cy="172" rx="21" ry="14" transform="rotate(-26 182 172)" fill="#ffffff" opacity="0.72"/>
                     </svg>
-                    <span style={{ fontSize: '14px', color: Y, marginLeft: '2px' }}>+</span>
+                    {/* Pin extension lines - manually drawn */}
+                    <div style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '20px',
+                      width: '2px',
+                      height: '30px',
+                      transform: 'translateX(-1px)',
+                      pointerEvents: 'none',
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: '0',
+                        top: '0',
+                        width: '1px',
+                        height: '100%',
+                        backgroundColor: '#000000',
+                        opacity: 0.5,
+                      }}/>
+                      <div style={{
+                        position: 'absolute',
+                        left: '1px',
+                        top: '0',
+                        width: '1px',
+                        height: '100%',
+                        backgroundColor: '#ffffff',
+                        opacity: 0.5,
+                      }}/>
+                    </div>
+                    <span style={{ fontSize: '14px', color: Y, marginLeft: '2px', position: 'relative', top: '2px' }}>+</span>
                   </button>
                 )}
                 {/* Rewind to start */}
@@ -1400,16 +1426,18 @@ export function PlaybackScreen({
                   width: '48px',
                   height: '79px',  // Extended to include pin lines
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
                   cursor: 'pointer',
                   padding: 0,
                   WebkitTapHighlightColor: 'transparent',
                   transform: swipeTransform,
                   transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
+                  position: 'relative',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="79" viewBox="0 0 512 840" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(82,42,156,0.6))' }}>
                   <defs>
                     <radialGradient id="sphereFillLarge" cx="34%" cy="28%" r="72%">
                       <stop offset="0%" stopColor="#f4b8ff"/>
@@ -1452,10 +1480,36 @@ export function PlaybackScreen({
                     <ellipse cx="203" cy="178" rx="56" ry="38" transform="rotate(-26 203 178)" fill="url(#highlightLarge)" opacity="0.9"/>
                     <ellipse cx="185" cy="159" rx="18" ry="11" transform="rotate(-26 185 159)" fill="#ffffff" opacity="0.72"/>
                   </g>
-                  {/* Pin extension lines from sphere center to progress bar */}
-                  <line x1="255" y1="406" x2="255" y2="840" stroke="#000000" strokeOpacity="0.5" strokeWidth="2"/>
-                  <line x1="257" y1="406" x2="257" y2="840" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="2"/>
                 </svg>
+                {/* Pin extension lines - manually drawn, extend to progress bar */}
+                <div style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '48px',
+                  width: '2px',
+                  height: '31px',
+                  transform: 'translateX(-1px)',
+                  pointerEvents: 'none',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: '0',
+                    top: '0',
+                    width: '1px',
+                    height: '100%',
+                    backgroundColor: '#000000',
+                    opacity: 0.5,
+                  }}/>
+                  <div style={{
+                    position: 'absolute',
+                    left: '1px',
+                    top: '0',
+                    width: '1px',
+                    height: '100%',
+                    backgroundColor: '#ffffff',
+                    opacity: 0.5,
+                  }}/>
+                </div>
               </div>
             </div>
           )
