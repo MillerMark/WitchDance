@@ -410,8 +410,8 @@ export function PlaybackScreen({
             const isScrubbing = isScrubbingRef.current
             // Use React state instead of engine.isPaused() to avoid race condition
             const isPausedNow = trainingPaused
-            // 5× rate while scrubbing (9 ms), much slower while paused (120 ms), normal 45 ms
-            const emitInterval = isScrubbing ? 9 : isPausedNow ? 120 : 45
+            // 5× rate while scrubbing (9 ms), 1/4 rate while paused (180 ms), normal 45 ms
+            const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
             const now = Date.now()
             if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
