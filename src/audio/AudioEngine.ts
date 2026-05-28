@@ -351,11 +351,30 @@ export class AudioEngine {
     const buffer = this.currentNode.source.buffer
     if (!buffer) return
     
+    // FIX #1: Clear mid-crossfade state before seeking
+    if (this._crossfading) {
+      this._dlog(`seek() clearing mid-crossfade state`)
+      this._teardown(this.incomingNode)
+      this.incomingNode = null
+      this._crossfading = false
+      this._incomingIndex = -1
+      this._clearTimer('xfadeCompletion')
+    }
+    
+    // FIX #1: Clear loop end timer (might be from fade-out)
+    this._clearTimer('loopEnd')
+    
+    // FIX #3: Preserve fade-out state across seek
+    const savedFadeOutAfterThis = this._fadeOutAfterThis
+    const savedFadeOutMode = this.fadeOutMode
+    
     // Clamp seek position to prevent entering fade-out zone
     const xfadeSecs = this._xfadeSecs(buffer.duration)
     const fadeStartTime = buffer.duration - xfadeSecs
     const maxSeekTime = Math.max(0, fadeStartTime - 0.1) // Leave 0.1s margin
     const seekTime = Math.max(0, Math.min(timeSeconds, Math.min(maxSeekTime, buffer.duration)))
+    
+    this._dlog(`seek() to ${seekTime.toFixed(2)}s (requested=${timeSeconds.toFixed(2)}s, max=${maxSeekTime.toFixed(2)}s)`)
     
     // Stop current playback
     try {
@@ -377,6 +396,14 @@ export class AudioEngine {
     this.currentDuration = buffer.duration
     
     src.start(0, seekTime)
+    
+    // FIX #3: Restore fade-out state
+    this._fadeOutAfterThis = savedFadeOutAfterThis
+    this.fadeOutMode = savedFadeOutMode
+    if (savedFadeOutAfterThis) {
+      this._fadeOutFinalIndex = this._currentIndex
+      this._dlog(`seek() restored fade-out mode, final index=${this._fadeOutFinalIndex}`)
+    }
     
     // Reschedule crossfade timer based on new position
     this._scheduleXfade()
@@ -654,8 +681,19 @@ export class AudioEngine {
     const ctx = this.ctx!
     const elapsed = ctx.currentTime - this.currentStartCtxTime
     const xfadeSecs = this._xfadeSecs(this.currentDuration)
-    const delay = Math.max(50, (this.currentDuration - xfadeSecs - elapsed) * 1000)
+    const fadeStartTime = this.currentDuration - xfadeSecs
+    
+    // FIX #2: Don't schedule if already past fade-start time
+    // This prevents premature crossfades when scrubbing near the end
+    if (elapsed >= fadeStartTime - 0.05) {
+      this._dlog(`_scheduleXfade() skipped: elapsed=${elapsed.toFixed(2)}s >= fadeStart=${fadeStartTime.toFixed(2)}s`)
+      return
+    }
+    
+    const delayMs = (fadeStartTime - elapsed) * 1000
+    const delay = Math.max(50, delayMs)
     this.xfadeTimer = setTimeout(() => void this._beginXfade(), delay)
+    this._dlog(`_scheduleXfade() scheduled in ${(delay/1000).toFixed(2)}s (elapsed=${elapsed.toFixed(2)}s, fadeStart=${fadeStartTime.toFixed(2)}s)`)
   }
 
   private async _beginXfade(): Promise<void> {

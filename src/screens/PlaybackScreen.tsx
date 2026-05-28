@@ -319,7 +319,12 @@ export function PlaybackScreen({
             if (fillerBtnRef.current) {
               const SHOW_WINDOW = 15
               let opacity = 0
-              if (state.crossfading) {
+              const isScrubbing = isScrubbingRef.current
+              
+              // FIX #4: Always show during scrubbing if near end
+              if (isScrubbing && remaining <= SHOW_WINDOW) {
+                opacity = 1
+              } else if (state.crossfading) {
                 const xfadeElapsedMs = Date.now() - xfadeStartWallRef.current
                 const halfwayMs = xfadeDurationMsRef.current / 2
                 opacity = Math.max(0, 1 - xfadeElapsedMs / halfwayMs)
