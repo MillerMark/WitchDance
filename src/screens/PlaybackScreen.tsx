@@ -414,11 +414,15 @@ export function PlaybackScreen({
             // Use React state instead of engine.isPaused() to avoid race condition
             const isPausedNow = trainingPaused
             
-            // Debug logging when state changes (OUTSIDE emission check so it always runs)
+            // Debug logging - log EVERY frame to diagnose why state changes aren't detected
             const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
+            const debugCounter = Date.now()
+            if (debugCounter % 1000 < 16) {  // Log roughly once per second
+              console.log(`[PARTICLE-DEBUG] trainingPaused=${trainingPaused}, isScrubbing=${isScrubbing}, currentState=${currentState}, lastState=${lastEmissionStateRef.current}`)
+            }
             if (currentState !== lastEmissionStateRef.current) {
               const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
-              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms, trainingPaused: ${trainingPaused}, isScrubbing: ${isScrubbing}`)
+              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms`)
               lastEmissionStateRef.current = currentState
             }
             
