@@ -128,6 +128,7 @@ export function PlaybackScreen({
   const [showDebug, setShowDebug] = useState(false)
   const [debugLog, setDebugLog] = useState<string[]>([])
   const [trainingPaused, setTrainingPaused] = useState(false)
+  const trainingPausedRef = useRef(false)  // Sync ref for RAF loop access
   
   // Debug logging for particle emission state
   const lastEmissionStateRef = useRef<string>('')
@@ -411,14 +412,14 @@ export function PlaybackScreen({
 
             // Emit particles at right edge of fill
             const isScrubbing = isScrubbingRef.current
-            // Use React state instead of engine.isPaused() to avoid race condition
-            const isPausedNow = trainingPaused
+            // Use ref instead of state to avoid stale closure values in RAF loop
+            const isPausedNow = trainingPausedRef.current
             
             // Debug logging - log EVERY frame to diagnose why state changes aren't detected
             const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
             const debugCounter = Date.now()
             if (debugCounter % 1000 < 16) {  // Log roughly once per second
-              console.log(`[PARTICLE-DEBUG] trainingPaused=${trainingPaused}, isScrubbing=${isScrubbing}, currentState=${currentState}, lastState=${lastEmissionStateRef.current}`)
+              console.log(`[PARTICLE-DEBUG] trainingPausedRef=${trainingPausedRef.current}, isScrubbing=${isScrubbing}, currentState=${currentState}, lastState=${lastEmissionStateRef.current}`)
             }
             if (currentState !== lastEmissionStateRef.current) {
               const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
@@ -602,6 +603,7 @@ export function PlaybackScreen({
       console.log('[PAUSE] Resuming playback')
       engine.resumePlayback()
       setTrainingPaused(false)
+      trainingPausedRef.current = false  // Sync ref for RAF loop
       // Manual resume → lock scrubbing and cancel cooldown
       scrubStateRef.current = 'locked'
       if (cooldownTimerRef.current) {
@@ -612,6 +614,7 @@ export function PlaybackScreen({
       console.log('[PAUSE] Pausing playback')
       engine.pausePlayback()
       setTrainingPaused(true)
+      trainingPausedRef.current = true  // Sync ref for RAF loop
     }
   }
 
