@@ -685,14 +685,20 @@ export function PlaybackScreen({
   }
 
   function handleProgressBarMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    console.log('[SCRUB-MOUSE] MouseDown - trainingMode:', trainingMode, 'scrubState:', scrubStateRef.current, 'paused:', trainingPaused)
     if (!trainingMode) return
     const engine = engineRef.current
     if (scrubStateRef.current === 'locked') {
       // LOCKED → UNLOCKED: only when paused
-      if (!engine.isPaused()) return
+      if (!trainingPaused) {
+        console.log('[SCRUB-MOUSE] Blocked: not paused')
+        return
+      }
+      console.log('[SCRUB-MOUSE] Unlocking scrubbing')
       scrubStateRef.current = 'unlocked'
     } else if (scrubStateRef.current === 'cooldown') {
       // COOLDOWN → COOLDOWN: reset the 20s timer
+      console.log('[SCRUB-MOUSE] Resetting cooldown timer')
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
       cooldownTimerRef.current = null
     }
@@ -703,10 +709,12 @@ export function PlaybackScreen({
       if (isScrubbingRef.current) handleProgressBarInteraction(me.clientX)
     }
     const handleMouseUp = () => {
+      console.log('[SCRUB-MOUSE] MouseUp')
       isScrubbingRef.current = false
       if (trainingMode && scrubStateRef.current !== 'locked') {
         const eng = engineRef.current
-        if (eng.isPaused()) {
+        if (trainingPaused) {
+          console.log('[SCRUB-MOUSE] Resuming playback after scrub')
           eng.resumePlayback()
           setTrainingPaused(false)
         }
