@@ -1318,7 +1318,7 @@ export function PlaybackScreen({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'flex-end',  // Bottom-align content
-          marginBottom: '-41px',  // Moved down 45px closer to progress bar (was 4px)
+          marginBottom: '-33px',  // Moved up 8px from -41px
           minHeight: '2.2rem',  // Reserve space for 2 lines
         }}>
           <p style={{
