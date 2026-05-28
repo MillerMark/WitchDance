@@ -558,7 +558,11 @@ export function PlaybackScreen({
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
     
+    const engine = engineRef.current
     const trackName = tracks[currentIndex]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance'
+    
+    // CRITICAL: Tell AudioEngine about training mode so it doesn't set metadata in performance mode
+    engine.setTrainingMode(trainingMode)
     
     // In training mode: enable next/previous track buttons and play/pause
     // In performance mode: disable them (current default behavior)

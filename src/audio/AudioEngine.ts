@@ -49,6 +49,9 @@ export class AudioEngine {
   private _fadeOutAfterThis = false
   private _intentionallyStopped = false
   private _playGeneration = 0
+  
+  // ── Training mode flag ───────────────────────────────────────
+  private _trainingMode = false
 
   // ── Filler mode ──────────────────────────────────────────────
   private _inFillerMode = false
@@ -295,6 +298,10 @@ export class AudioEngine {
 
   getCurrentIndex(): number {
     return this._currentIndex
+  }
+
+  setTrainingMode(enabled: boolean): void {
+    this._trainingMode = enabled
   }
 
   getFadeOutFinalIndex(): number {
@@ -683,7 +690,9 @@ export class AudioEngine {
 
     this.callbacks.onTrackChange?.(index)
 
-    if ('mediaSession' in navigator) {
+    // Only set media session metadata in training mode
+    // In performance mode, we want NO lock screen controls
+    if ('mediaSession' in navigator && this._trainingMode) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: this.tracks[index].name,
         artist: 'WitchDance',
