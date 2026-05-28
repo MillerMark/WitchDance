@@ -1306,7 +1306,7 @@ export function PlaybackScreen({
                 top: '48px',  // Start below the button (button is 48px tall)
                 left: '23px',  // Center horizontally (24px center - 1px for two lines)
                 width: '2px',
-                height: '98px',  // Extend down to progress bar (same as bottom position)
+                height: '31px',  // Extend down to progress bar (98px bottom - 67px bar position = 31px)
                 pointerEvents: 'none',
                 zIndex: -1,
               }}>
@@ -1384,10 +1384,7 @@ export function PlaybackScreen({
                   transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
                 }}
               >
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }}>
-                  <path d="M16 4 L16 28 M22 10 L16 4 L10 10" stroke="rgba(225,111,251,1)" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="16" cy="24" r="3.5" fill="rgba(225,111,251,1)"/>
-                </svg>
+                📍
               </button>
             </div>
           )
