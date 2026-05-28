@@ -1678,7 +1678,7 @@ export function PlaybackScreen({
             minHeight: '2rem',  // Reserve space for 2 lines
           }}>
             <p style={{
-              color: 'rgba(255,255,255,0.88)',
+              color: 'hsl(290, 100%, 93%)',
               fontSize: '0.8rem',
               margin: 0,
               width: '100%',
@@ -1819,7 +1819,7 @@ export function PlaybackScreen({
         left: 0,
         right: 0,
         textAlign: 'center',
-        color: 'white',
+        color: 'hsl(290, 100%, 93%)',
         fontSize: '0.76rem',
         fontWeight: 500,
         letterSpacing: '0.04em',
