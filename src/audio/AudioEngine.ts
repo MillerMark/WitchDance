@@ -357,8 +357,14 @@ export class AudioEngine {
       console.log('[AudioEngine] seek() blocked - no buffer')
       return
     }
-    const seekTime = Math.max(0, Math.min(timeSeconds, buffer.duration))
-    console.log('[AudioEngine] Seeking to', seekTime, '/', buffer.duration)
+    
+    // Clamp seek position to prevent entering fade-out zone
+    const xfadeSecs = this._xfadeSecs(buffer.duration)
+    const fadeStartTime = buffer.duration - xfadeSecs
+    const maxSeekTime = Math.max(0, fadeStartTime - 0.1) // Leave 0.1s margin
+    const seekTime = Math.max(0, Math.min(timeSeconds, Math.min(maxSeekTime, buffer.duration)))
+    
+    console.log('[AudioEngine] Seeking to', seekTime, '/', buffer.duration, '(fade starts at', fadeStartTime, ')')
     
     // Stop current playback
     try {
@@ -383,6 +389,9 @@ export class AudioEngine {
     
     console.log('[AudioEngine] Starting new source at offset', seekTime)
     src.start(0, seekTime)
+    
+    // Reschedule crossfade timer based on new position
+    this._scheduleXfade()
     
     // Re-pause only if paused AND not actively scrubbing
     if (this._mediaEl?.paused && !isActiveScrubbing) {
