@@ -413,16 +413,18 @@ export function PlaybackScreen({
             const isScrubbing = isScrubbingRef.current
             // Use React state instead of engine.isPaused() to avoid race condition
             const isPausedNow = trainingPaused
+            
+            // Debug logging when state changes (OUTSIDE emission check so it always runs)
+            const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
+            if (currentState !== lastEmissionStateRef.current) {
+              const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
+              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms, trainingPaused: ${trainingPaused}, isScrubbing: ${isScrubbing}`)
+              lastEmissionStateRef.current = currentState
+            }
+            
             // 5× rate while scrubbing (9 ms), 1/4 rate while paused (180 ms), normal 45 ms
             const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
             const now = Date.now()
-            
-            // Debug logging when state changes
-            const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
-            if (currentState !== lastEmissionStateRef.current) {
-              console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms, trainingPaused: ${trainingPaused}`)
-              lastEmissionStateRef.current = currentState
-            }
             
             if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
