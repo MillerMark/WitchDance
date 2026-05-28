@@ -130,6 +130,10 @@ export function PlaybackScreen({
   const [trainingPaused, setTrainingPaused] = useState(false)
   const trainingPausedRef = useRef(false)  // Sync ref for RAF loop access
   
+  // Bookmark swipe-to-delete state
+  const [bookmarkSwipeStartY, setBookmarkSwipeStartY] = useState<number | null>(null)
+  const [bookmarkSwipeDeltaY, setBookmarkSwipeDeltaY] = useState(0)
+  
   // Debug logging for particle emission state
   const lastEmissionStateRef = useRef<string>('')
 
@@ -1198,27 +1202,42 @@ export function PlaybackScreen({
                     <rect x="15" y="3" width="3" height="14" rx="1.2" fill={Y}/>
                   </svg>
                 </button>
-                {/* Set Bookmark - only when paused */}
-                {trainingPaused && (
-                  <button 
-                    aria-label="Set Bookmark" 
-                    style={{
-                      ...btnStyle,
-                      width: 'auto',
-                      paddingLeft: '12px',
-                      paddingRight: '12px',
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                      letterSpacing: '0.02em',
-                    }}
-                    onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
-                  >
-                    📍 Bookmark
-                  </button>
-                )}
               </>)
             })()}
           </div>
+          {/* Set Bookmark button - centered below play/pause */}
+          {trainingPaused && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              width: '100%',
+              marginTop: '8px',
+            }}>
+              <button 
+                aria-label="Set Bookmark" 
+                style={{
+                  background: 'rgba(20,16,4,0.85)',
+                  border: '1px solid rgba(255,200,80,0.35)',
+                  borderRadius: '8px',
+                  paddingLeft: '14px',
+                  paddingRight: '14px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  letterSpacing: '0.02em',
+                  color: 'rgba(255,200,80,1)',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+                onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
+              >
+                📍 Bookmark
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1236,74 +1255,117 @@ export function PlaybackScreen({
         padding: '0 24px',
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
-        {/* Bookmark indicator and delete button - positioned above progress bar */}
+        {/* Bookmark indicator - positioned above progress bar */}
         {trainingMode && currentTrack.bookmark !== undefined && (() => {
           const engine = engineRef.current
           const state = engine.getPlaybackState()
           const duration = state?.duration ?? currentTrack.duration ?? 0
-          const elapsed = state?.elapsed ?? 0
-          const bookmarkPercent = duration > 0 ? (currentTrack.bookmark / duration) * 100 : 0
-          const showDelete = Math.abs(elapsed - currentTrack.bookmark) <= 5
+          
+          // Calculate position correctly using same coordinate system as progress bar
+          // Progress bar: barInset = 24px, barWidth = totalWidth - 48px
+          // Bookmark position: barInset + (bookmark/duration) * barWidth
+          const barInset = 24
+          const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 375
+          const barWidth = containerWidth - (barInset * 2)
+          const bookmarkPixels = duration > 0 ? (currentTrack.bookmark / duration) * barWidth : 0
+          const bookmarkLeft = barInset + bookmarkPixels
+
+          // Swipe handlers for delete
+          const handleSwipeStart = (clientY: number) => {
+            setBookmarkSwipeStartY(clientY)
+            setBookmarkSwipeDeltaY(0)
+          }
+
+          const handleSwipeMove = (clientY: number) => {
+            if (bookmarkSwipeStartY !== null) {
+              const deltaY = bookmarkSwipeStartY - clientY  // Positive when swiping up
+              setBookmarkSwipeDeltaY(deltaY)
+            }
+          }
+
+          const handleSwipeEnd = () => {
+            if (bookmarkSwipeDeltaY >= 45) {  // 45px threshold for delete
+              handleDeleteBookmark()
+            }
+            setBookmarkSwipeStartY(null)
+            setBookmarkSwipeDeltaY(0)
+          }
+
+          const swipeOpacity = Math.max(0, 1 - bookmarkSwipeDeltaY / 60)
+          const swipeTransform = bookmarkSwipeDeltaY > 0 ? `translateY(-${bookmarkSwipeDeltaY}px)` : 'translateY(0)'
 
           return (
-            <div style={{
-              position: 'absolute',
-              bottom: '50px',
-              left: `calc(24px + ${bookmarkPercent}% - 12px)`,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              pointerEvents: 'auto',
-              zIndex: 4,
-            }}>
-              {/* Delete button - only when within 5 seconds */}
-              {showDelete && (
-                <button
-                  aria-label="Delete Bookmark"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteBookmark()
-                  }}
-                  style={{
-                    background: 'rgba(255,50,50,0.9)',
-                    border: '1px solid rgba(255,100,100,0.6)',
-                    borderRadius: '50%',
-                    width: '24px',
-                    height: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    padding: 0,
-                    fontSize: '0.7rem',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  ❌
-                </button>
-              )}
-              {/* Bookmark indicator */}
+            <div 
+              style={{
+                position: 'absolute',
+                bottom: '50px',
+                left: `${bookmarkLeft}px`,
+                transform: 'translateX(-24px)',  // Center the 48px wide element
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                pointerEvents: 'auto',
+                zIndex: 4,
+                opacity: swipeOpacity,
+                transition: bookmarkSwipeStartY === null ? 'opacity 0.2s ease' : 'none',
+              }}
+            >
+              {/* Bookmark indicator with swipe-to-delete */}
               <button
                 aria-label="Jump to Bookmark"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleJumpToBookmark()
                 }}
+                onTouchStart={(e) => {
+                  e.stopPropagation()
+                  handleSwipeStart(e.touches[0].clientY)
+                }}
+                onTouchMove={(e) => {
+                  e.stopPropagation()
+                  handleSwipeMove(e.touches[0].clientY)
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation()
+                  handleSwipeEnd()
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation()
+                  handleSwipeStart(e.clientY)
+                }}
+                onMouseMove={(e) => {
+                  if (bookmarkSwipeStartY !== null) {
+                    e.stopPropagation()
+                    handleSwipeMove(e.clientY)
+                  }
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation()
+                  handleSwipeEnd()
+                }}
+                onMouseLeave={(e) => {
+                  if (bookmarkSwipeStartY !== null) {
+                    e.stopPropagation()
+                    handleSwipeEnd()
+                  }
+                }}
                 style={{
-                  background: 'rgba(255,200,80,0.95)',
-                  border: '2px solid rgba(255,230,150,0.8)',
-                  borderRadius: '50%',
-                  width: '24px',
-                  height: '24px',
+                  background: 'rgba(0,0,0,0.5)',
+                  border: '2px solid rgba(255,255,255,0.25)',
+                  borderRadius: '8px',
+                  width: '48px',
+                  height: '48px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   padding: 0,
-                  fontSize: '0.85rem',
+                  fontSize: '1.7rem',
                   WebkitTapHighlightColor: 'transparent',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                  transform: swipeTransform,
+                  transition: bookmarkSwipeStartY === null ? 'transform 0.2s ease' : 'none',
                 }}
               >
                 📍
