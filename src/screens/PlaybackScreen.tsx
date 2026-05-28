@@ -384,24 +384,27 @@ export function PlaybackScreen({
             }
 
             // Draw progress bar at bottom of canvas (canvas is 60vh tall, bar offset to align with original position)
-            const barY = H - 51
-            const filledW = W * pct / 100
+            // Canvas is now full width, so indent progress bar by 24px on each side
+            const barY = H - 55  // Moved down 4px (was H - 51)
+            const barInset = 24  // Match original container padding
+            const barWidth = W - (barInset * 2)  // Inset on both sides
+            const filledW = barWidth * pct / 100
             
             ctx.clearRect(0, 0, W, H)
 
             // Track (unfilled) — gray rectangle
             ctx.fillStyle = 'rgba(160,160,160,0.5)'
-            ctx.fillRect(filledW > 0 ? filledW : 0, barY - 1.5, W - (filledW > 0 ? filledW : 0), 3)
+            ctx.fillRect(barInset + (filledW > 0 ? filledW : 0), barY - 1.5, barWidth - (filledW > 0 ? filledW : 0), 3)
 
             // Filled portion — gradient
             if (filledW > 0) {
-              const grad = ctx.createLinearGradient(0, 0, filledW, 0)
+              const grad = ctx.createLinearGradient(barInset, 0, barInset + filledW, 0)
               grad.addColorStop(0, 'rgba(100,60,200,0.6)')
               grad.addColorStop(0.6, 'rgba(210,90,255,0.9)')
               grad.addColorStop(0.88, 'rgba(255,160,255,1.0)')
               grad.addColorStop(1, 'rgba(255,240,255,1.0)')
               ctx.fillStyle = grad
-              ctx.fillRect(0, barY - 1.5, filledW, 3)
+              ctx.fillRect(barInset, barY - 1.5, filledW, 3)
             }
 
             // Emit particles at right edge of fill
@@ -1201,7 +1204,7 @@ export function PlaybackScreen({
             color: 'rgba(255,255,255,0.88)',
             fontSize: '0.8rem',
             margin: 0,
-            marginTop: 'calc(0.5em - 20px)',
+            marginTop: 'calc(0.5em - 24px)',  // Moved up 4px (was -20px)
             width: '100%',
             textAlign: 'center',
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
@@ -1282,10 +1285,10 @@ export function PlaybackScreen({
         ref={canvasRef}
         style={{
           position: 'absolute',
-          left: '24px',  // Match container padding
-          right: '24px',  // Match container padding
+          left: '0',  // Full width canvas to allow particles at edges
+          right: '0',
           bottom: '0',  // Extend to screen bottom so particles can fall all the way down
-          width: 'calc(100% - 48px)',  // Account for left+right padding
+          width: '100%',  // Full width canvas
           height: '60vh',  // Taller canvas for particles to travel
           display: 'block',
           pointerEvents: 'none',
