@@ -9,6 +9,7 @@ interface StoredTrack {
   lastModified: number
   type: string
   buffer: ArrayBuffer
+  bookmark?: number
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -24,7 +25,7 @@ function openDb(): Promise<IDBDatabase> {
 
 // Read all ArrayBuffers BEFORE opening the transaction to avoid async-in-transaction race
 export async function saveLibrary(
-  tracks: { id: string; name: string; file: File }[],
+  tracks: { id: string; name: string; file: File; bookmark?: number }[],
 ): Promise<void> {
   const records: StoredTrack[] = await Promise.all(
     tracks.map(async (t) => ({
@@ -34,6 +35,7 @@ export async function saveLibrary(
       lastModified: t.file.lastModified,
       type: t.file.type || 'audio/mpeg',
       buffer: await t.file.arrayBuffer(),
+      bookmark: t.bookmark,
     })),
   )
 
@@ -51,7 +53,7 @@ export async function saveLibrary(
 }
 
 export async function loadLibrary(): Promise<
-  { id: string; name: string; file: File }[]
+  { id: string; name: string; file: File; bookmark?: number }[]
 > {
   const db = await openDb()
   return new Promise((resolve, reject) => {
@@ -65,7 +67,7 @@ export async function loadLibrary(): Promise<
           type: r.type,
           lastModified: r.lastModified,
         })
-        return { id: r.id, name: r.name, file }
+        return { id: r.id, name: r.name, file, bookmark: r.bookmark }
       })
       resolve(tracks)
     }

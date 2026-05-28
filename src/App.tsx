@@ -32,7 +32,7 @@ export function App() {
           setRestored(true)
           return
         }
-        const tracks = stored.map((s) => trackFromFile(s.file))
+        const tracks = stored.map((s) => trackFromFile(s.file, s.bookmark))
         setLibrary(tracks)
 
         // Restore playlist from saved track IDs
@@ -78,13 +78,13 @@ export function App() {
 
   function handleImport(tracks: Track[]) {
     setLibrary(tracks)
-    saveLibrary(tracks.map((t) => ({ id: t.id, name: t.name, file: t.file }))).catch(() => {})
+    saveLibrary(tracks.map((t) => ({ id: t.id, name: t.name, file: t.file, bookmark: t.bookmark }))).catch(() => {})
   }
 
   function handleDeleteTrack(trackId: string) {
     const updatedLibrary = library.filter((t) => t.id !== trackId)
     setLibrary(updatedLibrary)
-    saveLibrary(updatedLibrary.map((t) => ({ id: t.id, name: t.name, file: t.file }))).catch(() => {})
+    saveLibrary(updatedLibrary.map((t) => ({ id: t.id, name: t.name, file: t.file, bookmark: t.bookmark }))).catch(() => {})
     
     // Also remove from playlist if present
     const updatedPlaylist = playlist.filter((t) => t.id !== trackId)
@@ -109,6 +109,23 @@ export function App() {
   function handleFillerTrackChange(id: string | null) {
     setFillerTrackId(id)
     saveFillerTrackId(id)
+  }
+
+  function handleUpdateTrackBookmark(trackId: string, bookmark: number | undefined) {
+    // Update library
+    const updatedLibrary = library.map((t) =>
+      t.id === trackId ? { ...t, bookmark } : t
+    )
+    setLibrary(updatedLibrary)
+    saveLibrary(updatedLibrary.map((t) => ({ id: t.id, name: t.name, file: t.file, bookmark: t.bookmark }))).catch(() => {})
+
+    // Update playlist if track is in it
+    const updatedPlaylist = playlist.map((t) =>
+      t.id === trackId ? { ...t, bookmark } : t
+    )
+    if (JSON.stringify(updatedPlaylist) !== JSON.stringify(playlist)) {
+      setPlaylist(updatedPlaylist)
+    }
   }
 
   function handlePlay() {
@@ -179,6 +196,7 @@ export function App() {
             saveDebugMode(next)
           }}
           onEngineReady={(e) => { playbackEngineRef.current = e }}
+          onUpdateTrackBookmark={handleUpdateTrackBookmark}
         />
       )}
     </div>

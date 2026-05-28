@@ -18,6 +18,7 @@ interface Props {
   trainingMode: boolean
   onToggleTraining: () => void
   onEngineReady?: (engine: AudioEngine) => void
+  onUpdateTrackBookmark: (trackId: string, bookmark: number | undefined) => void
 }
 
 function formatTime(secs: number): string {
@@ -71,6 +72,7 @@ export function PlaybackScreen({
   trainingMode,
   onToggleTraining,
   onEngineReady,
+  onUpdateTrackBookmark,
 }: Props) {
   const engineRef = useRef(new AudioEngine())
   const onStopRef = useRef(onStop)
@@ -627,6 +629,35 @@ export function PlaybackScreen({
     }
   }
 
+  function handleSetBookmark() {
+    const engine = engineRef.current
+    const state = engine.getPlaybackState()
+    if (!state) return
+    const bookmark = state.elapsed
+    onUpdateTrackBookmark(currentTrack.id, bookmark)
+  }
+
+  function handleDeleteBookmark() {
+    onUpdateTrackBookmark(currentTrack.id, undefined)
+  }
+
+  function handleJumpToBookmark() {
+    const bookmark = currentTrack.bookmark
+    if (bookmark === undefined) return
+    const engine = engineRef.current
+    engine.seek(bookmark, false)
+    if (trainingPaused) {
+      engine.resumePlayback()
+      setTrainingPaused(false)
+      trainingPausedRef.current = false
+      scrubStateRef.current = 'locked'
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current)
+        cooldownTimerRef.current = null
+      }
+    }
+  }
+
   function handleTrainingRewind() {
     const engine = engineRef.current
     const state = engine.getPlaybackState()
@@ -1161,6 +1192,24 @@ export function PlaybackScreen({
                     <rect x="15" y="3" width="3" height="14" rx="1.2" fill={Y}/>
                   </svg>
                 </button>
+                {/* Set Bookmark - only when paused */}
+                {trainingPaused && (
+                  <button 
+                    aria-label="Set Bookmark" 
+                    style={{
+                      ...btnStyle,
+                      width: 'auto',
+                      paddingLeft: '12px',
+                      paddingRight: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.02em',
+                    }}
+                    onClick={(e) => { e.stopPropagation(); handleSetBookmark() }}
+                  >
+                    📍 Bookmark
+                  </button>
+                )}
               </>)
             })()}
           </div>
@@ -1181,6 +1230,81 @@ export function PlaybackScreen({
         padding: '0 24px',
         pointerEvents: 'auto', // Changed from 'none' to allow progress bar touches
       }}>
+        {/* Bookmark indicator and delete button - positioned above progress bar */}
+        {trainingMode && currentTrack.bookmark !== undefined && (() => {
+          const engine = engineRef.current
+          const state = engine.getPlaybackState()
+          const duration = state?.duration ?? currentTrack.duration ?? 0
+          const elapsed = state?.elapsed ?? 0
+          const bookmarkPercent = duration > 0 ? (currentTrack.bookmark / duration) * 100 : 0
+          const showDelete = Math.abs(elapsed - currentTrack.bookmark) <= 5
+
+          return (
+            <div style={{
+              position: 'absolute',
+              bottom: '50px',
+              left: `calc(24px + ${bookmarkPercent}% - 12px)`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              pointerEvents: 'auto',
+              zIndex: 4,
+            }}>
+              {/* Delete button - only when within 5 seconds */}
+              {showDelete && (
+                <button
+                  aria-label="Delete Bookmark"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteBookmark()
+                  }}
+                  style={{
+                    background: 'rgba(255,50,50,0.9)',
+                    border: '1px solid rgba(255,100,100,0.6)',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontSize: '0.7rem',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  ❌
+                </button>
+              )}
+              {/* Bookmark indicator */}
+              <button
+                aria-label="Jump to Bookmark"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleJumpToBookmark()
+                }}
+                style={{
+                  background: 'rgba(255,200,80,0.95)',
+                  border: '2px solid rgba(255,230,150,0.8)',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: '0.85rem',
+                  WebkitTapHighlightColor: 'transparent',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                }}
+              >
+                📍
+              </button>
+            </div>
+          )
+        })()}
         {/* Song name - bottom aligned just above progress bar */}
         <div style={{
           width: '100%',
