@@ -415,12 +415,8 @@ export function PlaybackScreen({
             // Use ref instead of state to avoid stale closure values in RAF loop
             const isPausedNow = trainingPausedRef.current
             
-            // Debug logging - log EVERY frame to diagnose why state changes aren't detected
+            // Track state changes for particle emission adjustments
             const currentState = isScrubbing ? 'scrubbing' : (isPausedNow ? 'paused' : 'playing')
-            const debugCounter = Date.now()
-            if (debugCounter % 1000 < 16) {  // Log roughly once per second
-              console.log(`[PARTICLE-DEBUG] trainingPausedRef=${trainingPausedRef.current}, isScrubbing=${isScrubbing}, currentState=${currentState}, lastState=${lastEmissionStateRef.current}`)
-            }
             if (currentState !== lastEmissionStateRef.current) {
               const emitInterval = isScrubbing ? 9 : isPausedNow ? 180 : 45
               console.log(`[PARTICLE] Emission state changed: ${lastEmissionStateRef.current} → ${currentState}, interval: ${emitInterval}ms`)
@@ -718,6 +714,7 @@ export function PlaybackScreen({
     if (trainingPaused) {
       engine.resumePlayback()
       setTrainingPaused(false)
+      trainingPausedRef.current = false  // Sync ref for RAF loop
     }
     scrubStateRef.current = 'cooldown'
     if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
@@ -759,6 +756,7 @@ export function PlaybackScreen({
           console.log('[SCRUB-MOUSE] Resuming playback after scrub')
           eng.resumePlayback()
           setTrainingPaused(false)
+          trainingPausedRef.current = false  // Sync ref for RAF loop
         }
         scrubStateRef.current = 'cooldown'
         if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current)
