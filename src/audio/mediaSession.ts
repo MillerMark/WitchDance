@@ -5,6 +5,8 @@ export function updateMediaSession(
   trackName: string,
   onPlay?: () => void,
   onPause?: () => void,
+  onNextTrack?: () => void,
+  onPreviousTrack?: () => void,
 ): void {
   if (!('mediaSession' in navigator)) return
 
@@ -16,9 +18,16 @@ export function updateMediaSession(
 
   if (onPlay) navigator.mediaSession.setActionHandler('play', onPlay)
   if (onPause) navigator.mediaSession.setActionHandler('pause', onPause)
-  // Disable skip actions so users don't accidentally skip (crossfade handles transitions)
-  try { navigator.mediaSession.setActionHandler('previoustrack', null) } catch { /* ok */ }
-  try { navigator.mediaSession.setActionHandler('nexttrack', null) } catch { /* ok */ }
+  
+  // Enable/disable skip actions based on whether handlers are provided
+  // In training mode: handlers provided (allow changing songs)
+  // In performance mode: handlers not provided (disable skip to prevent accidents)
+  try { 
+    navigator.mediaSession.setActionHandler('nexttrack', onNextTrack || null) 
+  } catch { /* ok */ }
+  try { 
+    navigator.mediaSession.setActionHandler('previoustrack', onPreviousTrack || null) 
+  } catch { /* ok */ }
 }
 
 export function clearMediaSession(): void {

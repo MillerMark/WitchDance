@@ -554,6 +554,36 @@ export function PlaybackScreen({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Update media session handlers when training mode changes ─────────────
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    
+    const trackName = tracks[currentIndex]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance'
+    
+    // In training mode: enable next/previous track buttons
+    // In performance mode: disable them (current default behavior)
+    if (trainingMode) {
+      updateMediaSession(
+        trackName,
+        undefined, // onPlay
+        undefined, // onPause
+        () => {
+          // Next track
+          const nextIdx = (currentIndex + 1) % tracks.length
+          engineRef.current.crossfadeTo(nextIdx)
+        },
+        () => {
+          // Previous track
+          const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length
+          engineRef.current.crossfadeTo(prevIdx)
+        },
+      )
+    } else {
+      // Performance mode - disable skip buttons
+      updateMediaSession(trackName)
+    }
+  }, [trainingMode, currentIndex, tracks])
+
   // ── Handlers (from Playback.tsx, unchanged) ───────────────────────────
 
   function handleChangeSong() {
