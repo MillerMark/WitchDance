@@ -603,14 +603,9 @@ export function PlaybackScreen({
         },
       )
     } else {
-      // Performance mode - CRITICAL: Use NO-OP handlers to actively block ALL controls
-      // Setting to null allows browsers to use default behavior - we must actively swallow commands
-      const noop = () => { /* Intentionally do nothing - block pause in performance mode */ }
-      updateMediaSession(trackName, noop, noop, noop, noop)
-      // Force playback state to 'none' to prevent default browser pause behavior
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'none'
-      }
+      // Performance mode - CRITICAL: CLEAR all media session to prevent ANY lock screen controls
+      // Don't set handlers at all - completely remove media session presence
+      clearMediaSession()
     }
   }, [trainingMode, currentIndex, tracks])
 

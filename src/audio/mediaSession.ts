@@ -40,6 +40,12 @@ export function setMediaSessionPlaybackState(state: 'playing' | 'paused'): void 
 export function clearMediaSession(): void {
   if (!('mediaSession' in navigator)) return
   navigator.mediaSession.metadata = null
+  // Clear all handlers and set playback state to none
+  navigator.mediaSession.setActionHandler('play', null)
+  navigator.mediaSession.setActionHandler('pause', null)
+  try { navigator.mediaSession.setActionHandler('nexttrack', null) } catch { /* ok */ }
+  try { navigator.mediaSession.setActionHandler('previoustrack', null) } catch { /* ok */ }
+  navigator.mediaSession.playbackState = 'none'
 }
 
 let _wakeLock: WakeLockSentinel | null = null
