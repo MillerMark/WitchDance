@@ -531,8 +531,8 @@ export function PlaybackScreen({
               ctx.shadowColor = 'rgba(0,0,0,0.85)'
               ctx.shadowBlur = 5
               ctx.fillStyle = 'rgba(255,255,255,0.95)'
-              // Position 74px above progress bar (18% closer: 90 × 0.82 = 73.8)
-              ctx.fillText(timeStr, labelX, barY - 74)
+              // Position 119px above progress bar (moved up 45px from 74px)
+              ctx.fillText(timeStr, labelX, barY - 119)
               ctx.restore()
             }
           }
@@ -1300,6 +1300,33 @@ export function PlaybackScreen({
                 transition: bookmarkSwipeStartY === null ? 'opacity 0.2s ease' : 'none',
               }}
             >
+              {/* Pin extension lines from bookmark to progress bar */}
+              <div style={{
+                position: 'absolute',
+                top: '48px',  // Start below the button (button is 48px tall)
+                left: '23px',  // Center horizontally (24px center - 1px for two lines)
+                width: '2px',
+                height: '98px',  // Extend down to progress bar (same as bottom position)
+                pointerEvents: 'none',
+                zIndex: -1,
+              }}>
+                {/* Black line on left */}
+                <div style={{
+                  position: 'absolute',
+                  left: '0',
+                  width: '1px',
+                  height: '100%',
+                  background: 'rgba(0,0,0,0.5)',
+                }} />
+                {/* White line on right */}
+                <div style={{
+                  position: 'absolute',
+                  left: '1px',
+                  width: '1px',
+                  height: '100%',
+                  background: 'rgba(255,255,255,0.5)',
+                }} />
+              </div>
               {/* Bookmark indicator with swipe-to-delete */}
               <button
                 aria-label="Jump to Bookmark"
