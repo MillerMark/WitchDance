@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { AudioEngine } from '../audio/AudioEngine'
 import type { Track } from '../types/track'
 import { iosAudioUnlock } from '../audio/iosUnlock'
-import { updateMediaSession, setMediaSessionPlaybackState, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
+import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
 import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
 
@@ -554,70 +554,19 @@ export function PlaybackScreen({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Update media session handlers when training mode changes ─────────────
+  // ── Disable ALL media session controls (lock screen, media keys, etc.) ───
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
     
-    const engine = engineRef.current
-    const trackName = tracks[currentIndex]?.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') ?? 'WitchDance'
+    // CRITICAL: Completely disable all lock screen controls
+    // Lock screen buttons must have ZERO impact on playback
+    clearMediaSession()
     
-    // CRITICAL: Tell AudioEngine about training mode so it doesn't set metadata in performance mode
-    engine.setTrainingMode(trainingMode)
-    
-    // In training mode: enable next/previous track buttons and play/pause
-    // In performance mode: disable them (current default behavior)
-    if (trainingMode) {
-      updateMediaSession(
-        trackName,
-        () => {
-          // Play handler - resume from training pause
-          const engine = engineRef.current
-          engine.resumePlayback()
-          setTrainingPaused(false)
-          trainingPausedRef.current = false
-          scrubStateRef.current = 'locked'
-          if (cooldownTimerRef.current) {
-            clearTimeout(cooldownTimerRef.current)
-            cooldownTimerRef.current = null
-          }
-          setMediaSessionPlaybackState('playing')
-        },
-        () => {
-          // Pause handler - pause in training mode
-          const engine = engineRef.current
-          engine.pausePlayback()
-          setTrainingPaused(true)
-          trainingPausedRef.current = true
-          setMediaSessionPlaybackState('paused')
-        },
-        () => {
-          // Next track - use crossfadeTo for smooth transition
-          const engine = engineRef.current
-          const currentIdx = engine.getCurrentIndex()
-          const nextIdx = (currentIdx + 1) % tracks.length
-          engine.crossfadeTo(nextIdx)
-        },
-        () => {
-          // Previous track - ALWAYS go to previous track (no restart logic)
-          // This prevents iOS from switching to seek mode (±10 seconds)
-          const engine = engineRef.current
-          const currentIdx = engine.getCurrentIndex()
-          const prevIdx = (currentIdx - 1 + tracks.length) % tracks.length
-          engine.crossfadeTo(prevIdx)
-        },
-      )
-    } else {
-      // Performance mode - CRITICAL: CLEAR all media session to prevent ANY lock screen controls
-      // Don't set handlers at all - completely remove media session presence
-      clearMediaSession()
-    }
-  }, [trainingMode, currentIndex, tracks])
+    // Tell AudioEngine to never set metadata
+    engineRef.current.setTrainingMode(false)
+  }, [currentIndex, tracks])
 
-  // ── Sync media session playback state when training pause changes ────────
-  useEffect(() => {
-    if (!trainingMode) return
-    setMediaSessionPlaybackState(trainingPaused ? 'paused' : 'playing')
-  }, [trainingPaused, trainingMode])
+  // Remove the playback state sync - we don't want ANY media session interaction
 
   // ── Handlers (from Playback.tsx, unchanged) ───────────────────────────
 
