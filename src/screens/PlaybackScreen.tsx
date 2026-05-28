@@ -408,21 +408,25 @@ export function PlaybackScreen({
             const isScrubbing = isScrubbingRef.current
             // Use React state instead of engine.isPaused() to avoid race condition
             const isPausedNow = trainingPaused
-            // 3× rate while scrubbing (15 ms), much slower while paused (120 ms), normal 45 ms
-            const emitInterval = isScrubbing ? 15 : isPausedNow ? 120 : 45
+            // 5× rate while scrubbing (9 ms), much slower while paused (120 ms), normal 45 ms
+            const emitInterval = isScrubbing ? 9 : isPausedNow ? 120 : 45
             const now = Date.now()
             if (filledW > 2 && now - lastEmitRef.current > emitInterval) {
               lastEmitRef.current = now
-              // Emit fewer particles when paused (1 instead of 4)
-              const particleCount = isPausedNow && !isScrubbing ? 1 : 4
+              // Emit more particles when scrubbing (6), fewer when paused (1), normal (4)
+              const particleCount = isScrubbing ? 6 : (isPausedNow && !isScrubbing ? 1 : 4)
               for (let i = 0; i < particleCount; i++) {
                 const family = COLOR_FAMILIES[Math.floor(Math.random() * COLOR_FAMILIES.length)]
                 let vx: number, vy: number
                 if (isScrubbing && Math.random() < 2 / 3) {
-                  // 2/3 of scrubbing particles shoot straight up
-                  const speed = 0.4 + Math.random() * 1.8
-                  vx = (Math.random() - 0.5) * 0.15
-                  vy = -speed
+                  // 2/3 of scrubbing particles shoot upward in 25° arc (±12.5° from vertical)
+                  const baseSpeed = 0.4 + Math.random() * 1.8
+                  const speed = baseSpeed * 1.5  // 50% faster when scrubbing
+                  // ±12.5° = ±0.218 radians from straight up (-π/2)
+                  const angleOffset = (Math.random() - 0.5) * 0.436  // ±12.5° in radians
+                  const angle = -Math.PI / 2 + angleOffset
+                  vx = Math.cos(angle) * speed * 0.5
+                  vy = Math.sin(angle) * speed
                 } else {
                   const goDown = Math.random() < 0.28
                   const speed = 0.4 + Math.random() * 1.8
@@ -489,8 +493,8 @@ export function PlaybackScreen({
               ctx.shadowColor = 'rgba(0,0,0,0.85)'
               ctx.shadowBlur = 5
               ctx.fillStyle = 'rgba(255,255,255,0.95)'
-              // Position 90px above progress bar (64px above title + ~26px for title height)
-              ctx.fillText(timeStr, labelX, barY - 90)
+              // Position 74px above progress bar (18% closer: 90 × 0.82 = 73.8)
+              ctx.fillText(timeStr, labelX, barY - 74)
               ctx.restore()
             }
           }
