@@ -1700,19 +1700,19 @@ export function PlaybackScreen({
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                padding: '4px 20px 20px 20px',
+                padding: '8px 20px 20px 20px',
               }}
             >
               <div style={{
                 position: 'absolute',
-                top: '4px',
-                left: '20px',
-                right: '20px',
+                top: '8px',
+                left: '0',
+                right: '0',
                 color: 'white',
                 fontSize: '0.95rem',
                 fontWeight: 500,
                 letterSpacing: '0.05em',
-                textAlign: 'left',
+                textAlign: 'center',
               }}>
                 {fillerScheduled && !isFillerMode ? (
                   // Countdown mode
@@ -1722,7 +1722,7 @@ export function PlaybackScreen({
                   <>Fill: {Math.floor(fillerElapsed / 60)}:{String(fillerElapsed % 60).padStart(2, '0')}</>
                 )}
               </div>
-              <div style={{ fontSize: '1.5rem' }}>
+              <div style={{ fontSize: '1.5rem', lineHeight: '1' }}>
                 ▶&nbsp;&nbsp;Resume Performance
               </div>
             </button>
