@@ -1177,7 +1177,6 @@ export function PlaybackScreen({
                 WebkitTapHighlightColor: 'transparent',
               }
               const Y = 'rgba(255,200,80,1)'
-              const P = 'rgba(225,111,251,1)'  // Purple for bookmark
               return (<>
                 {/* Set Bookmark - only when paused */}
                 {trainingPaused && (
@@ -1217,7 +1216,7 @@ export function PlaybackScreen({
                       <circle cx="256" cy="188" r="76" fill="#291055" opacity="0.42"/>
                       <circle cx="256" cy="184" r="68" fill="url(#innerGradient)"/>
                     </svg>
-                    <span style={{ fontSize: '14px', color: P }}>+</span>
+                    <span style={{ fontSize: '14px', color: Y }}>+</span>
                   </button>
                 )}
                 {/* Rewind to start */}
