@@ -1490,7 +1490,7 @@ export function PlaybackScreen({
             style={{
               position: 'absolute',
               left: -20,
-              top: '3px',
+              top: '18px',  // Moved down one line height from 3px
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
@@ -1506,7 +1506,7 @@ export function PlaybackScreen({
             style={{
               position: 'absolute',
               right: -20,
-              top: '3px',
+              top: '18px',  // Moved down one line height from 3px
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
