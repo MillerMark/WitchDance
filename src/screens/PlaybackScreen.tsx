@@ -459,8 +459,9 @@ export function PlaybackScreen({
 
             // Update + draw particles
             const DT = 1 / 60
+            // Allow particles to fall below canvas (removed p.y < H check)
             particlesRef.current = particlesRef.current.filter(
-              p => p.life > 0 && p.y > -H * 0.5 && p.y < H
+              p => p.life > 0 && p.y > -H * 0.5
             )
             for (const p of particlesRef.current) {
               p.life -= DT / p.maxLife
@@ -1283,16 +1284,16 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* Particle canvas — extends higher to show particles shooting upward */}
+      {/* Particle canvas — extends from near top to screen bottom */}
       <canvas
         ref={canvasRef}
         style={{
           position: 'absolute',
           left: '24px',  // Match container padding
           right: '24px',  // Match container padding
-          bottom: '1.7em',  // Fine-tuned position between title and "Next up"
+          bottom: '0',  // Extend to screen bottom so particles can fall all the way down
           width: 'calc(100% - 48px)',  // Account for left+right padding
-          height: '200px',  // Taller to show particles shooting up
+          height: '60vh',  // Taller canvas for particles to travel
           display: 'block',
           pointerEvents: 'none',
           zIndex: 1,
