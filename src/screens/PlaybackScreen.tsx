@@ -592,9 +592,29 @@ export function PlaybackScreen({
           engineRef.current.crossfadeTo(nextIdx)
         },
         () => {
-          // Previous track
-          const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length
-          engineRef.current.crossfadeTo(prevIdx)
+          // Previous track - smart behavior like in-app rewind button
+          const engine = engineRef.current
+          const state = engine.getPlaybackState()
+          const elapsed = state?.elapsed ?? 0
+          
+          if (elapsed < 3) {
+            // Near start — go to previous track
+            const prevIdx = (currentIndex - 1 + tracks.length) % tracks.length
+            engine.seekToTrackIndex(prevIdx, 0)
+            setCurrentIndex(prevIdx)
+            setNextUpIndex((prevIdx + 1) % tracks.length)
+          } else {
+            // Past 3 seconds — restart current track
+            engine.seekToTrackStart()
+          }
+          
+          // Resume if paused
+          if (trainingPausedRef.current) {
+            engine.resumePlayback()
+            setTrainingPaused(false)
+            trainingPausedRef.current = false
+            setMediaSessionPlaybackState('playing')
+          }
         },
       )
     } else {
