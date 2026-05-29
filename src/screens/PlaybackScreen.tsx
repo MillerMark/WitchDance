@@ -2000,7 +2000,7 @@ export function PlaybackScreen({
         </div>
       )}
 
-      {/* ── Tap-reveal controls: Change Song, Stop ─────────── */}
+      {/* ── Tap-reveal controls: Pause & Fill, Change Song, Stop ─────────── */}
       {!isFillerMode && !fillerScheduled && !isFadeOut && (
         <div
           style={{
@@ -2015,19 +2015,12 @@ export function PlaybackScreen({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '6px',
+            gap: '0px',
             padding: '0 24px',
           }}
           onClick={(e) => e.stopPropagation()}
         >
 
-          <button
-            className="btn-stop-immediate"
-            onClick={handleChangeSong}
-            disabled={isPanelOpen}
-          >
-            Change Song...
-          </button>
           {/* Only show manual fill button when auto-fill is disabled */}
           {!autoFillEnabled && (
             <button
@@ -2045,10 +2038,18 @@ export function PlaybackScreen({
             </button>
           )}
           <button
+            className="btn-stop-immediate"
+            onClick={handleChangeSong}
+            disabled={isPanelOpen}
+            style={{ marginTop: '16px' }}
+          >
+            Change Song...
+          </button>
+          <button
             className="btn-stop-immediate btn-destructive"
             onClick={handleStopButton}
             disabled={isPanelOpen}
-            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: '12px' }}
+            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem', marginTop: '16px' }}
           >
             <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
               <rect x="1" y="1" width="16" height="16" rx="2" fill="rgba(255,255,255,0.5)" />
