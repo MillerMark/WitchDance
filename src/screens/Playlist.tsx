@@ -41,6 +41,11 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
   const [showFillerPicker, setShowFillerPicker] = useState(false)
   const dragHandleRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
+  // Stable refs so drag-move/end handlers never need listener re-attachment
+  const dragRef = useRef<DragState | null>(null)
+  const handleDragMoveRef = useRef<(e: PointerEvent) => void>(() => {})
+  const handleDragEndRef = useRef<(e: PointerEvent) => void>(() => {})
+
   // ── Fill preview audio ──
   const previewCtxRef = useRef<AudioContext | null>(null)
   const previewSourceRef = useRef<AudioBufferSourceNode | null>(null)
@@ -113,7 +118,17 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     setDrag(null)
   }, [drag, tracks, onReorder])
 
-  // Attach non-passive event listeners for drag handles
+  // Keep refs current on every render so stable event listeners always call the latest handlers
+  dragRef.current = drag
+  handleDragMoveRef.current = handleDragMove
+  handleDragEndRef.current = handleDragEnd
+
+  // Attach non-passive event listeners for drag handles.
+  // IMPORTANT: deps must NOT include drag/handleDragMove/handleDragEnd — those change on every
+  // drag-state update, which would remove/re-add listeners mid-drag. On iOS Safari, removing a
+  // pointermove listener from an element with setPointerCapture releases the capture, causing all
+  // subsequent events to miss the button entirely (looks like "stuck at 1 position"). Refs are
+  // updated synchronously each render, so the stable closures always call the latest handlers.
   useEffect(() => {
     const handles = dragHandleRefs.current
     const cleanups: (() => void)[] = []
@@ -121,13 +136,13 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     handles.forEach((button, trackId) => {
       const onPointerDown = (e: PointerEvent) => handleDragStart(e, trackId)
       const onPointerMove = (e: PointerEvent) => {
-        if (drag?.trackId === trackId) handleDragMove(e)
+        if (dragRef.current?.trackId === trackId) handleDragMoveRef.current(e)
       }
       const onPointerUp = (e: PointerEvent) => {
-        if (drag?.trackId === trackId) handleDragEnd(e)
+        if (dragRef.current?.trackId === trackId) handleDragEndRef.current(e)
       }
       const onPointerCancel = (e: PointerEvent) => {
-        if (drag?.trackId === trackId) handleDragEnd(e)
+        if (dragRef.current?.trackId === trackId) handleDragEndRef.current(e)
       }
 
       button.addEventListener('pointerdown', onPointerDown, { passive: false })
@@ -146,7 +161,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     return () => {
       cleanups.forEach((cleanup) => cleanup())
     }
-  }, [drag, handleDragStart, handleDragMove, handleDragEnd])
+  }, [tracks, handleDragStart])
 
   // ── Fill preview playback ──
   const stopPreview = useCallback(() => {
