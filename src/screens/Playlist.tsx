@@ -116,9 +116,8 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
         await ctx.resume()
       }
 
-      // Fetch and decode audio
-      const response = await fetch(`/music/${track.id}`)
-      const arrayBuffer = await response.arrayBuffer()
+      // Load and decode audio from File object
+      const arrayBuffer = await track.file.arrayBuffer()
       const buffer = await ctx.decodeAudioData(arrayBuffer)
 
       // If track changed while loading, abort
