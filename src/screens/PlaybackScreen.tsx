@@ -102,6 +102,7 @@ export function PlaybackScreen({
   const [isFadeOut, setIsFadeOut] = useState(false)
   const [fadeAfterThis, setFadeAfterThis] = useState(false)
   const [fadeOutFinalIndex, setFadeOutFinalIndex] = useState(-1)
+  const [fadeOutCountdown, setFadeOutCountdown] = useState(0)
   const [showFadePicker, setShowFadePicker] = useState(false)
   const [isFillerMode, setIsFillerMode] = useState(false)
   const [fillerElapsed, setFillerElapsed] = useState(0)
@@ -710,7 +711,31 @@ export function PlaybackScreen({
     setIsFadeOut(false)
     setFadeAfterThis(false)
     setFadeOutFinalIndex(-1)
+    setFadeOutCountdown(0)
   }
+
+  // Update fade-out countdown every second
+  useEffect(() => {
+    if (!isFadeOut) {
+      setFadeOutCountdown(0)
+      return
+    }
+
+    const updateCountdown = () => {
+      const state = engineRef.current.getPlaybackState()
+      if (state) {
+        const remaining = Math.max(0, Math.ceil(state.duration - state.elapsed))
+        setFadeOutCountdown(remaining)
+      }
+    }
+
+    // Update immediately
+    updateCountdown()
+
+    // Then update every second
+    const interval = setInterval(updateCountdown, 1000)
+    return () => clearInterval(interval)
+  }, [isFadeOut])
 
   function handleRestartFrom(index: number) {
     setPendingAction({ type: 'restart', index, name: displayName(tracks[index]) })
@@ -1991,7 +2016,9 @@ export function PlaybackScreen({
               letterSpacing: '0.02em',
             }}
           >
-            {fadeAfterThis ? 'Stopping performance after this song...' : 'Stopping performance now...'}
+            {fadeAfterThis
+              ? `Stopping performance after this song... (${fadeOutCountdown}s)`
+              : `Stopping performance in ${fadeOutCountdown}s...`}
           </div>
           <button
             className="btn-cancel-fade"
