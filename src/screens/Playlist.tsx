@@ -79,41 +79,43 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
 
   const handleDragMove = useCallback(
     (e: PointerEvent) => {
-      if (!drag) return
+      const currentDrag = dragRef.current
+      if (!currentDrag) return
       e.preventDefault()
-      const deltaY = e.pageY - drag.startY
+      const deltaY = e.pageY - currentDrag.startY
       const toIndex = Math.max(
         0,
-        Math.min(tracks.length - 1, drag.fromIndex + Math.round(deltaY / drag.rowHeight)),
+        Math.min(tracks.length - 1, currentDrag.fromIndex + Math.round(deltaY / currentDrag.rowHeight)),
       )
       console.log('[DRAG MOVE]', {
         pageY: e.pageY,
         clientY: e.clientY,
         scrollY: window.scrollY,
-        startY: drag.startY,
+        startY: currentDrag.startY,
         deltaY,
-        deltaRows: deltaY / drag.rowHeight,
-        fromIndex: drag.fromIndex,
+        deltaRows: deltaY / currentDrag.rowHeight,
+        fromIndex: currentDrag.fromIndex,
         toIndex,
-        currentToIndex: drag.toIndex
+        currentToIndex: currentDrag.toIndex
       })
-      if (toIndex !== drag.toIndex) {
+      if (toIndex !== currentDrag.toIndex) {
         setDrag((prev) => (prev ? { ...prev, toIndex } : null))
       }
     },
-    [drag, tracks.length],
+    [tracks.length],
   )
 
   const handleDragEnd = useCallback((e: PointerEvent) => {
     e.preventDefault()
-    if (!drag) return
+    const currentDrag = dragRef.current
+    if (!currentDrag) return
     console.log('[DRAG END]', {
-      fromIndex: drag.fromIndex,
-      toIndex: drag.toIndex,
-      willReorder: drag.toIndex !== drag.fromIndex
+      fromIndex: currentDrag.fromIndex,
+      toIndex: currentDrag.toIndex,
+      willReorder: currentDrag.toIndex !== currentDrag.fromIndex
     })
-    if (drag.toIndex !== drag.fromIndex) {
-      onReorder(moveItem(tracks, drag.fromIndex, drag.toIndex))
+    if (currentDrag.toIndex !== currentDrag.fromIndex) {
+      onReorder(moveItem(tracks, currentDrag.fromIndex, currentDrag.toIndex))
     }
     setDrag(null)
   }, [drag, tracks, onReorder])

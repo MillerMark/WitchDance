@@ -35,6 +35,7 @@ Hired as the primary builder for the WitchDance crossfade music player PWA. Resp
 
 ## Learnings
 
+- **iOS `setPointerCapture` + listener cleanup interaction** — On iOS Safari, calling `removeEventListener('pointermove', fn)` on an element that currently holds `setPointerCapture()` releases the pointer capture. This is why any `useEffect` that re-attaches drag listeners during active dragging (e.g., because `drag` state is in the deps array) causes drag to stop tracking after the first state change. Fix: use stable refs (`dragRef`, `handleDragMoveRef`, `handleDragEndRef`) updated each render, so event-listener closures are never recreated during a drag gesture.
 - **`_incomingFillerNode` pattern** — Any async flow in Web Audio that creates a source node and then promotes it to a named field after a delay MUST track the intermediate node separately. Clearing the completion timer is not enough — the node itself is still playing.
 - **`xfadeCompletionTimer` is shared** — The same `xfadeCompletionTimer` is used for both normal playlist crossfades and filler-entry crossfades. Cancelling it in `exitFillerMode` is safe because filler-related cleanup should always win; there should be no in-flight playlist crossfade when filler is active.
 - **Key files:** `src/audio/AudioEngine.ts` (crossfade engine), `src/screens/PlaybackScreen.tsx` (filler mode React state machine at lines 738–779).
@@ -45,6 +46,28 @@ Hired as the primary builder for the WitchDance crossfade music player PWA. Resp
 - **Render condition guards fill visibility** — The bookmark JSX uses `!isFillerMode && !fillerScheduled` so the element is fully unmounted during fill (no pointer events, no layout cost), while the opacity fade-out runs before those conditions change, ensuring no visible jump.
 - **Fill mode scrim pattern** — A `position: fixed`, `zIndex: 8`, `rgba(0,0,0,0.5)` scrim div signals modal state during fill. It sits between the background UI (z-index 0-5) and the fill overlay (z-index 10). The WitchDance logo container must be raised to z-index 11 so it stays crisp above the scrim. Render both scrim and overlay with the same `(fillerScheduled || isFillerMode)` condition.
 - **Z-index stack in PlaybackScreen:** particles/credits z-1, progress/controls z-2–5, fill scrim z-8, fill overlay z-10, WitchDance logo z-11.
+
+### 2025-05-27 — Fix: Drag-and-drop only moves one position regardless of drag distance
+
+**Bug:** When dragging a track in the playlist, it only moved down by one position no matter how far the user dragged. Console logs confirmed `deltaY` was being calculated correctly, but `toIndex` never exceeded `fromIndex + 1`.
+
+**Root Cause (`src/screens/Playlist.tsx`):**
+
+The `useEffect` that attaches pointer event listeners had `[drag, handleDragMove, handleDragEnd]` in its dependency array. Every time `drag.toIndex` changed (i.e., the first position update), React:
+1. Ran the effect cleanup — **removing `pointermove` listener from the button**
+2. Re-attached fresh listeners with the updated `drag` in closure
+
+On iOS Safari, removing a `pointermove` listener from an element that holds `setPointerCapture()` releases the pointer capture. With capture gone, all subsequent `pointermove` events stop reaching the drag-handle button entirely. The drag appeared frozen at 1 position after the first position change.
+
+**Fix (`src/screens/Playlist.tsx`):**
+- Added `dragRef`, `handleDragMoveRef`, `handleDragEndRef` refs (typed to match the state/handlers)
+- Synchronize refs each render (after all handlers are declared): `dragRef.current = drag`, etc.
+- Event-listener closures in `useEffect` read from refs instead of capturing closures
+- Changed `useEffect` deps to `[tracks, handleDragStart]` — no longer includes `drag`, `handleDragMove`, or `handleDragEnd`
+- Listeners are now stable for the entire drag gesture; `setPointerCapture` is never disrupted
+
+**Files:** `src/screens/Playlist.tsx`
+**Commit:** `fix: drag-and-drop only moves one position regardless of drag distance`
 
 ### 2025-05-26 — Fix: Infinite drag event loop in Playlist
 
