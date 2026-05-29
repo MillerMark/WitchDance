@@ -210,7 +210,8 @@ button:disabled {
   background-color: rgba(0, 0, 0, 0.5);
   position: relative;
   transition: all 0.2s ease;
-  margin-top: 8px;
+  margin-top: 1px;
+  margin-left: 6px;
 }
 
 .auto-fill-checkbox:checked {
