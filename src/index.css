@@ -206,15 +206,15 @@ button:disabled {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid hsl(290, 40%, 60%);
   background-color: rgba(0, 0, 0, 0.5);
   position: relative;
   transition: all 0.2s ease;
 }
 
 .auto-fill-checkbox:checked {
-  background-color: #f59e0b;
-  border-color: #f59e0b;
+  background-color: hsl(290, 100%, 93%);
+  border-color: hsl(290, 100%, 93%);
 }
 
 .auto-fill-checkbox:checked::after {
@@ -222,8 +222,8 @@ button:disabled {
   position: absolute;
   left: 3px;
   top: 0px;
-  width: 4px;
-  height: 8px;
+  width: 6px;
+  height: 10px;
   border: solid #000;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
