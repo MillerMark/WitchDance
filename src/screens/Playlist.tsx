@@ -39,6 +39,7 @@ function formatTitle(name: string): string {
 export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTrackId, onFillerTrackChange, fillVolume, onFillVolumeChange }: Props) {
   const [drag, setDrag] = useState<DragState | null>(null)
   const [showFillerPicker, setShowFillerPicker] = useState(false)
+  const dragHandleRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
   // ── Fill preview audio ──
   const previewCtxRef = useRef<AudioContext | null>(null)
@@ -51,25 +52,46 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     : tracks
 
   const handleDragStart = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>, trackId: string) => {
+    (e: PointerEvent, trackId: string) => {
       e.preventDefault()
-      e.currentTarget.setPointerCapture(e.pointerId)
-      const rowEl = e.currentTarget.closest('.playlist-row') as HTMLElement | null
+      const target = e.currentTarget as HTMLButtonElement
+      target.setPointerCapture(e.pointerId)
+      const rowEl = target.closest('.playlist-row') as HTMLElement | null
       const rowHeight = rowEl?.getBoundingClientRect().height ?? 72
       const fromIndex = tracks.findIndex((t) => t.id === trackId)
+      console.log('[DRAG START]', {
+        trackId,
+        fromIndex,
+        pageY: e.pageY,
+        clientY: e.clientY,
+        scrollY: window.scrollY,
+        rowHeight
+      })
       setDrag({ trackId, fromIndex, toIndex: fromIndex, startY: e.pageY, rowHeight })
     },
     [tracks],
   )
 
   const handleDragMove = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
+    (e: PointerEvent) => {
       if (!drag) return
+      e.preventDefault()
       const deltaY = e.pageY - drag.startY
       const toIndex = Math.max(
         0,
         Math.min(tracks.length - 1, drag.fromIndex + Math.round(deltaY / drag.rowHeight)),
       )
+      console.log('[DRAG MOVE]', {
+        pageY: e.pageY,
+        clientY: e.clientY,
+        scrollY: window.scrollY,
+        startY: drag.startY,
+        deltaY,
+        deltaRows: deltaY / drag.rowHeight,
+        fromIndex: drag.fromIndex,
+        toIndex,
+        currentToIndex: drag.toIndex
+      })
       if (toIndex !== drag.toIndex) {
         setDrag((prev) => (prev ? { ...prev, toIndex } : null))
       }
@@ -77,13 +99,49 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     [drag, tracks.length],
   )
 
-  const handleDragEnd = useCallback(() => {
+  const handleDragEnd = useCallback((e: PointerEvent) => {
+    e.preventDefault()
     if (!drag) return
+    console.log('[DRAG END]', {
+      fromIndex: drag.fromIndex,
+      toIndex: drag.toIndex,
+      willReorder: drag.toIndex !== drag.fromIndex
+    })
     if (drag.toIndex !== drag.fromIndex) {
       onReorder(moveItem(tracks, drag.fromIndex, drag.toIndex))
     }
     setDrag(null)
   }, [drag, tracks, onReorder])
+
+  // Attach non-passive event listeners for drag handles
+  useEffect(() => {
+    const handles = dragHandleRefs.current
+    
+    handles.forEach((button, trackId) => {
+      const onPointerDown = (e: PointerEvent) => handleDragStart(e, trackId)
+      const onPointerMove = (e: PointerEvent) => {
+        if (drag?.trackId === trackId) handleDragMove(e)
+      }
+      const onPointerUp = (e: PointerEvent) => {
+        if (drag?.trackId === trackId) handleDragEnd(e)
+      }
+      const onPointerCancel = (e: PointerEvent) => {
+        if (drag?.trackId === trackId) handleDragEnd(e)
+      }
+
+      button.addEventListener('pointerdown', onPointerDown, { passive: false })
+      button.addEventListener('pointermove', onPointerMove, { passive: false })
+      button.addEventListener('pointerup', onPointerUp, { passive: false })
+      button.addEventListener('pointercancel', onPointerCancel, { passive: false })
+
+      return () => {
+        button.removeEventListener('pointerdown', onPointerDown)
+        button.removeEventListener('pointermove', onPointerMove)
+        button.removeEventListener('pointerup', onPointerUp)
+        button.removeEventListener('pointercancel', onPointerCancel)
+      }
+    })
+  }, [drag, handleDragStart, handleDragMove, handleDragEnd])
 
   // ── Fill preview playback ──
   const stopPreview = useCallback(() => {
@@ -210,12 +268,12 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
                   >
                     {/* Drag handle */}
                     <button
+                      ref={(el) => {
+                        if (el) dragHandleRefs.current.set(track.id, el)
+                        else dragHandleRefs.current.delete(track.id)
+                      }}
                       className="drag-handle"
                       aria-label="Drag to reorder"
-                      onPointerDown={(e) => handleDragStart(e, track.id)}
-                      onPointerMove={isDragging ? handleDragMove : undefined}
-                      onPointerUp={isDragging ? handleDragEnd : undefined}
-                      onPointerCancel={isDragging ? handleDragEnd : undefined}
                     >
                       ≡
                     </button>
