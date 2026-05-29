@@ -1335,7 +1335,7 @@ export function PlaybackScreen({
           <div style={{ display: 'flex', flexDirection: 'row', gap: '6px' }}>
             {(() => {
               const btnStyle: React.CSSProperties = {
-                background: 'rgba(20,16,4,0.85)',
+                background: 'rgba(20,4,20,0.85)',
                 border: '1px solid rgba(225,111,251,0.35)',  // Purple border for bookmark button
                 borderRadius: '8px',
                 width: '44px',
