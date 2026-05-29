@@ -49,6 +49,7 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 0; /* Footer will handle safe area */
+  min-height: 0; /* Allow flex item to shrink below content size for scrolling */
 }
 
 button {
