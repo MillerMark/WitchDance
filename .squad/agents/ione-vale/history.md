@@ -45,3 +45,26 @@ Hired as the primary builder for the WitchDance crossfade music player PWA. Resp
 - **Render condition guards fill visibility** — The bookmark JSX uses `!isFillerMode && !fillerScheduled` so the element is fully unmounted during fill (no pointer events, no layout cost), while the opacity fade-out runs before those conditions change, ensuring no visible jump.
 - **Fill mode scrim pattern** — A `position: fixed`, `zIndex: 8`, `rgba(0,0,0,0.5)` scrim div signals modal state during fill. It sits between the background UI (z-index 0-5) and the fill overlay (z-index 10). The WitchDance logo container must be raised to z-index 11 so it stays crisp above the scrim. Render both scrim and overlay with the same `(fillerScheduled || isFillerMode)` condition.
 - **Z-index stack in PlaybackScreen:** particles/credits z-1, progress/controls z-2–5, fill scrim z-8, fill overlay z-10, WitchDance logo z-11.
+
+### 2025-05-26 — Fix: Infinite drag event loop in Playlist
+
+**Bug:** When dragging a track in the playlist, thousands of `[DRAG START]` events flooded the console. The same event fired repeatedly and indefinitely, continuing even after the mouse left the browser window entirely. This made drag-and-drop completely unusable.
+
+**Root Cause (`src/screens/Playlist.tsx` lines 116-144):**
+
+The `useEffect` hook that attaches pointer event listeners had a broken cleanup pattern:
+1. Inside the `forEach` loop over drag handles, it used `return ()` to attempt cleanup
+2. **`forEach` doesn't use return values** — those cleanup functions were discarded
+3. The effect's dependencies included `drag`, `handleDragStart`, `handleDragMove`, `handleDragEnd`
+4. When `setDrag()` was called during drag start, it triggered a re-render
+5. The useEffect ran again, attaching NEW listeners without removing old ones
+6. Each drag movement caused more state changes, more re-renders, exponential listener growth
+7. The callbacks themselves were recreated on every render (due to `drag` dependency), compounding the problem
+
+**Fix (`src/screens/Playlist.tsx`):**
+- Collected cleanup functions into a `cleanups: (() => void)[]` array during the `forEach` loop
+- Returned a proper cleanup function from the useEffect that calls all accumulated cleanups
+- This ensures all event listeners are removed before new ones are attached on each effect run
+
+**Files:** `src/screens/Playlist.tsx`
+**Commit:** `fix: stop infinite drag event loop in Playlist`

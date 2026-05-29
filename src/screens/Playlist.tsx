@@ -116,6 +116,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
   // Attach non-passive event listeners for drag handles
   useEffect(() => {
     const handles = dragHandleRefs.current
+    const cleanups: (() => void)[] = []
     
     handles.forEach((button, trackId) => {
       const onPointerDown = (e: PointerEvent) => handleDragStart(e, trackId)
@@ -134,13 +135,17 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
       button.addEventListener('pointerup', onPointerUp, { passive: false })
       button.addEventListener('pointercancel', onPointerCancel, { passive: false })
 
-      return () => {
+      cleanups.push(() => {
         button.removeEventListener('pointerdown', onPointerDown)
         button.removeEventListener('pointermove', onPointerMove)
         button.removeEventListener('pointerup', onPointerUp)
         button.removeEventListener('pointercancel', onPointerCancel)
-      }
+      })
     })
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup())
+    }
   }, [drag, handleDragStart, handleDragMove, handleDragEnd])
 
   // ── Fill preview playback ──
