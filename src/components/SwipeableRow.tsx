@@ -96,7 +96,6 @@ export function SwipeableRow({ onDelete, children, className = '' }: Props) {
 
   // Mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
     handleStart(e.clientX, e.clientY)
   }
 
