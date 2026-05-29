@@ -357,8 +357,16 @@ export function PlaybackScreen({
     // ── Unified RAF: engine polling + particle canvas ──────────────────
     const tick = () => {
       // ── Engine polling (from Playback.tsx) ──
-      // Use React state instead of engine.isInFillerMode() for consistency
-      if (isFillerMode) {
+      // Poll engine state directly instead of React state to avoid lag
+      const engineInFillerMode = engine.isInFillerMode()
+      
+      // Sync React state if out of sync
+      if (engineInFillerMode !== isFillerMode) {
+        console.log(`[RAF] Syncing isFillerMode: React=${isFillerMode} -> Engine=${engineInFillerMode}`)
+        setIsFillerMode(engineInFillerMode)
+      }
+      
+      if (engineInFillerMode) {
         // Filler mode: update splash names
         const fs = engine.getFillerState()
         if (fs) {
@@ -478,8 +486,8 @@ export function PlaybackScreen({
             // Determine fill pct for canvas
             let pct = 0
             let elapsedSecs = 0
-            // Use React state instead of engine.isInFillerMode() for consistency
-            if (isFillerMode) {
+            // Poll engine directly to avoid React state lag
+            if (engineInFillerMode) {
               const fs = engine.getFillerState()
               if (fs) {
                 pct = fs.duration > 0 ? (fs.elapsed / fs.duration) * 100 : 0

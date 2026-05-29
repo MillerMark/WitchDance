@@ -585,6 +585,7 @@ export class AudioEngine {
       this._fillerStartCtxTime = this.ctx.currentTime
       this._inFillerMode = true
       this._dlog(`enterFillerMode complete offset=${fillerOffset.toFixed(2)}`)
+      console.log(`[AE] _inFillerMode=${this._inFillerMode}, calling onFillerModeStarted callback`)
       this.callbacks.onFillerModeStarted?.(resumeNextIndex)
       this._scheduleFillerLoop()
     }, xfadeSecs * 1000)
