@@ -1904,7 +1904,11 @@ export function PlaybackScreen({
                 )}
               </div>
               <div style={{ fontSize: '1.5rem', lineHeight: '1' }}>
-                ▶&nbsp;&nbsp;Next Song
+                {fillerScheduled && !isFillerMode ? (
+                  <>▶&nbsp;&nbsp;Resume Playlist</>
+                ) : (
+                  <>▶&nbsp;&nbsp;Next Song</>
+                )}
               </div>
             </button>
             {/* Next up — shown at the bottom of filler overlay */}
