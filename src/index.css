@@ -206,10 +206,11 @@ button:disabled {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  border: 2px solid hsl(290, 40%, 60%);
+  border: 2px solid hsl(290, 20%, 30%);
   background-color: rgba(0, 0, 0, 0.5);
   position: relative;
   transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
 .auto-fill-checkbox:checked {

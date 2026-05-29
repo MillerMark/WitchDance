@@ -1462,6 +1462,9 @@ export function PlaybackScreen({
                 color: 'hsl(290, 100%, 93%)',
                 letterSpacing: '0.04em',
                 transition: 'color 0.2s ease',
+                background: 'rgba(0, 0, 0, 0.25)',
+                padding: '4px 8px',
+                borderRadius: '6px',
               }}>
                 Auto-fill between songs
               </span>
