@@ -4,6 +4,8 @@ const KEY_FILLER_TRACK_ID = 'wd_filler_track_id'
 const KEY_FILLER_OFFSET = 'wd_filler_offset'
 const KEY_AUTO_FILL = 'wd_auto_fill'
 const KEY_FILL_VOLUME = 'wd_fill_volume'
+const KEY_FILLER_MODE_ACTIVE = 'wd_filler_mode_active'
+const KEY_FILLER_RESUME_INDEX = 'wd_filler_resume_index'
 
 export function savePlaylist(trackIds: string[]): void {
   try {
@@ -88,4 +90,23 @@ export function saveDebugMode(on: boolean): void {
 
 export function loadDebugMode(): boolean {
   try { return sessionStorage.getItem('debug-mode') === '1' } catch { return false }
+}
+
+export function saveFillerModeActive(active: boolean): void {
+  try { localStorage.setItem(KEY_FILLER_MODE_ACTIVE, active ? '1' : '0') } catch { /* silent */ }
+}
+
+export function loadFillerModeActive(): boolean {
+  try { return localStorage.getItem(KEY_FILLER_MODE_ACTIVE) === '1' } catch { return false }
+}
+
+export function saveFillerResumeIndex(index: number): void {
+  try { localStorage.setItem(KEY_FILLER_RESUME_INDEX, index.toString()) } catch { /* silent */ }
+}
+
+export function loadFillerResumeIndex(): number {
+  try {
+    const val = localStorage.getItem(KEY_FILLER_RESUME_INDEX)
+    return val ? parseInt(val, 10) : 0
+  } catch { return 0 }
 }

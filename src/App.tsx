@@ -6,7 +6,7 @@ import type { AudioEngine } from './audio/AudioEngine'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
 import { saveLibrary, loadLibrary } from './storage/libraryDb'
-import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId, saveDebugMode, loadDebugMode, loadFillVolume, saveFillVolume } from './storage/sessionState'
+import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId, saveDebugMode, loadDebugMode, loadFillVolume, saveFillVolume, saveFillerModeActive } from './storage/sessionState'
 import { loadPlaybackPos, clearPlaybackPos } from './storage/playbackPos'
 import { iosAudioUnlock } from './audio/iosUnlock'
 import './index.css'
@@ -144,6 +144,8 @@ export function App() {
   }
 
   function handleStop() {
+    // Clear filler mode state when stopping performance
+    saveFillerModeActive(false)
     saveScreen('playlist')
     setScreen('playlist')
   }

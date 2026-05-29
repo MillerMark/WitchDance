@@ -4,7 +4,7 @@ import type { Track } from '../types/track'
 import { iosAudioUnlock } from '../audio/iosUnlock'
 import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
-import { saveFillerOffset, loadFillerOffset, saveAutoFillEnabled, loadAutoFillEnabled } from '../storage/sessionState'
+import { saveFillerOffset, loadFillerOffset, saveAutoFillEnabled, loadAutoFillEnabled, saveFillerModeActive, loadFillerModeActive, saveFillerResumeIndex, loadFillerResumeIndex } from '../storage/sessionState'
 
 declare const __COMMIT_HASH__: string
 
@@ -338,10 +338,23 @@ export function PlaybackScreen({
         setFillerElapsed(0)
         setIsFillerMode(true)
         setFillerScheduled(false)
+        // Save filler mode state for persistence across page refresh
+        saveFillerModeActive(true)
+        saveFillerResumeIndex(resumeNextIndex)
       },
     }
 
-    if (!resumePos) {
+    // Check if we should restore filler mode from previous session
+    const wasInFillerMode = loadFillerModeActive()
+    const savedFillerOffset = loadFillerOffset()
+    const savedResumeIndex = loadFillerResumeIndex()
+
+    if (wasInFillerMode && fillerTrack) {
+      // Resume in filler mode
+      console.log('[PlaybackScreen] Restoring filler mode:', { savedFillerOffset, savedResumeIndex })
+      void engine.enterFillerMode(fillerTrack, savedFillerOffset, savedResumeIndex)
+    } else if (!resumePos) {
+      // Start fresh from beginning
       engine.start(tracks, 0, audioCtx).catch(console.error)
     }
     void requestWakeLock()
@@ -835,6 +848,8 @@ export function PlaybackScreen({
       saveFillerOffset(fillerOffset)
       setIsFillerMode(false)
       setFillerElapsed(0)
+      // Clear filler mode persistence state
+      saveFillerModeActive(false)
     }
     
     // Clear scheduled state
