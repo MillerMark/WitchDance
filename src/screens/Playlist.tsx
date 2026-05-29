@@ -11,6 +11,8 @@ interface Props {
   library: Track[]
   fillerTrackId: string | null
   onFillerTrackChange: (id: string | null) => void
+  fillVolume: number
+  onFillVolumeChange: (volume: number) => void
 }
 
 interface DragState {
@@ -34,7 +36,7 @@ function formatTitle(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTrackId, onFillerTrackChange }: Props) {
+export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTrackId, onFillerTrackChange, fillVolume, onFillVolumeChange }: Props) {
   const [drag, setDrag] = useState<DragState | null>(null)
   const [showFillerPicker, setShowFillerPicker] = useState(false)
 
@@ -195,6 +197,21 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
                   {track.id === fillerTrackId && <span className="filler-picker-check">✓</span>}
                 </button>
               ))}
+            </div>
+            {/* Fill volume slider */}
+            <div className="filler-volume-row">
+              <span className="filler-volume-label">Fill volume</span>
+              <div className="filler-volume-control">
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  value={Math.round(fillVolume * 100)}
+                  className="filler-volume-slider"
+                  onChange={(e) => onFillVolumeChange(parseInt(e.target.value) / 100)}
+                />
+                <span className="filler-volume-pct">{Math.round(fillVolume * 100)}%</span>
+              </div>
             </div>
             {fillerTrackId && (
               <button

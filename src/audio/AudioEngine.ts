@@ -15,6 +15,7 @@ export interface AudioEngineCallbacks {
   onTrackChange?: (trackIndex: number) => void
   onLoopEnd?: () => void
   onDebugLog?: (entry: string) => void
+  onFillerModeStarted?: (resumeNextIndex: number) => void
 }
 
 interface AudioNode2 {
@@ -52,6 +53,12 @@ export class AudioEngine {
   
   // ── Training mode flag ───────────────────────────────────────
   private _trainingMode = false
+
+  // ── Auto-fill mode ──────────────────────────────────────────
+  private _autoFillEnabled = false
+  private _autoFillFillerTrack: Track | null = null
+  private _autoFillFillerOffset = 0
+  private _fillVolume = 1.0
 
   // ── Filler mode ──────────────────────────────────────────────
   private _inFillerMode = false
@@ -305,6 +312,19 @@ export class AudioEngine {
     this._trainingMode = enabled
   }
 
+  setAutoFillEnabled(enabled: boolean): void {
+    this._autoFillEnabled = enabled
+  }
+
+  setFillerInfo(track: Track | null, offset: number): void {
+    this._autoFillFillerTrack = track
+    this._autoFillFillerOffset = offset
+  }
+
+  setFillVolume(volume: number): void {
+    this._fillVolume = Math.max(0.1, Math.min(1.0, volume))
+  }
+
   getFadeOutFinalIndex(): number {
     return this._fadeOutFinalIndex
   }
@@ -540,7 +560,7 @@ export class AudioEngine {
 
     const fillerNode = this._makeNode(buffer, 0)
     fillerNode.gain.gain.setValueAtTime(0, now)
-    fillerNode.gain.gain.linearRampToValueAtTime(1, now + xfadeSecs)
+    fillerNode.gain.gain.linearRampToValueAtTime(this._fillVolume, now + xfadeSecs)
     fillerNode.source.start(0, fillerOffset)
     this._incomingFillerNode = fillerNode
 
@@ -565,6 +585,7 @@ export class AudioEngine {
       this._fillerStartCtxTime = now
       this._inFillerMode = true
       this._dlog(`enterFillerMode complete offset=${fillerOffset.toFixed(2)}`)
+      this.callbacks.onFillerModeStarted?.(resumeNextIndex)
       this._scheduleFillerLoop()
     }, xfadeSecs * 1000)
   }
@@ -672,7 +693,7 @@ export class AudioEngine {
 
     const newFillerNode = this._makeNode(buffer, 0)
     newFillerNode.gain.gain.setValueAtTime(0, now)
-    newFillerNode.gain.gain.linearRampToValueAtTime(1, now + xfadeSecs)
+    newFillerNode.gain.gain.linearRampToValueAtTime(this._fillVolume, now + xfadeSecs)
     newFillerNode.source.start(0)
     this._incomingFillerNode = newFillerNode
 
@@ -795,6 +816,18 @@ export class AudioEngine {
 
     const ctx = this.ctx
     const nextIdx = this._next(this._currentIndex)
+
+    // Auto-fill: if enabled and filler track available, enter filler mode instead of normal crossfade
+    if (
+      this._autoFillEnabled &&
+      this._autoFillFillerTrack &&
+      !this._inFillerMode &&
+      !this._incomingFillerNode
+    ) {
+      await this.enterFillerMode(this._autoFillFillerTrack, this._autoFillFillerOffset, nextIdx)
+      return
+    }
+
     const nextBuf = await this._load(this.tracks[nextIdx])
     const xfadeSecs = this._xfadeSecs(
       Math.min(this.currentDuration, nextBuf.duration),

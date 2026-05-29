@@ -4,7 +4,7 @@ import type { Track } from '../types/track'
 import { iosAudioUnlock } from '../audio/iosUnlock'
 import { updateMediaSession, clearMediaSession, requestWakeLock, releaseWakeLock } from '../audio/mediaSession'
 import { savePlaybackPos, clearPlaybackPos } from '../storage/playbackPos'
-import { saveFillerOffset, loadFillerOffset } from '../storage/sessionState'
+import { saveFillerOffset, loadFillerOffset, saveAutoFillEnabled, loadAutoFillEnabled } from '../storage/sessionState'
 
 declare const __COMMIT_HASH__: string
 
@@ -15,6 +15,7 @@ interface Props {
   resumePos?: { trackIndex: number; elapsed: number } | null
   onResumeConsumed?: () => void
   fillerTrack: Track | null
+  fillVolume: number
   trainingMode: boolean
   onToggleTraining: () => void
   onEngineReady?: (engine: AudioEngine) => void
@@ -69,6 +70,7 @@ export function PlaybackScreen({
   resumePos,
   onResumeConsumed,
   fillerTrack,
+  fillVolume,
   trainingMode,
   onToggleTraining,
   onEngineReady,
@@ -105,6 +107,7 @@ export function PlaybackScreen({
   const [fillerElapsed, setFillerElapsed] = useState(0)
   const [fillerScheduled, setFillerScheduled] = useState(false) // New: scheduled fill state
   const [fillerCountdown, setFillerCountdown] = useState(0) // New: countdown to fill start
+  const [autoFillEnabled, setAutoFillEnabled] = useState(loadAutoFillEnabled)
   const fillerStartTimeRef = useRef(0)
   const fillerOffsetRef = useRef(loadFillerOffset())
   const lastFillerSaveRef = useRef(0)
@@ -112,6 +115,14 @@ export function PlaybackScreen({
   const fillerTrackRef = useRef(fillerTrack)
   const fillerScheduleTimeRef = useRef(0) // New: when fill was scheduled
   useEffect(() => { fillerTrackRef.current = fillerTrack }, [fillerTrack])
+
+  // Sync auto-fill settings to engine whenever they change
+  useEffect(() => {
+    const engine = engineRef.current
+    engine.setAutoFillEnabled(autoFillEnabled)
+    engine.setFillerInfo(fillerTrack, fillerOffsetRef.current)
+    engine.setFillVolume(fillVolume)
+  }, [autoFillEnabled, fillerTrack, fillVolume]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Title crossfade animation ───────────────────────────────────────────
   const [, setDisplayTitle] = useState(
@@ -321,6 +332,13 @@ export function PlaybackScreen({
         setBookmarkXfadeOpacity(0)
       },
       onLoopEnd: () => onStopRef.current(),
+      onFillerModeStarted: (resumeNextIndex) => {
+        fillerResumeIndexRef.current = resumeNextIndex
+        fillerStartTimeRef.current = Date.now()
+        setFillerElapsed(0)
+        setIsFillerMode(true)
+        setFillerScheduled(false)
+      },
     }
 
     if (!resumePos) {
@@ -367,6 +385,7 @@ export function PlaybackScreen({
         if (now2 - lastFillerSaveRef.current > 2000) {
           lastFillerSaveRef.current = now2
           saveFillerOffset(off)
+          engine.setFillerInfo(fillerTrackRef.current, off)
         }
       } else {
         const state = engine.getPlaybackState()
@@ -1243,9 +1262,11 @@ export function PlaybackScreen({
             justifyContent: 'space-between',
             paddingLeft: '12px',
             paddingRight: '12px',
-            marginTop: '2px',
+            marginTop: trainingMode ? '2px' : '0px',
+            maxHeight: trainingMode ? '60px' : '0px',
+            overflow: 'hidden',
             opacity: trainingMode ? 1 : 0,
-            transition: 'opacity 0.3s ease',
+            transition: 'opacity 0.3s ease, max-height 0.3s ease, margin-top 0.3s ease',
             pointerEvents: trainingMode ? 'auto' : 'none',
           }}
           onTouchStart={(e) => e.stopPropagation()}
@@ -1379,6 +1400,67 @@ export function PlaybackScreen({
               </>)
             })()}
           </div>
+        </div>
+
+        {/* Auto-fill toggle — below training controls */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '480px',
+            paddingLeft: '14px',
+            paddingRight: '14px',
+            marginTop: '4px',
+          }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {fillerTrack ? (
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+            }}>
+              <input
+                type="checkbox"
+                checked={autoFillEnabled}
+                onChange={(e) => {
+                  const next = e.target.checked
+                  setAutoFillEnabled(next)
+                  saveAutoFillEnabled(next)
+                }}
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  accentColor: '#f59e0b',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                color: autoFillEnabled ? 'rgba(255,200,80,0.9)' : 'rgba(255,255,255,0.45)',
+                letterSpacing: '0.04em',
+                transition: 'color 0.2s ease',
+              }}>
+                Auto-fill between songs
+              </span>
+            </label>
+          ) : (
+            <p style={{
+              fontSize: '0.7rem',
+              fontFamily: 'monospace',
+              color: 'rgba(255,255,255,0.35)',
+              margin: 0,
+              letterSpacing: '0.03em',
+              lineHeight: '1.4',
+            }}>
+              Enable auto-fill by specifying music to play between songs.
+            </p>
+          )}
         </div>
       </div>
 
@@ -1779,6 +1861,33 @@ export function PlaybackScreen({
                 ▶&nbsp;&nbsp;Resume Performance
               </div>
             </button>
+            {/* Next up — shown at the bottom of filler overlay */}
+            {nextTrackName && (
+              <div style={{
+                marginTop: '16px',
+                textAlign: 'center',
+              }}>
+                <p style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.7rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  margin: '0 0 4px',
+                }}>
+                  Next up
+                </p>
+                <p style={{
+                  color: 'hsl(290, 100%, 93%)',
+                  fontSize: '1.15rem',
+                  fontWeight: 600,
+                  margin: 0,
+                  textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+                }}>
+                  {nextTrackName}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

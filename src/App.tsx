@@ -6,7 +6,7 @@ import type { AudioEngine } from './audio/AudioEngine'
 import type { Track } from './types/track'
 import { trackFromFile } from './types/track'
 import { saveLibrary, loadLibrary } from './storage/libraryDb'
-import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId, saveDebugMode, loadDebugMode } from './storage/sessionState'
+import { savePlaylist, loadPlaylist, saveScreen, loadScreen, loadFillerTrackId, saveFillerTrackId, saveDebugMode, loadDebugMode, loadFillVolume, saveFillVolume } from './storage/sessionState'
 import { loadPlaybackPos, clearPlaybackPos } from './storage/playbackPos'
 import { iosAudioUnlock } from './audio/iosUnlock'
 import './index.css'
@@ -20,6 +20,7 @@ export function App() {
   const [restored, setRestored] = useState(false)
   const [resumePos, setResumePos] = useState<{ trackIndex: number; elapsed: number } | null>(null)
   const [fillerTrackId, setFillerTrackId] = useState<string | null>(loadFillerTrackId)
+  const [fillVolume, setFillVolume] = useState(loadFillVolume)
   const [trainingMode, setTrainingMode] = useState(() => loadDebugMode())
   const audioCtxRef = useRef<AudioContext | null>(null)
   const playbackEngineRef = useRef<AudioEngine | null>(null)
@@ -111,6 +112,11 @@ export function App() {
     saveFillerTrackId(id)
   }
 
+  function handleFillVolumeChange(volume: number) {
+    setFillVolume(volume)
+    saveFillVolume(volume)
+  }
+
   function handleUpdateTrackBookmark(trackId: string, bookmark: number | undefined) {
     // Update library
     const updatedLibrary = library.map((t) =>
@@ -179,6 +185,8 @@ export function App() {
           library={library}
           fillerTrackId={fillerTrackId}
           onFillerTrackChange={handleFillerTrackChange}
+          fillVolume={fillVolume}
+          onFillVolumeChange={handleFillVolumeChange}
         />
       )}
       {screen === 'playback' && (
@@ -189,6 +197,7 @@ export function App() {
           resumePos={resumePos}
           onResumeConsumed={() => setResumePos(null)}
           fillerTrack={library.find((t) => t.id === fillerTrackId) ?? null}
+          fillVolume={fillVolume}
           trainingMode={trainingMode}
           onToggleTraining={() => {
             const next = !trainingMode
