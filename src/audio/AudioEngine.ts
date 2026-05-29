@@ -824,7 +824,22 @@ export class AudioEngine {
       !this._inFillerMode &&
       !this._incomingFillerNode
     ) {
-      await this.enterFillerMode(this._autoFillFillerTrack, this._autoFillFillerOffset, nextIdx)
+      // Check if we're too close to the end of the fill song - if so, reset to beginning
+      const gen = this._playGeneration
+      const fillerBuffer = await this._load(this._autoFillFillerTrack)
+      if (gen !== this._playGeneration) return // Stale
+      
+      const fillerDuration = fillerBuffer.duration
+      let startOffset = this._autoFillFillerOffset
+      
+      // If within 15 seconds of end, reset to beginning for a fresh journey
+      if (startOffset + 15 > fillerDuration) {
+        this._dlog(`Auto-fill offset ${startOffset.toFixed(2)}s too close to end (duration=${fillerDuration.toFixed(2)}s), resetting to 0`)
+        startOffset = 0
+        this._autoFillFillerOffset = 0
+      }
+      
+      await this.enterFillerMode(this._autoFillFillerTrack, startOffset, nextIdx)
       return
     }
 

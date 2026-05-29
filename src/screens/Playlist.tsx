@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Track } from '../types/track'
 import { saveFillerTrackId } from '../storage/sessionState'
 import { SwipeableRow } from '../components/SwipeableRow'
@@ -40,6 +40,12 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
   const [drag, setDrag] = useState<DragState | null>(null)
   const [showFillerPicker, setShowFillerPicker] = useState(false)
 
+  // ── Fill preview audio ──
+  const previewCtxRef = useRef<AudioContext | null>(null)
+  const previewSourceRef = useRef<AudioBufferSourceNode | null>(null)
+  const previewGainRef = useRef<GainNode | null>(null)
+  const previewTrackIdRef = useRef<string | null>(null)
+
   const visualTracks = drag
     ? moveItem(tracks, drag.fromIndex, drag.toIndex)
     : tracks
@@ -78,6 +84,90 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
     }
     setDrag(null)
   }, [drag, tracks, onReorder])
+
+  // ── Fill preview playback ──
+  const stopPreview = useCallback(() => {
+    if (previewSourceRef.current) {
+      try {
+        previewSourceRef.current.stop()
+      } catch { /* already stopped */ }
+      previewSourceRef.current = null
+    }
+    previewTrackIdRef.current = null
+  }, [])
+
+  const playPreview = useCallback(async (track: Track) => {
+    stopPreview()
+    previewTrackIdRef.current = track.id
+
+    try {
+      // Initialize AudioContext if needed
+      if (!previewCtxRef.current) {
+        previewCtxRef.current = new AudioContext()
+        previewGainRef.current = previewCtxRef.current.createGain()
+        previewGainRef.current.connect(previewCtxRef.current.destination)
+      }
+
+      const ctx = previewCtxRef.current
+      const gainNode = previewGainRef.current!
+      
+      // Resume context if suspended
+      if (ctx.state === 'suspended') {
+        await ctx.resume()
+      }
+
+      // Fetch and decode audio
+      const response = await fetch(`/music/${track.id}`)
+      const arrayBuffer = await response.arrayBuffer()
+      const buffer = await ctx.decodeAudioData(arrayBuffer)
+
+      // If track changed while loading, abort
+      if (previewTrackIdRef.current !== track.id) return
+
+      // Create and start source
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.loop = true
+      source.connect(gainNode)
+      gainNode.gain.value = fillVolume
+      source.start(0)
+      
+      previewSourceRef.current = source
+    } catch (err) {
+      console.error('Failed to play preview:', err)
+    }
+  }, [stopPreview, fillVolume])
+
+  const updatePreviewVolume = useCallback((volume: number) => {
+    if (previewGainRef.current) {
+      previewGainRef.current.gain.value = volume
+    }
+  }, [])
+
+  // Clean up on unmount or when dialog closes
+  useEffect(() => {
+    if (!showFillerPicker) {
+      stopPreview()
+    } else if (fillerTrackId) {
+      // Auto-play current filler when dialog opens
+      const track = library.find((t) => t.id === fillerTrackId)
+      if (track) {
+        void playPreview(track)
+      }
+    }
+    return () => stopPreview()
+  }, [showFillerPicker, stopPreview]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFillerTrackSelect = useCallback((track: Track) => {
+    onFillerTrackChange(track.id)
+    saveFillerTrackId(track.id)
+    void playPreview(track)
+  }, [onFillerTrackChange, playPreview])
+
+  const handleVolumeChange = useCallback((volume: number) => {
+    onFillVolumeChange(volume)
+    updatePreviewVolume(volume)
+  }, [onFillVolumeChange, updatePreviewVolume])
 
   function handleRemove(trackId: string) {
     onReorder(tracks.filter((t) => t.id !== trackId))
@@ -187,11 +277,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
                 <button
                   key={track.id}
                   className={`filler-picker-row${track.id === fillerTrackId ? ' active' : ''}`}
-                  onClick={() => {
-                    onFillerTrackChange(track.id)
-                    saveFillerTrackId(track.id)
-                    setShowFillerPicker(false)
-                  }}
+                  onClick={() => handleFillerTrackSelect(track)}
                 >
                   <span className="filler-picker-name">{formatTitle(track.name)}</span>
                   {track.id === fillerTrackId && <span className="filler-picker-check">✓</span>}
@@ -208,7 +294,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
                   max={100}
                   value={Math.round(fillVolume * 100)}
                   className="filler-volume-slider"
-                  onChange={(e) => onFillVolumeChange(parseInt(e.target.value) / 100)}
+                  onChange={(e) => handleVolumeChange(parseInt(e.target.value) / 100)}
                 />
                 <span className="filler-volume-pct">{Math.round(fillVolume * 100)}%</span>
               </div>
@@ -226,7 +312,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
               </button>
             )}
             <button className="btn-confirm-cancel" onClick={() => setShowFillerPicker(false)}>
-              Cancel
+              Done
             </button>
           </div>
         </div>

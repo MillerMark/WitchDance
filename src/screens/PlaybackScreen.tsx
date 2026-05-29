@@ -1437,6 +1437,8 @@ export function PlaybackScreen({
                   accentColor: '#f59e0b',
                   cursor: 'pointer',
                   flexShrink: 0,
+                  backgroundColor: autoFillEnabled ? 'transparent' : 'rgba(0, 0, 0, 0.5)',
+                  borderRadius: '2px',
                 }}
               />
               <span style={{
@@ -1858,7 +1860,7 @@ export function PlaybackScreen({
                 )}
               </div>
               <div style={{ fontSize: '1.5rem', lineHeight: '1' }}>
-                ▶&nbsp;&nbsp;Resume Performance
+                ▶&nbsp;&nbsp;Next Song
               </div>
             </button>
             {/* Next up — shown at the bottom of filler overlay */}
@@ -1869,7 +1871,7 @@ export function PlaybackScreen({
               }}>
                 <p style={{
                   color: 'rgba(255,255,255,0.5)',
-                  fontSize: '0.7rem',
+                  fontSize: '1.05rem',
                   fontFamily: 'monospace',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
@@ -1879,7 +1881,7 @@ export function PlaybackScreen({
                 </p>
                 <p style={{
                   color: 'hsl(290, 100%, 93%)',
-                  fontSize: '1.15rem',
+                  fontSize: '1.75rem',
                   fontWeight: 600,
                   margin: 0,
                   textShadow: '0 1px 6px rgba(0,0,0,0.9)',
@@ -1978,7 +1980,7 @@ export function PlaybackScreen({
             onClick={handleCancelFadeOut}
             disabled={isPanelOpen}
           >
-            ↺  Resume Performance
+            ↺  Next Song
           </button>
         </div>
       )}
@@ -2011,19 +2013,22 @@ export function PlaybackScreen({
           >
             Change Song...
           </button>
-          <button
-            ref={fillerBtnRef}
-            className="btn-enter-filler"
-            onClick={handleEnterFiller}
-            disabled={isPanelOpen || !fillerTrack}
-            style={{ opacity: 0, pointerEvents: 'none', marginTop: '112px' }}
-          >
-            <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
-              <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
-              <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
-            </svg>
-            Pause & Fill
-          </button>
+          {/* Only show manual fill button when auto-fill is disabled */}
+          {!autoFillEnabled && (
+            <button
+              ref={fillerBtnRef}
+              className="btn-enter-filler"
+              onClick={handleEnterFiller}
+              disabled={isPanelOpen || !fillerTrack}
+              style={{ opacity: 0, pointerEvents: 'none', marginTop: '112px' }}
+            >
+              <svg width="20" height="18" viewBox="0 0 20 18" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 12, position: 'relative', top: -1 }}>
+                <rect x="1" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
+                <rect x="13" y="1" width="6" height="16" rx="2" fill="rgba(251,191,36,0.5)" />
+              </svg>
+              Pause & Fill
+            </button>
+          )}
           <button
             className="btn-stop-immediate btn-destructive"
             onClick={handleStopButton}
