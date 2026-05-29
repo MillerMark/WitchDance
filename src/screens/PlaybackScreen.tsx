@@ -1297,7 +1297,7 @@ export function PlaybackScreen({
           onClick={(e) => e.stopPropagation()}
         >
           <p style={{
-            color: 'rgba(255,200,80,1)',
+            color: 'hsl(290, 100%, 93%)',
             fontSize: '0.85rem',
             fontFamily: 'monospace',
             margin: 0,
@@ -1322,7 +1322,7 @@ export function PlaybackScreen({
                 padding: 0,
                 WebkitTapHighlightColor: 'transparent',
               }
-              const Y = 'rgba(255,200,80,1)'
+              const Y = 'hsl(290, 100%, 93%)'
               return (<>
                 {/* Set Bookmark - only when paused */}
                 {trainingPaused && (
