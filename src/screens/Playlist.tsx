@@ -118,7 +118,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
       onReorder(moveItem(tracks, currentDrag.fromIndex, currentDrag.toIndex))
     }
     setDrag(null)
-  }, [drag, tracks, onReorder])
+  }, [tracks, onReorder])
 
   // Keep refs current on every render so stable event listeners always call the latest handlers
   dragRef.current = drag
