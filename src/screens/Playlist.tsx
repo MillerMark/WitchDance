@@ -57,7 +57,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
       const rowEl = e.currentTarget.closest('.playlist-row') as HTMLElement | null
       const rowHeight = rowEl?.getBoundingClientRect().height ?? 72
       const fromIndex = tracks.findIndex((t) => t.id === trackId)
-      setDrag({ trackId, fromIndex, toIndex: fromIndex, startY: e.clientY, rowHeight })
+      setDrag({ trackId, fromIndex, toIndex: fromIndex, startY: e.pageY, rowHeight })
     },
     [tracks],
   )
@@ -65,7 +65,7 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
   const handleDragMove = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
       if (!drag) return
-      const deltaY = e.clientY - drag.startY
+      const deltaY = e.pageY - drag.startY
       const toIndex = Math.max(
         0,
         Math.min(tracks.length - 1, drag.fromIndex + Math.round(deltaY / drag.rowHeight)),
