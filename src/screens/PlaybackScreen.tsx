@@ -1454,20 +1454,12 @@ export function PlaybackScreen({
                   setAutoFillEnabled(next)
                   saveAutoFillEnabled(next)
                 }}
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  accentColor: '#f59e0b',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  backgroundColor: autoFillEnabled ? 'transparent' : 'rgba(0, 0, 0, 0.5)',
-                  borderRadius: '2px',
-                }}
+                className="auto-fill-checkbox"
               />
               <span style={{
                 fontSize: '0.75rem',
                 fontFamily: 'monospace',
-                color: autoFillEnabled ? 'rgba(255,200,80,0.9)' : 'rgba(255,255,255,0.45)',
+                color: 'hsl(290, 100%, 93%)',
                 letterSpacing: '0.04em',
                 transition: 'color 0.2s ease',
               }}>
