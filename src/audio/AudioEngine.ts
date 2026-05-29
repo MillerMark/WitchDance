@@ -582,7 +582,7 @@ export class AudioEngine {
       this.currentNode = fillerNode
       this._incomingFillerNode = null
       this.currentDuration = buffer.duration
-      this._fillerStartCtxTime = now
+      this._fillerStartCtxTime = this.ctx.currentTime
       this._inFillerMode = true
       this._dlog(`enterFillerMode complete offset=${fillerOffset.toFixed(2)}`)
       this.callbacks.onFillerModeStarted?.(resumeNextIndex)
