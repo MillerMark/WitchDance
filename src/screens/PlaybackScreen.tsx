@@ -638,8 +638,8 @@ export function PlaybackScreen({
               ctx.shadowColor = 'rgba(0,0,0,0.85)'
               ctx.shadowBlur = 5
               ctx.fillStyle = 'rgba(255,255,255,0.95)'
-              // Position 119px above progress bar (moved up 45px from 74px)
-              ctx.fillText(timeStr, labelX, barY - 119)
+              // Position 94px above progress bar (moved down 25px from 119px)
+              ctx.fillText(timeStr, labelX, barY - 94)
               ctx.restore()
             }
           }
