@@ -46,7 +46,7 @@ body {
 
 /* Playlist screen needs scrolling */
 .screen.playlist {
-  overflow-y: auto;
+  overflow-y: auto !important; /* Override body's overflow: hidden */
   -webkit-overflow-scrolling: touch;
   padding-bottom: 0; /* Footer will handle safe area */
   min-height: 0; /* Allow flex item to shrink below content size for scrolling */
