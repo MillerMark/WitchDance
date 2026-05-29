@@ -1,7 +1,22 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import type { Track } from '../types/track'
 import { saveFillerTrackId } from '../storage/sessionState'
-import { SwipeableRow } from '../components/SwipeableRow'
+import { SortableTrackRow } from '../components/SortableTrackRow'
 
 interface Props {
   tracks: Track[]
@@ -15,21 +30,6 @@ interface Props {
   onFillVolumeChange: (volume: number) => void
 }
 
-interface DragState {
-  trackId: string
-  fromIndex: number
-  toIndex: number
-  startY: number
-  rowHeight: number
-}
-
-function moveItem<T>(arr: T[], from: number, to: number): T[] {
-  const result = [...arr]
-  const [item] = result.splice(from, 1)
-  result.splice(to, 0, item)
-  return result
-}
-
 function formatTitle(name: string): string {
   return name
     .replace(/[_-]/g, ' ')
@@ -37,14 +37,19 @@ function formatTitle(name: string): string {
 }
 
 export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTrackId, onFillerTrackChange, fillVolume, onFillVolumeChange }: Props) {
-  const [drag, setDrag] = useState<DragState | null>(null)
   const [showFillerPicker, setShowFillerPicker] = useState(false)
-  const dragHandleRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
-  // Stable refs so drag-move/end handlers never need listener re-attachment
-  const dragRef = useRef<DragState | null>(null)
-  const handleDragMoveRef = useRef<(e: PointerEvent) => void>(() => {})
-  const handleDragEndRef = useRef<(e: PointerEvent) => void>(() => {})
+  // Configure sensors for touch and mouse support
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts (prevents conflicts with swipe-to-delete)
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   // ── Fill preview audio ──
   const previewCtxRef = useRef<AudioContext | null>(null)
@@ -52,118 +57,16 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
   const previewGainRef = useRef<GainNode | null>(null)
   const previewTrackIdRef = useRef<string | null>(null)
 
-  const visualTracks = drag
-    ? moveItem(tracks, drag.fromIndex, drag.toIndex)
-    : tracks
+  // Handle drag end event
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
 
-  const handleDragStart = useCallback(
-    (e: PointerEvent, trackId: string) => {
-      e.preventDefault()
-      const target = e.currentTarget as HTMLButtonElement
-      target.setPointerCapture(e.pointerId)
-      const rowEl = target.closest('.playlist-row') as HTMLElement | null
-      const rowHeight = rowEl?.getBoundingClientRect().height ?? 72
-      const fromIndex = tracks.findIndex((t) => t.id === trackId)
-      console.log('[DRAG START]', {
-        trackId,
-        fromIndex,
-        pageY: e.pageY,
-        clientY: e.clientY,
-        scrollY: window.scrollY,
-        rowHeight
-      })
-      setDrag({ trackId, fromIndex, toIndex: fromIndex, startY: e.pageY, rowHeight })
-    },
-    [tracks],
-  )
-
-  const handleDragMove = useCallback(
-    (e: PointerEvent) => {
-      const currentDrag = dragRef.current
-      if (!currentDrag) return
-      e.preventDefault()
-      const deltaY = e.pageY - currentDrag.startY
-      const toIndex = Math.max(
-        0,
-        Math.min(tracks.length - 1, currentDrag.fromIndex + Math.round(deltaY / currentDrag.rowHeight)),
-      )
-      console.log('[DRAG MOVE]', {
-        pageY: e.pageY,
-        clientY: e.clientY,
-        scrollY: window.scrollY,
-        startY: currentDrag.startY,
-        deltaY,
-        deltaRows: deltaY / currentDrag.rowHeight,
-        fromIndex: currentDrag.fromIndex,
-        toIndex,
-        currentToIndex: currentDrag.toIndex
-      })
-      if (toIndex !== currentDrag.toIndex) {
-        setDrag((prev) => (prev ? { ...prev, toIndex } : null))
-      }
-    },
-    [tracks.length],
-  )
-
-  const handleDragEnd = useCallback((e: PointerEvent) => {
-    e.preventDefault()
-    const currentDrag = dragRef.current
-    if (!currentDrag) return
-    console.log('[DRAG END]', {
-      fromIndex: currentDrag.fromIndex,
-      toIndex: currentDrag.toIndex,
-      willReorder: currentDrag.toIndex !== currentDrag.fromIndex
-    })
-    if (currentDrag.toIndex !== currentDrag.fromIndex) {
-      onReorder(moveItem(tracks, currentDrag.fromIndex, currentDrag.toIndex))
+    if (over && active.id !== over.id) {
+      const oldIndex = tracks.findIndex((t) => t.id === active.id)
+      const newIndex = tracks.findIndex((t) => t.id === over.id)
+      onReorder(arrayMove(tracks, oldIndex, newIndex))
     }
-    setDrag(null)
   }, [tracks, onReorder])
-
-  // Keep refs current on every render so stable event listeners always call the latest handlers
-  dragRef.current = drag
-  handleDragMoveRef.current = handleDragMove
-  handleDragEndRef.current = handleDragEnd
-
-  // Attach non-passive event listeners for drag handles.
-  // IMPORTANT: deps must NOT include drag/handleDragMove/handleDragEnd — those change on every
-  // drag-state update, which would remove/re-add listeners mid-drag. On iOS Safari, removing a
-  // pointermove listener from an element with setPointerCapture releases the capture, causing all
-  // subsequent events to miss the button entirely (looks like "stuck at 1 position"). Refs are
-  // updated synchronously each render, so the stable closures always call the latest handlers.
-  useEffect(() => {
-    const handles = dragHandleRefs.current
-    const cleanups: (() => void)[] = []
-    
-    handles.forEach((button, trackId) => {
-      const onPointerDown = (e: PointerEvent) => handleDragStart(e, trackId)
-      const onPointerMove = (e: PointerEvent) => {
-        if (dragRef.current?.trackId === trackId) handleDragMoveRef.current(e)
-      }
-      const onPointerUp = (e: PointerEvent) => {
-        if (dragRef.current?.trackId === trackId) handleDragEndRef.current(e)
-      }
-      const onPointerCancel = (e: PointerEvent) => {
-        if (dragRef.current?.trackId === trackId) handleDragEndRef.current(e)
-      }
-
-      button.addEventListener('pointerdown', onPointerDown, { passive: false })
-      button.addEventListener('pointermove', onPointerMove, { passive: false })
-      button.addEventListener('pointerup', onPointerUp, { passive: false })
-      button.addEventListener('pointercancel', onPointerCancel, { passive: false })
-
-      cleanups.push(() => {
-        button.removeEventListener('pointerdown', onPointerDown)
-        button.removeEventListener('pointermove', onPointerMove)
-        button.removeEventListener('pointerup', onPointerUp)
-        button.removeEventListener('pointercancel', onPointerCancel)
-      })
-    })
-
-    return () => {
-      cleanups.forEach((cleanup) => cleanup())
-    }
-  }, [tracks, handleDragStart])
 
   // ── Fill preview playback ──
   const stopPreview = useCallback(() => {
@@ -277,39 +180,28 @@ export function Playlist({ tracks, onReorder, onBack, onPlay, library, fillerTra
       ) : (
         <>
           {/* ── Track list ── */}
-          <div className="playlist-list">
-            {visualTracks.map((track, visualIndex) => {
-              const isDragging = drag?.trackId === track.id
-              return (
-                <SwipeableRow
-                  key={track.id}
-                  onDelete={() => handleRemove(track.id)}
-                >
-                  <div
-                    className={`playlist-row${isDragging ? ' dragging' : ''}`}
-                  >
-                    {/* Drag handle */}
-                    <button
-                      ref={(el) => {
-                        if (el) dragHandleRefs.current.set(track.id, el)
-                        else dragHandleRefs.current.delete(track.id)
-                      }}
-                      className="drag-handle"
-                      aria-label="Drag to reorder"
-                    >
-                      ≡
-                    </button>
-
-                    {/* Index */}
-                    <div className="playlist-row-index">{visualIndex + 1}</div>
-
-                    {/* Title */}
-                    <div className="playlist-row-title">{formatTitle(track.name)}</div>
-                  </div>
-                </SwipeableRow>
-              )
-            })}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={tracks.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="playlist-list">
+                {tracks.map((track, index) => (
+                  <SortableTrackRow
+                    key={track.id}
+                    track={track}
+                    index={index}
+                    onRemove={handleRemove}
+                    formatTitle={formatTitle}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
 
           {/* ── Loop-wrap note ── */}
           <p className="playlist-loop-note">
